@@ -33,9 +33,49 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# script di debug usa-e-getta e loro output
+# Restano su disco, ma fuori dal repo: erano sonde scritte al volo contro il
+# database remoto, e fix_slots.js è stato sostituito dal bottone
+# "Ricalcola slot occupati" in /admin/setup.
+/scratch/
+/check_admin.js
+/check_db.js
+/check_info.js
+/check_profili.js
+/fix_slots.js
+/get_slots.js
+/get_users.js
+/parse.js
+/test_query.js
+/test_rose.js
+/*.log
+/out.txt
+/output_emails.txt
+/users.json
+/users_info.json
+/profili.json
+/slots.json
+/squadre_info.json
+/liste_info.json
+/users_table.txt
+/rose_debug.txt
+
+# Dati di partenza della lega: file binari con nomi, password e budget reali
+# dei partecipanti. Restano in locale, non vanno su un repo remoto.
+/db_excel/
+
+# Cache locale della CLI Supabase (project-ref e dump del catalogo).
+/supabase/.temp/
+
+# Preferenze personali di Claude Code; launch.json invece è configurazione
+# di progetto e va versionato.
+/.claude/settings.local.json
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+backup-pre-reset.json
+budget-ricostruito.xlsx

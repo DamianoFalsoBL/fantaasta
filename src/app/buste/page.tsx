@@ -1,0 +1,416 @@
+'use client'
+
+import { useState, useEffect, useMemo } from 'react'
+import { createClient } from '@/utils/supabase/client'
+import { useRouter } from 'next/navigation'
+import MantraBadge from '@/components/MantraBadge'
+
+type Squadra = {
+  id: string
+  nome: string
+  crediti_residui: number
+  slot_occupati: number
+}
+
+type Giocatore = {
+  id: number
+  nome: string
+  ruolo: 'P' | 'D' | 'C' | 'A'
+  squadra: string | null
+  quotazione: number
+  eta: number | null
+  ruolo_mantra: string[] | null
+}
+
+type BustaConGiocatore = {
+  id: string
+  esito: 'ATTESA' | 'VINTO' | 'CONTESO' | 'PERSO'
+  turno: number
+  giocatori: Giocatore | null
+}
+
+export default function BustePage() {
+  const supabase = createClient()
+  const router = useRouter()
+  
+  const [faseAperta, setFaseAperta] = useState(false)
+  const [squadra, setSquadra] = useState<Squadra | null>(null)
+  const [slotTotali, setSlotTotali] = useState(30)
+
+  // Per fase aperta
+  const [ricerca, setRicerca] = useState('')
+  const [filtroRuolo, setFiltroRuolo] = useState('')
+  const [giocatoriLiberi, setGiocatoriLiberi] = useState<Giocatore[]>([])
+  const [selezionati, setSelezionati] = useState<Giocatore[]>([])
+
+  // Per fase chiusa
+  const [risultati, setRisultati] = useState<BustaConGiocatore[]>([])
+
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadData()
+
+    const channelRegole = supabase.channel(`regole_lega_buste-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'regole_lega' },
+        () => {
+          loadData()
+        }
+      )
+      .subscribe()
+
+    const channelBuste = supabase.channel('buste_updates')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'buste' },
+        () => {
+          loadData()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channelRegole)
+      supabase.removeChannel(channelBuste)
+    }
+  }, [])
+
+  const loadData = async () => {
+    setLoading(true)
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) {
+      router.push('/login')
+      return
+    }
+
+    const { data: prof } = await supabase.from('profili').select('squadra_id').eq('id', userData.user.id).single()
+    if (!prof?.squadra_id) {
+      setLoading(false)
+      return
+    }
+
+    const { data: sq } = await supabase.from('squadre').select('*').eq('id', prof.squadra_id).single()
+    // Senza questo controllo, ogni `sq.id` più sotto lanciava se la query
+    // falliva (per esempio per una policy RLS).
+    if (!sq) {
+      setLoading(false)
+      return
+    }
+    setSquadra(sq as Squadra)
+
+    const { data: rData } = await supabase
+      .from('regole_lega')
+      .select('fase_buste_aperta, slot_totali')
+      .limit(1)
+      .maybeSingle()
+    const aperta = rData?.fase_buste_aperta || false
+    setSlotTotali(rData?.slot_totali ?? 30)
+    setFaseAperta(aperta)
+
+    if (aperta) {
+      // Carica i liberi, escludendo chi è fuori lista
+      const { data: liberi } = await supabase
+        .from('giocatori')
+        .select('*')
+        .eq('stato', 'LIBERO')
+        .eq('fuori_lista', false)
+        .order('nome')
+      setGiocatoriLiberi((liberi as Giocatore[]) || [])
+
+      // Carica eventuali selezioni salvate in precedenza e non ancora elaborate
+      const { data: busteInAttesa } = await supabase
+        .from('buste')
+        .select('giocatore_id')
+        .eq('squadra_id', sq.id)
+        .eq('esito', 'ATTESA')
+
+      if (busteInAttesa && busteInAttesa.length > 0 && liberi) {
+        const ids = busteInAttesa.map(b => b.giocatore_id)
+        setSelezionati((liberi as Giocatore[]).filter(g => ids.includes(g.id)))
+      }
+
+    } else {
+      // Carica le buste elaborate e non
+      const { data: storico } = await supabase
+        .from('buste')
+        .select('*, giocatori(*)')
+        .eq('squadra_id', sq.id)
+        .order('created_at', { ascending: false })
+      setRisultati((storico as unknown as BustaConGiocatore[]) || [])
+    }
+
+    setLoading(false)
+  }
+
+  // Ricerca su nome, ruolo classico e ruoli Mantra. Si mostrano tutti i
+  // risultati: la lista scorre nel suo contenitore.
+  // Risultati raggruppati per turno, dal più recente.
+  const perTurno = useMemo(() => {
+    const gruppi = new Map<number, BustaConGiocatore[]>()
+    for (const r of risultati) {
+      const t = r.turno ?? 1
+      if (!gruppi.has(t)) gruppi.set(t, [])
+      gruppi.get(t)!.push(r)
+    }
+    return [...gruppi.entries()].sort((a, b) => b[0] - a[0])
+  }, [risultati])
+
+  const liberiFiltrati = useMemo(() => {
+    const q = ricerca.toLowerCase().trim()
+    return giocatoriLiberi.filter(g => {
+      if (q && !g.nome.toLowerCase().includes(q) && !(g.squadra ?? '').toLowerCase().includes(q)) return false
+      if (filtroRuolo) {
+        const mantra = g.ruolo_mantra?.map(m => m.toUpperCase()) ?? []
+        if (g.ruolo !== filtroRuolo && !mantra.includes(filtroRuolo)) return false
+      }
+      return true
+    })
+  }, [giocatoriLiberi, ricerca, filtroRuolo])
+
+  const toggleSelezionato = (giocatore: Giocatore) => {
+    if (selezionati.find(s => s.id === giocatore.id)) {
+      setSelezionati(selezionati.filter(s => s.id !== giocatore.id))
+    } else {
+      setSelezionati([...selezionati, giocatore])
+    }
+  }
+
+  const submitBuste = async () => {
+    if (!squadra) return
+    const slotLiberi = slotTotali - squadra.slot_occupati
+    if (selezionati.length !== slotLiberi) {
+      alert(`Errore: Devi selezionare ESATTAMENTE ${slotLiberi} giocatori.`)
+      return
+    }
+
+    const costoTotale = selezionati.reduce((sum, g) => sum + g.quotazione, 0)
+    if (costoTotale > squadra.crediti_residui) {
+      alert(`Errore: Il costo totale (${costoTotale}) supera il tuo budget (${squadra.crediti_residui}).`)
+      return
+    }
+
+    const ids = selezionati.map(g => g.id)
+    const { error } = await supabase.rpc('submit_buste', { p_giocatori_ids: ids })
+    
+    if (error) {
+      alert("Errore salvataggio: " + error.message)
+    } else {
+      alert("Buste salvate con successo!")
+      loadData()
+    }
+  }
+
+  if (loading) return <div className="p-12 text-center text-ink-mid">Caricamento…</div>
+  if (!squadra) return <div className="p-12 text-center text-ink-mid">Nessuna squadra associata.</div>
+
+  const slotLiberi = slotTotali - squadra.slot_occupati
+  const costoTotale = selezionati.reduce((sum, g) => sum + g.quotazione, 0)
+  const isValida = selezionati.length === slotLiberi && costoTotale <= squadra.crediti_residui
+
+  return (
+    <div className="mx-auto max-w-7xl p-3 sm:p-6 md:p-8">
+      <h1 className="fm-title mb-5 text-2xl sm:text-3xl">Mercato di riparazione · Buste</h1>
+
+      {!faseAperta ? (
+        <div className="space-y-5">
+          <div className="fm-alert fm-alert-danger">
+            <h2 className="fm-title text-base">La fase buste è chiusa</h2>
+            <p className="mt-1 text-sm">L&apos;inserimento delle liste non è al momento consentito.</p>
+          </div>
+
+          <div className="fm-panel overflow-hidden">
+            <div className="fm-panel-head">
+              <span>I tuoi risultati</span>
+              {risultati.length > 0 && <span className="fm-label">{risultati.length}</span>}
+            </div>
+            <div className="fm-panel-body">
+            {risultati.length === 0 ? (
+              <p className="text-sm text-ink-dim">Non hai effettuato scelte o non ci sono risultati.</p>
+            ) : (
+              perTurno.map(([turno, righe]) => (
+              <div key={turno} className="mb-6 last:mb-0">
+                {/* Un'intestazione per turno: senza, gli esiti di tornate
+                    diverse si mescolavano senza modo di distinguerli. */}
+                {perTurno.length > 1 && (
+                  <div className="mb-2.5 flex items-center gap-3">
+                    <span className="fm-chip fm-chip-attivo">Turno {turno}</span>
+                    <div className="flex-1 border-t border-line" />
+                  </div>
+                )}
+              <div className="grid gap-2">
+                {righe.map(r => (
+                  <div key={r.id} className="flex flex-col gap-2 rounded-md border border-line bg-panel-hi p-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      {/* Optional chaining: una busta orfana faceva crashare l'intera pagina */}
+                      <div className="fm-nome text-base">{r.giocatori?.nome ?? 'Giocatore rimosso'}</div>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
+                        <span>{r.giocatori?.ruolo} · {r.giocatori?.squadra}{r.giocatori?.eta ? ` · U${r.giocatori.eta}` : ''}</span>
+                        {r.giocatori?.ruolo_mantra && r.giocatori.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.giocatori.ruolo_mantra} />}
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      {r.esito === 'VINTO' && <span className="fm-chip fm-chip-neon">✅ Preso a {r.giocatori?.quotazione} cr</span>}
+                      {r.esito === 'CONTESO' && <span className="fm-chip fm-chip-ambra">⚔️ Spareggio live</span>}
+                      {r.esito === 'PERSO' && <span className="fm-chip fm-chip-rosso">❌ Non assegnato</span>}
+                      {r.esito === 'ATTESA' && <span className="fm-chip">⏳ In attesa</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              </div>
+              ))
+            )}
+            </div>
+          </div>
+        </div>
+      ) : slotLiberi <= 0 ? (
+        <div className="fm-alert fm-alert-warn">
+          <h2 className="fm-title text-base">Rosa al completo</h2>
+          <p className="mt-1 text-sm">La tua squadra non ha slot liberi. Non puoi partecipare a questa fase di mercato.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4 lg:flex-row">
+
+          {/* Colonna Ricerca */}
+          <div className="fm-panel p-3 sm:p-4 lg:w-2/3">
+            <div className="mb-3 flex flex-col gap-2 sm:flex-row">
+              <input
+                type="text"
+                placeholder="Cerca calciatore svincolato…"
+                /* `focus:ring-0` azzerava l'anello di focus proprio sui due
+                   comandi principali della pagina. */
+                className="fm-input flex-1"
+                value={ricerca}
+                onChange={e => setRicerca(e.target.value)}
+                aria-label="Cerca calciatore svincolato"
+              />
+              <select
+                className="fm-select sm:w-40"
+                value={filtroRuolo}
+                onChange={e => setFiltroRuolo(e.target.value)}
+                aria-label="Filtra per ruolo"
+              >
+                <option value="">Tutti i ruoli</option>
+                {['P', 'D', 'C', 'A'].map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+
+            <div className="mb-2">
+              {/* Prima la lista era tagliata a 100 elementi senza dirlo: ordinata
+                  per nome si fermava a metà della lettera C. */}
+              <span className="fm-label">
+                {liberiFiltrati.length} giocator{liberiFiltrati.length === 1 ? 'e' : 'i'} su {giocatoriLiberi.length}
+              </span>
+            </div>
+
+            {/* Altezza in `svh` e non fissa: 600px superava il viewport di molti
+                telefoni, e `vh` su iOS è falsato dalla barra degli indirizzi. */}
+            <div className="h-[55svh] space-y-1.5 overflow-y-auto pr-1 md:h-[600px]">
+              {liberiFiltrati.length === 0 && (
+                <div className="p-8 text-center text-sm text-ink-dim">
+                  Nessun giocatore trovato con questi filtri.
+                </div>
+              )}
+              {liberiFiltrati.map(g => {
+                  const isSelected = selezionati.find(s => s.id === g.id)
+                  return (
+                    <div
+                      key={g.id}
+                      onClick={() => toggleSelezionato(g)}
+                      className={`flex cursor-pointer items-center justify-between gap-3 rounded-md border p-2.5 transition ${
+                        isSelected
+                          ? 'border-neon bg-panel-hover'
+                          : 'border-line bg-panel-hi hover:border-line-hi hover:bg-panel-hover'
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <div className="fm-nome truncate text-base">{g.nome}</div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
+                          <span>{g.ruolo} · {g.squadra}{g.eta ? ` · U${g.eta}` : ''}</span>
+                          {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
+                        </div>
+                      </div>
+                      <div className="shrink-0">
+                        <span className={`fm-badge ${isSelected ? 'fm-badge-top' : 'fm-badge-good'}`}>{g.quotazione}</span>
+                      </div>
+                    </div>
+                  )
+              })}
+            </div>
+          </div>
+
+          {/* Colonna Carrello */}
+          <div className="space-y-4 lg:w-1/3">
+            <div className="fm-panel overflow-hidden">
+              <div className="fm-panel-head fm-panel-head--neon">
+                <span className="truncate">{squadra.nome}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 p-3">
+                <div className="fm-metric">
+                  <div className="fm-metric-label">Budget residuo</div>
+                  <div className="fm-metric-value">{squadra.crediti_residui}<span className="text-xs text-ink-dim"> cr</span></div>
+                </div>
+                <div className="fm-metric">
+                  <div className="fm-metric-label">Slot da riempire</div>
+                  <div className="fm-metric-value">{slotLiberi}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="fm-panel overflow-hidden">
+              <div className="fm-panel-head">
+                <span>I tuoi selezionati</span>
+                <span className="fm-label">{selezionati.length}/{slotLiberi}</span>
+              </div>
+
+              <div className="fm-panel-body">
+                <div className="mb-4 divide-y divide-line">
+                  {selezionati.map(g => (
+                    <div key={g.id} className="flex items-center justify-between gap-2 py-1.5">
+                      <span className="fm-nome truncate">{g.nome}</span>
+                      <span className="fm-badge fm-badge-good shrink-0">{g.quotazione}</span>
+                    </div>
+                  ))}
+                  {selezionati.length === 0 && (
+                    <div className="py-4 text-center text-sm text-ink-dim">Nessun giocatore selezionato</div>
+                  )}
+                </div>
+
+                <div className="mb-4 border-t border-line pt-3">
+                  <div className="flex items-center justify-between">
+                    <span className="fm-label">Costo totale</span>
+                    <span className={`text-xl font-bold tabular-nums ${costoTotale > squadra.crediti_residui ? 'text-rosso' : 'text-neon'}`}>
+                      {costoTotale} cr
+                    </span>
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <span className="fm-label">Slot riempiti</span>
+                    <span className={`text-lg font-bold tabular-nums ${selezionati.length !== slotLiberi ? 'text-rosso' : 'text-neon'}`}>
+                      {selezionati.length} / {slotLiberi}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={submitBuste}
+                  disabled={!isValida}
+                  className="fm-btn fm-btn-primary w-full"
+                >
+                  Salva la lista
+                </button>
+                {!isValida && (
+                  <p className="mt-2.5 text-center text-xs font-semibold text-rosso">
+                    Devi riempire esattamente tutti gli slot e non superare il budget.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
+  )
+}
