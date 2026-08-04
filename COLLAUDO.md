@@ -1,5 +1,9 @@
 # Collaudo FantaAsta
 
+> Per il collaudo completo del sito **in produzione** usa
+> [TEST-PRODUZIONE.md](TEST-PRODUZIONE.md): copre ogni bottone e ogni caso
+> limite. Questo documento resta come giro rapido in locale.
+
 Checklist per provare il sito end-to-end. Segui l'ordine: ogni sezione dipende dalla precedente.
 
 Per avviare:

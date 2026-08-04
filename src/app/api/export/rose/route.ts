@@ -16,6 +16,28 @@ import { getProfiloCorrente, isAdminRole } from '@/utils/auth'
  */
 export const dynamic = 'force-dynamic'
 
+/**
+ * Marca temporale per il nome del file: `2026-08-04_18-42-07`.
+ *
+ * Con la sola data due export dello stesso giorno finivano nello stesso nome e
+ * il browser li rinominava in `rose-2026-08-04 (1).csv`, perdendo l'ordine.
+ *
+ * L'ora è quella italiana, non quella del server: su Vercel il runtime gira in
+ * UTC, quindi d'estate un export delle 21:30 si sarebbe chiamato `19-30`.
+ * I due punti non si usano: su Windows non sono ammessi nei nomi dei file.
+ */
+function istante(): string {
+  const parti = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Rome',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false,
+  }).format(new Date())
+
+  // `sv-SE` produce già `2026-08-04 18:42:07`, formato ISO senza sorprese.
+  return parti.replace(' ', '_').replace(/:/g, '-')
+}
+
 /** Virgolette secondo RFC 4180: servono se il campo contiene `,`, `"` o a capo. */
 function campoCsv(valore: string): string {
   return /[",\r\n]/.test(valore) ? `"${valore.replace(/"/g, '""')}"` : valore
@@ -68,12 +90,11 @@ export async function GET(request: Request) {
   // CRLF e BOM: senza BOM Excel apre il file in ANSI e storpia gli accenti
   // nei nomi delle fantasquadre.
   const csv = '﻿' + linee.join('\r\n') + '\r\n'
-  const oggi = new Date().toISOString().slice(0, 10)
 
   return new NextResponse(csv, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="rose-${oggi}.csv"`,
+      'Content-Disposition': `attachment; filename="rose-${istante()}.csv"`,
       'Cache-Control': 'no-store',
     },
   })
