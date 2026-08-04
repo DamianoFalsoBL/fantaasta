@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Barlow_Condensed, Geist_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 
@@ -55,6 +56,9 @@ export default function RootLayout({
         <main className="flex-1 w-full">
           {children}
         </main>
+        {/* Metriche Vercel: non renderizza nulla, inietta solo lo script che
+            raccoglie i Core Web Vitals. Fuori da Vercel resta inerte. */}
+        <SpeedInsights />
       </body>
     </html>
   );
