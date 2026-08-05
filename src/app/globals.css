@@ -303,6 +303,25 @@
   .fm-input:disabled,
   .fm-select:disabled { opacity: .5; cursor: not-allowed; }
 
+  /* Intestazioni dei gruppi nella tendina.
+     Vale solo dove il browser disegna il menu da sé (Chrome su Windows e
+     Linux): su macOS lo disegna il sistema operativo e queste regole vengono
+     ignorate. Per questo le intestazioni sono distinte anche nel testo. */
+  .fm-select optgroup {
+    background: var(--color-void);
+    color: var(--color-neon);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: .1em;
+  }
+  .fm-select option {
+    background: var(--color-panel);
+    color: var(--color-ink);
+    font-weight: 500;
+    letter-spacing: normal;
+  }
+
   /* Il pulsante interno di <input type="file"> non eredita nulla:
      senza queste righe resta col tema chiaro del browser. */
   .fm-file::file-selector-button {

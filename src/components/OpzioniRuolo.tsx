@@ -13,12 +13,18 @@ export default function OpzioniRuolo({ presenti }: { presenti: Set<string> }) {
   return (
     <>
       <option value="">Tutti i ruoli</option>
-      <optgroup label="Reparto">
+      {/* Le intestazioni sono scritte in maiuscolo e fra lineette perché il
+          menu a tendina nativo è disegnato dal sistema operativo: su macOS il
+          CSS applicato a <optgroup> viene ignorato, e il solo grassetto non
+          bastava a distinguerle dalle voci. Il testo invece si vede ovunque.
+          Le regole in globals.css rifiniscono il risultato dove il browser
+          disegna la tendina da sé (Chrome su Windows e Linux). */}
+      <optgroup label="— REPARTO —">
         {RUOLI_CLASSICI.map((o) => (
           <option key={o.valore} value={o.valore}>{o.etichetta}</option>
         ))}
       </optgroup>
-      <optgroup label="Ruolo Mantra">
+      <optgroup label="— RUOLO MANTRA —">
         {opzioniMantra(presenti).map((o) => (
           <option key={o.valore} value={o.valore}>{o.etichetta}</option>
         ))}
