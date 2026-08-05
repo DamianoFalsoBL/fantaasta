@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import MantraBadge from '@/components/MantraBadge'
+import OpzioniRuolo from '@/components/OpzioniRuolo'
+import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
 
 export type RigaAsta = {
   id: number
@@ -22,14 +24,7 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
   const [soloContesi, setSoloContesi] = useState(false)
   const [soloMie, setSoloMie] = useState(false)
 
-  const ruoliUnici = useMemo(() => {
-    const s = new Set<string>()
-    righe.forEach((r) => {
-      if (r.ruolo) s.add(r.ruolo)
-      r.ruolo_mantra?.forEach((m) => s.add(m.toUpperCase()))
-    })
-    return [...s].sort()
-  }, [righe])
+  const ruoliMantra = useMemo(() => mantraPresenti(righe), [righe])
 
   const squadreFanta = useMemo(() => {
     const s = new Set<string>()
@@ -40,10 +35,7 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
   const filtrate = useMemo(() => {
     return righe.filter((r) => {
       if (nome && !r.nome.toLowerCase().includes(nome.toLowerCase())) return false
-      if (ruolo) {
-        const mantra = r.ruolo_mantra?.map((m) => m.toUpperCase()) ?? []
-        if (r.ruolo !== ruolo && !mantra.includes(ruolo.toUpperCase())) return false
-      }
+      if (!ruoloCorrisponde(ruolo, r.ruolo, r.ruolo_mantra)) return false
       if (squadraFanta && !r.contendenti.includes(squadraFanta)) return false
       if (soloContesi && r.contendenti.length < 2) return false
       if (soloMie && !r.inMiaLista) return false
@@ -83,8 +75,7 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
             value={ruolo}
             onChange={(e) => setRuolo(e.target.value)}
           >
-            <option value="">Tutti i ruoli</option>
-            {ruoliUnici.map((r) => <option key={r} value={r}>{r}</option>)}
+            <OpzioniRuolo presenti={ruoliMantra} />
           </select>
         </div>
         <div>

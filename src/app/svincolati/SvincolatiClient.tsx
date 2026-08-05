@@ -1,6 +1,8 @@
 'use client'
 import { useState, useMemo } from 'react'
 import MantraBadge from '@/components/MantraBadge'
+import OpzioniRuolo from '@/components/OpzioniRuolo'
+import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
 
 export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
   const [searchNome, setSearchNome] = useState('')
@@ -14,17 +16,8 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
     return Array.from(sq).sort()
   }, [giocatori])
 
-  // Estrai tutti i ruoli mantra (e classici) unici per il filtro
-  const ruoliUnici = useMemo(() => {
-    const ruoli = new Set<string>()
-    giocatori.forEach(g => {
-      if (g.ruolo) ruoli.add(g.ruolo)
-      if (g.ruolo_mantra) {
-        g.ruolo_mantra.forEach((r: string) => ruoli.add(r.toUpperCase()))
-      }
-    })
-    return Array.from(ruoli).sort()
-  }, [giocatori])
+  // Solo i ruoli Mantra: i quattro reparti sono fissi e li elenca OpzioniRuolo.
+  const ruoliMantra = useMemo(() => mantraPresenti(giocatori), [giocatori])
 
   // Filtra i giocatori
   const giocatoriFiltrati = useMemo(() => {
@@ -32,9 +25,7 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
       const matchNome = g.nome.toLowerCase().includes(searchNome.toLowerCase())
       const matchSquadra = searchSquadra === '' || g.squadra === searchSquadra
       
-      const matchRuolo = searchRuolo === '' || 
-        g.ruolo === searchRuolo || 
-        (g.ruolo_mantra && g.ruolo_mantra.map((r:string) => r.toUpperCase()).includes(searchRuolo.toUpperCase()))
+      const matchRuolo = ruoloCorrisponde(searchRuolo, g.ruolo, g.ruolo_mantra)
       
       const matchEta = searchEta === '' || (g.eta && g.eta <= parseInt(searchEta))
 
@@ -79,10 +70,7 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
             value={searchRuolo}
             onChange={(e) => setSearchRuolo(e.target.value)}
           >
-            <option value="">Tutti i ruoli</option>
-            {ruoliUnici.map((r) => (
-              <option key={r} value={r}>{r}</option>
-            ))}
+            <OpzioniRuolo presenti={ruoliMantra} />
           </select>
         </div>
         <div>
@@ -106,8 +94,8 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
               <th>Nome</th>
               <th>Ruoli</th>
               <th>Squadra</th>
-              <th className="fm-num">Età</th>
-              <th className="fm-num">Quotazione</th>
+              <th>Età</th>
+              <th>Quotazione</th>
             </tr>
           </thead>
           <tbody>
@@ -128,8 +116,8 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
                     </span>
                   </td>
                   <td data-label="Squadra" className="uppercase text-ink-mid">{g.squadra}</td>
-                  <td data-label="Età" className="fm-num text-ink-mid">{g.eta ? String(g.eta) : '—'}</td>
-                  <td data-label="Quotazione" className="fm-num">
+                  <td data-label="Età" className="tabular-nums text-ink-mid">{g.eta ? String(g.eta) : '—'}</td>
+                  <td data-label="Quotazione" className="tabular-nums">
                     <span className="fm-badge fm-badge-good">{g.quotazione}</span>
                   </td>
                 </tr>
