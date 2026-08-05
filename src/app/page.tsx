@@ -12,7 +12,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-foreground">
+    <div className="flex flex-1 flex-col items-center justify-center bg-background px-4 py-10 text-foreground">
       <main className="flex flex-col items-center gap-4 p-4 text-center sm:p-8">
         <h1 className="fm-title text-4xl sm:text-6xl">
           Fantacalcio <span className="text-neon">Asta Live</span>

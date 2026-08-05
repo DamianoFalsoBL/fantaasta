@@ -3,6 +3,10 @@ import { Inter, Barlow_Condensed, Geist_Mono } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
+// Una sola fonte per il numero di versione: quella di package.json, che si
+// alza col rilascio. Duplicarla in una costante significherebbe, prima o poi,
+// mostrare a schermo una versione diversa da quella pubblicata.
+import { version } from "../../package.json";
 
 // Inter per testi e dati: ottima leggibilità a corpo piccolo e cifre tabellari,
 // che qui servono ovunque (budget, quotazioni, timer).
@@ -53,9 +57,17 @@ export default function RootLayout({
           `body` non stratificata lo sovrascriveva. */}
       <body className="min-h-full flex flex-col">
         <NavBar />
-        <main className="flex-1 w-full">
+        {/* `flex flex-col` serve al piè di pagina: permette alla pagina di
+            occupare l'altezza disponibile con `flex-1` invece che con
+            `min-h-screen`, che sommandosi a barra e piè di pagina produrrebbe
+            uno scorrimento fantasma. */}
+        <main className="flex w-full flex-1 flex-col">
           {children}
         </main>
+
+        <footer className="border-t border-line px-3 py-2 text-center text-[10px] tracking-wide text-ink-dim">
+          v{version} · Vibe coded by F4150
+        </footer>
         {/* Metriche Vercel: non renderizza nulla, inietta solo lo script che
             raccoglie i Core Web Vitals. Fuori da Vercel resta inerte. */}
         <SpeedInsights />

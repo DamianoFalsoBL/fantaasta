@@ -8,7 +8,7 @@ export default async function LoginPage({
   const { message } = await searchParams
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex flex-1 items-center justify-center bg-background px-4 py-10">
       {/* Le varianti `dark:` che c'erano qui sono state rimosse: il tema è
           unico e scuro, e con `dark:` legato a prefers-color-scheme un utente
           con sistema chiaro avrebbe visto metà pagina in tema chiaro. */}
