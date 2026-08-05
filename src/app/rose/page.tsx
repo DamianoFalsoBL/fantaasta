@@ -126,7 +126,7 @@ export default async function RosePage() {
                                 <span className="fm-nome truncate">{g.nome}</span>
                                 {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
                               </div>
-                              <div className="fm-label truncate">{g.squadra}{g.eta ? ` · U${g.eta}` : ''}</div>
+                              <div className="fm-label truncate">{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</div>
                             </div>
                           </div>
                           <div className={`shrink-0 font-bold tabular-nums ${isRiparazione ? 'text-viola-hi' : 'text-ink'}`}>

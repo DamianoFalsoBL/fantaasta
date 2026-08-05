@@ -226,14 +226,14 @@ export default function NavBar() {
 
   const metriche = budgetInfo && !isSuperAdmin ? (
     <>
-      <div className="flex flex-col text-right">
+      <div className="flex flex-col text-center">
         <span className="fm-label leading-none">Budget</span>
         <span className="text-sm font-bold tabular-nums leading-tight text-ink">
           {budgetInfo.budget}<span className="text-[10px] font-normal text-ink-dim"> cr</span>
         </span>
       </div>
       <div className="h-6 w-px bg-line-hi" />
-      <div className="flex flex-col text-right">
+      <div className="flex flex-col text-center">
         <span
           className="fm-label leading-none"
           title="Budget virtuale: budget attuale meno il valore dei giocatori ancora in asta"
@@ -249,7 +249,7 @@ export default function NavBar() {
         </span>
       </div>
       <div className="h-6 w-px bg-line-hi" />
-      <div className="flex flex-col text-right">
+      <div className="flex flex-col text-center">
         <span className="fm-label leading-none">Slot liberi</span>
         <span className="text-sm font-bold tabular-nums leading-tight text-ink">{budgetInfo.slotLiberi}</span>
       </div>

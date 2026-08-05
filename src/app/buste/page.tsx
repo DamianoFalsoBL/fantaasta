@@ -246,7 +246,7 @@ export default function BustePage() {
                       {/* Optional chaining: una busta orfana faceva crashare l'intera pagina */}
                       <div className="fm-nome text-base">{r.giocatori?.nome ?? 'Giocatore rimosso'}</div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                        <span>{r.giocatori?.ruolo} · {r.giocatori?.squadra}{r.giocatori?.eta ? ` · U${r.giocatori.eta}` : ''}</span>
+                        <span>{r.giocatori?.ruolo} · {r.giocatori?.squadra}{r.giocatori?.eta ? ` · ${r.giocatori.eta}` : ''}</span>
                         {r.giocatori?.ruolo_mantra && r.giocatori.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.giocatori.ruolo_mantra} />}
                       </div>
                     </div>
@@ -328,7 +328,7 @@ export default function BustePage() {
                       <div className="min-w-0">
                         <div className="fm-nome truncate text-base">{g.nome}</div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                          <span>{g.ruolo} · {g.squadra}{g.eta ? ` · U${g.eta}` : ''}</span>
+                          <span>{g.ruolo} · {g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
                           {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
                         </div>
                       </div>

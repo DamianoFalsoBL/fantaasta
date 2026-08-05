@@ -282,7 +282,7 @@ export default function AdminAstaPage() {
                 )}
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                <span>{g.ruolo} · {g.squadra}{g.eta ? ` · U${g.eta}` : ''}</span>
+                <span>{g.ruolo} · {g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
                 {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
               </div>
               {g.contendenti && g.contendenti.length > 0 && (

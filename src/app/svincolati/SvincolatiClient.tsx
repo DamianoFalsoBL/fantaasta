@@ -128,7 +128,7 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
                     </span>
                   </td>
                   <td data-label="Squadra" className="uppercase text-ink-mid">{g.squadra}</td>
-                  <td data-label="Età" className="fm-num text-ink-mid">{g.eta ? `U${g.eta}` : '—'}</td>
+                  <td data-label="Età" className="fm-num text-ink-mid">{g.eta ? String(g.eta) : '—'}</td>
                   <td data-label="Quotazione" className="fm-num">
                     <span className="fm-badge fm-badge-good">{g.quotazione}</span>
                   </td>

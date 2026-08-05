@@ -52,7 +52,7 @@ export default async function StoricoPage() {
                   <td data-label="Calciatore" className="fm-nome">
                     <span className="flex items-center gap-2">
                       {t.giocatori?.nome}
-                      {t.giocatori?.eta ? <span className="fm-label">U{t.giocatori?.eta}</span> : null}
+                      {t.giocatori?.eta ? <span className="fm-label">{t.giocatori?.eta}</span> : null}
                     </span>
                   </td>
                   <td data-label="Ruolo">

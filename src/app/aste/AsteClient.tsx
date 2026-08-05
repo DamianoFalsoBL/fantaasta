@@ -145,7 +145,7 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
                       {r.ruolo_mantra && r.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.ruolo_mantra} />}
                     </span>
                   </td>
-                  <td data-label="Età" className="fm-num text-ink-mid">{r.eta ? `U${r.eta}` : '—'}</td>
+                  <td data-label="Età" className="fm-num text-ink-mid">{r.eta ? String(r.eta) : '—'}</td>
                   <td data-label="Squadra" className="text-ink-mid">{r.squadra ?? '—'}</td>
                   <td data-label="Prezzo" className="fm-num">
                     <span className="fm-badge fm-badge-good">{r.quotazione}</span>

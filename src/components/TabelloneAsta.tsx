@@ -421,7 +421,7 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                     <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
                       <span>
                         {item.giocatori.ruolo} · {item.giocatori.squadra}
-                        {item.giocatori.eta ? ` · U${item.giocatori.eta}` : ''}
+                        {item.giocatori.eta ? ` · ${item.giocatori.eta}` : ''}
                       </span>
                       {item.giocatori.ruolo_mantra && item.giocatori.ruolo_mantra.length > 0 && <MantraBadge ruoli={item.giocatori.ruolo_mantra} />}
                       <span className="fm-badge fm-badge-low">Base {item.giocatori.quotazione}</span>
@@ -515,7 +515,9 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
       )}
 
       <div className="fm-panel mx-auto w-full max-w-4xl overflow-hidden">
-        <div className="relative border-b border-line-hi bg-panel-hi px-4 py-4 text-center">
+        {/* Spaziatura ridotta sotto sm: su uno schermo da 5" ogni riga tolta
+            qui è una riga guadagnata in fondo, dove stanno i partecipanti. */}
+        <div className="relative border-b border-line-hi bg-panel-hi px-3 py-3 text-center sm:px-4 sm:py-4">
           <h2 className="fm-title text-2xl sm:text-3xl">{asta.giocatori.nome}</h2>
           <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-sm text-ink-mid">
             <span>{asta.giocatori.ruolo}</span>
@@ -524,7 +526,7 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
             {asta.giocatori.eta && (
               <>
                 <span className="text-ink-dim">&bull;</span>
-                <span>U{asta.giocatori.eta}</span>
+                <span>{asta.giocatori.eta}</span>
               </>
             )}
             {asta.giocatori.ruolo_mantra && asta.giocatori.ruolo_mantra.length > 0 && (
@@ -541,15 +543,15 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
           )}
         </div>
 
-        <div className="p-4 sm:p-6">
+        <div className="p-3 sm:p-6">
           {/* I bordi laterali della colonna centrale, da impilata su mobile,
               diventavano due barre verticali senza senso: sotto md separa un
               bordo orizzontale. */}
-          <div className="flex flex-col items-stretch justify-between gap-4 md:flex-row md:gap-6">
+          <div className="flex flex-col items-stretch justify-between gap-3 md:flex-row md:gap-6">
 
             <div className="w-full flex-1 text-center">
               <p className="fm-label">Offerta attuale</p>
-              <div className="mt-1 text-5xl font-bold tabular-nums text-ink sm:text-6xl">{asta.prezzo_corrente}</div>
+              <div className="mt-1 text-4xl font-bold tabular-nums text-ink sm:text-6xl">{asta.prezzo_corrente}</div>
               {asta.squadre ? (
                 <div className={`fm-chip mt-2 ${isWinning ? 'fm-chip-neon' : 'fm-chip-ambra'}`}>
                   In testa: {asta.squadre.nome} {isWinning && '(Tu)'}
@@ -575,10 +577,10 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
               )}
             </div>
 
-            <div className="w-full flex-1 border-y border-line py-4 text-center md:min-h-[140px] md:border-x md:border-y-0 md:px-4 md:py-0">
+            <div className="w-full flex-1 border-y border-line py-3 text-center sm:py-4 md:min-h-[140px] md:border-x md:border-y-0 md:px-4 md:py-0">
               <p className="fm-label">Tempo rimasto</p>
               {isChiamata ? (
-                 <div className="mt-5 text-base font-semibold leading-tight text-ink-dim">
+                 <div className="mt-3 text-base font-semibold leading-tight text-ink-dim sm:mt-5">
                    In attesa che l&apos;admin<br />avvii il timer…
                  </div>
               ) : (
@@ -586,13 +588,13 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                     0.5: per metà di ogni secondo il numero più importante della
                     schermata scendeva sotto soglia di contrasto. Ora lampeggia
                     il colore, non la trasparenza. */
-                 <div className={`mt-1 text-6xl font-bold tabular-nums sm:text-7xl ${timeLeft <= 5 ? 'animate-battito text-rosso' : 'text-neon'}`}>
+                 <div className={`mt-1 text-5xl font-bold tabular-nums sm:text-7xl ${timeLeft <= 5 ? 'animate-battito text-rosso' : 'text-neon'}`}>
                    {timeLeft}
                  </div>
               )}
             </div>
 
-            <div className="flex w-full flex-1 flex-col items-center gap-2.5">
+            <div className="flex w-full flex-1 flex-col items-center gap-2 sm:gap-2.5">
               <p className="fm-label w-full text-center">Rilancia</p>
 
               {error && <div className="fm-alert fm-alert-danger w-full text-center text-xs font-semibold">{error}</div>}
@@ -626,7 +628,7 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
 
           </div>
 
-          <div className="mt-6 border-t border-line pt-5">
+          <div className="mt-4 border-t border-line pt-4 sm:mt-6 sm:pt-5">
             <h3 className="fm-label mb-3 text-center">👥 Partecipanti in gara</h3>
             <div className="flex flex-wrap justify-center gap-2">
               {partecipanti.map((p) => {
