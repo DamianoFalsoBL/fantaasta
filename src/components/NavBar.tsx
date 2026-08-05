@@ -299,7 +299,7 @@ export default function NavBar() {
               {vociUtente.length > 0 && (
                 <div className="group relative">
                   <button className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-ink-mid transition hover:bg-panel-hover hover:text-ink">
-                    Area Utente <span className="text-[10px]">▼</span>
+                    Manager <span className="text-[10px]">▼</span>
                   </button>
                   <div className="invisible absolute left-0 z-50 mt-1 w-52 overflow-hidden rounded-md border border-line-hi bg-panel opacity-0 shadow-xl transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
                     {vociUtente.map((v) => voceTendina(v, 'viola'))}
@@ -310,7 +310,7 @@ export default function NavBar() {
               {vociAdmin.length > 0 && (
                 <div className="group relative ml-2 border-l border-line-hi pl-3">
                   <button className="flex items-center gap-1.5 rounded-md border border-rosso/40 bg-rosso/10 px-3 py-2 text-sm font-semibold text-rosso transition hover:bg-rosso/20">
-                    Amministrazione <span className="text-[10px]">▼</span>
+                    Admin <span className="text-[10px]">▼</span>
                   </button>
                   <div className="invisible absolute left-3 z-50 mt-1 w-56 overflow-hidden rounded-md border border-line-hi bg-panel opacity-0 shadow-xl transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
                     {vociAdmin.map((v) => voceTendina(v, 'rosso'))}
@@ -359,7 +359,7 @@ export default function NavBar() {
           {vociAdmin.length > 0 && (
             <>
               <div className="border-t border-line bg-panel-hi px-4 py-1.5">
-                <span className="fm-label text-rosso">Amministrazione</span>
+                <span className="fm-label text-rosso">Admin</span>
               </div>
               {vociAdmin.map(voceMobile)}
             </>
