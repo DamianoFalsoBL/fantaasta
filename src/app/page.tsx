@@ -14,8 +14,6 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-foreground">
       <main className="flex flex-col items-center gap-4 p-4 text-center sm:p-8">
-        <span className="fm-chip fm-chip-neon">Dolomiti Fanta League</span>
-
         <h1 className="fm-title text-4xl sm:text-6xl">
           Fantacalcio <span className="text-neon">Asta Live</span>
         </h1>
