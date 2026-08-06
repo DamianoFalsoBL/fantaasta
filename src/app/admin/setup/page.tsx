@@ -145,7 +145,7 @@ export default function AdminSetupPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 px-3 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto w-full max-w-4xl space-y-4 px-3 py-6 sm:px-6 sm:py-8">
       <h1 className="fm-title text-2xl sm:text-3xl">⚙️ Impostazioni sistema</h1>
 
       {esito && (

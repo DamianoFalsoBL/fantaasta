@@ -46,7 +46,7 @@ export default async function RosePage() {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto w-full max-w-3xl p-6">
         <div className="fm-alert fm-alert-danger font-semibold">
           Errore caricamento rose: {error.message}
         </div>
@@ -59,7 +59,7 @@ export default async function RosePage() {
 
   return (
     <div className="px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full max-w-7xl">
 
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="fm-title text-2xl sm:text-3xl">Rose squadre</h1>

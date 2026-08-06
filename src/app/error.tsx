@@ -21,7 +21,7 @@ export default function GlobalError({
   }, [error])
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-20 text-center">
+    <div className="mx-auto w-full max-w-xl px-4 py-20 text-center">
       <h1 className="fm-title mb-3 text-3xl text-rosso">Qualcosa è andato storto</h1>
       <p className="mb-3 text-ink-mid">
         Si è verificato un errore durante il caricamento della pagina.

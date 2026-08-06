@@ -60,7 +60,15 @@ export default function RootLayout({
         {/* `flex flex-col` serve al piè di pagina: permette alla pagina di
             occupare l'altezza disponibile con `flex-1` invece che con
             `min-h-screen`, che sommandosi a barra e piè di pagina produrrebbe
-            uno scorrimento fantasma. */}
+            uno scorrimento fantasma.
+
+            ATTENZIONE: essendo <main> un contenitore flessibile, i suoi figli
+            sono elementi flex, e un margine automatico sull'asse trasversale
+            (`mx-auto`) ANNULLA lo stiramento: l'elemento si dimensiona sul
+            proprio contenuto invece che sulla larghezza disponibile. Ogni
+            contenitore di pagina `mx-auto max-w-*` deve quindi portare anche
+            `w-full`, altrimenti la larghezza della pagina cambia al cambiare
+            di ciò che contiene. */}
         <main className="flex w-full flex-1 flex-col">
           {children}
         </main>

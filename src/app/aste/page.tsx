@@ -74,7 +74,7 @@ export default async function AstePage() {
 
   return (
     <main className="py-6 sm:py-8">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="fm-panel overflow-hidden">
           <div className="fm-panel-head">
             <div>

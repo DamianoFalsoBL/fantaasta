@@ -23,7 +23,7 @@ export default async function DebugPage() {
     .order('slot_occupati', { ascending: true })
 
   return (
-    <div className="mx-auto max-w-3xl px-3 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto w-full max-w-3xl px-3 py-6 sm:px-6 sm:py-8">
       <h1 className="fm-title mb-4 text-2xl sm:text-3xl">Slot per squadra</h1>
 
       {error && <div className="fm-alert fm-alert-danger mb-4 font-semibold">Errore: {error.message}</div>}
