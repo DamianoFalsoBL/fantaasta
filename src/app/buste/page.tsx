@@ -341,8 +341,11 @@ export default function BustePage() {
             </div>
           </div>
 
-          {/* Colonna Carrello */}
-          <div className="space-y-4 lg:w-1/3">
+          {/* Colonna Carrello.
+              `order-first` sotto lg: impilata, finiva in fondo a un elenco di
+              centinaia di giocatori e il pulsante di salvataggio era
+              irraggiungibile senza scorrere tutto. */}
+          <div className="order-first space-y-4 lg:order-none lg:w-1/3">
             <div className="fm-panel overflow-hidden">
               <div className="fm-panel-head fm-panel-head--neon">
                 <span className="truncate">{squadra.nome}</span>
@@ -366,7 +369,7 @@ export default function BustePage() {
               </div>
 
               <div className="fm-panel-body">
-                <div className="mb-4 divide-y divide-line">
+                <div className="mb-4 max-h-[30svh] divide-y divide-line overflow-y-auto lg:max-h-none lg:overflow-visible">
                   {selezionati.map(g => (
                     <div key={g.id} className="flex items-center justify-between gap-2 py-1.5">
                       <span className="fm-nome truncate">{g.nome}</span>
