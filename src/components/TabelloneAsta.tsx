@@ -55,13 +55,26 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const fetchAsta = async () => {
-    const { data } = await supabase
+    // Niente `maybeSingle()`: manda `Accept: application/vnd.pgrst.object+json`,
+    // e con quell'intestazione PostgREST può rispondere con uno stato che il
+    // client tratta da errore. Con `limit(1)` e il primo elemento la risposta è
+    // un normale array e quel caso non esiste.
+    const { data: righeAsta, error: erroreAsta } = await supabase
       .from('aste')
       .select('*, giocatori(*), squadre(*)')
       .in('stato', ['IN_CORSO', 'CHIAMATA'])
       .order('created_at', { ascending: false })
       .limit(1)
-      .maybeSingle()
+
+    // L'errore veniva scartato: una lettura fallita diventava indistinguibile
+    // da "nessuna asta in corso", cioè una schermata plausibile e falsa. Si
+    // tiene l'ultimo stato buono invece di azzerarlo.
+    if (erroreAsta) {
+      setError(`Impossibile leggere lo stato dell'asta: ${erroreAsta.message}`)
+      return
+    }
+
+    const data = righeAsta?.[0] ?? null
     setAsta(data)
 
     let partData: any[] = []

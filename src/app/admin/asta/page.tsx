@@ -27,8 +27,22 @@ export default function AdminAstaPage() {
   const [esito, setEsito] = useState<string | null>(null)
 
   const loadData = async () => {
-    // 1. Carica asta in corso o in chiamata
-    const { data: corrente } = await supabase.from('aste').select('*, giocatori(*), squadre(*)').in('stato', ['IN_CORSO', 'CHIAMATA']).maybeSingle()
+    // 1. Carica asta in corso o in chiamata.
+    // Come nel tabellone: niente `maybeSingle()`, che oltre a esporre la
+    // risposta singolare non aveva nemmeno un `limit(1)`, quindi bastavano due
+    // righe non terminate per far fallire tutta la Regia.
+    const { data: correnti, error: erroreCorrente } = await supabase
+      .from('aste')
+      .select('*, giocatori(*), squadre(*)')
+      .in('stato', ['IN_CORSO', 'CHIAMATA'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    if (erroreCorrente) {
+      setError(`Impossibile leggere l'asta in corso: ${erroreCorrente.message}`)
+      return
+    }
+    const corrente = correnti?.[0] ?? null
     setAstaCorrente(corrente)
 
     // Un'asta chiusa senza nessuno in testa è andata deserta.
