@@ -28,16 +28,45 @@ async function assertAdmin(): Promise<string | null> {
 }
 
 /** Legge il primo foglio del file caricato come array di oggetti. */
-async function leggiFoglio(formData: FormData): Promise<Record<string, unknown>[]> {
+/**
+ * Legge il foglio di un file Excel.
+ *
+ * Prendere sempre il primo foglio funziona con gli export del listone, che ne
+ * hanno uno solo, ma non con il gestionale della lega: 36 fogli, e il primo è
+ * la tabella squadra→proprietario. L'import scartava tutte le righe con
+ * "manca # o Nome", indicando la cosa sbagliata.
+ *
+ * Con `riconosci` si cerca il primo foglio le cui intestazioni superano il
+ * controllo; senza, resta il comportamento di prima.
+ */
+async function leggiFoglio(
+  formData: FormData,
+  riconosci?: (colonne: string[]) => boolean
+): Promise<Record<string, unknown>[]> {
   const file = formData.get('file')
   if (!(file instanceof File) || file.size === 0) {
     throw new Error('Nessun file selezionato.')
   }
   const buffer = Buffer.from(await file.arrayBuffer())
   const wb = xlsx.read(buffer)
-  const sheet = wb.Sheets[wb.SheetNames[0]]
-  if (!sheet) throw new Error('Il file non contiene alcun foglio.')
-  return xlsx.utils.sheet_to_json(sheet) as Record<string, unknown>[]
+
+  if (wb.SheetNames.length === 0) throw new Error('Il file non contiene alcun foglio.')
+
+  if (!riconosci) {
+    return xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]) as Record<string, unknown>[]
+  }
+
+  for (const nome of wb.SheetNames) {
+    const righe = xlsx.utils.sheet_to_json(wb.Sheets[nome]) as Record<string, unknown>[]
+    if (righe.length === 0) continue
+    const colonne = Object.keys(righe[0]).map((c) => c.toLowerCase().trim())
+    if (riconosci(colonne)) return righe
+  }
+
+  // Elencare i fogli trovati evita di dover indovinare quale sia quello giusto.
+  throw new Error(
+    `Nessun foglio contiene le colonne attese. Fogli nel file: ${wb.SheetNames.join(', ')}.`
+  )
 }
 
 /** Chiavi in minuscolo e senza spazi ai bordi, per tollerare intestazioni diverse. */
@@ -215,7 +244,11 @@ export async function importListone(formData: FormData): Promise<RisultatoImport
 
   let righe: Record<string, unknown>[]
   try {
-    righe = await leggiFoglio(formData)
+    // Un foglio è un listone se ha un identificativo e un nome: sono le due
+    // colonne senza le quali una riga verrebbe comunque scartata.
+    righe = await leggiFoglio(formData, (colonne) =>
+      (colonne.includes('#') || colonne.includes('id')) && colonne.includes('nome')
+    )
   } catch (e) {
     return { error: (e as Error).message }
   }
