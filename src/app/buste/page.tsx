@@ -287,10 +287,16 @@ export default function BustePage() {
           <p className="mt-1 text-sm">La tua squadra non ha slot liberi. Non puoi partecipare a questa fase di mercato.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 lg:flex-row">
+        {/* Griglia e non flex: con `w-2/3` + `w-1/3` + `gap-4` la somma supera
+            il 100%, quindi le due colonne devono restringersi, e nessuna può
+            scendere sotto la larghezza minima del proprio contenuto. Bastava
+            aggiungere un nome ai selezionati per spostare la colonna di
+            sinistra. Le tracce della griglia non dipendono dal contenuto, e
+            `min-w-0` toglie anche il minimo automatico. */}
+        <div className="grid gap-4 lg:grid-cols-3">
 
           {/* Colonna Ricerca */}
-          <div className="fm-panel p-3 sm:p-4 lg:w-2/3">
+          <div className="fm-panel min-w-0 p-3 sm:p-4 lg:col-span-2">
             <div className="mb-3 flex flex-col gap-2 sm:flex-row">
               <input
                 type="text"
@@ -361,7 +367,7 @@ export default function BustePage() {
               `order-first` sotto lg: impilata, finiva in fondo a un elenco di
               centinaia di giocatori e il pulsante di salvataggio era
               irraggiungibile senza scorrere tutto. */}
-          <div className="order-first space-y-4 lg:order-none lg:w-1/3">
+          <div className="order-first min-w-0 space-y-4 lg:order-none">
             <div className="fm-panel overflow-hidden">
               <div className="fm-panel-head fm-panel-head--neon">
                 <span className="truncate">{squadra.nome}</span>
