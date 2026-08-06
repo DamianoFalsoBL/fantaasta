@@ -217,10 +217,20 @@ export default function AdminAstaPage() {
         )}
       </div>
 
+      {/* Gli avvisi stanno subito sotto la barra dell'ordine di chiamata.
+          L'errore era in fondo alla pagina, sotto il pannello dell'asta: chi
+          premeva una pillola in cima non lo vedeva nemmeno. */}
       {esito && (
         <div className="fm-alert fm-alert-ok flex items-start justify-between gap-3">
           <span className="font-semibold">{esito}</span>
           <button onClick={() => setEsito(null)} aria-label="Chiudi avviso" className="shrink-0 opacity-70 hover:opacity-100">✕</button>
+        </div>
+      )}
+
+      {error && (
+        <div className="fm-alert fm-alert-danger flex items-start justify-between gap-3">
+          <span className="font-semibold">{error}</span>
+          <button onClick={() => setError(null)} aria-label="Chiudi errore" className="shrink-0 opacity-70 hover:opacity-100">✕</button>
         </div>
       )}
 
@@ -283,8 +293,6 @@ export default function AdminAstaPage() {
           <h2 className="fm-title text-lg text-ink-mid">Nessuna asta in corso</h2>
         </div>
       )}
-
-      {error && <div className="fm-alert fm-alert-danger font-semibold">{error}</div>}
 
       <div className="fm-panel overflow-hidden">
         <div className="fm-panel-head">

@@ -43,6 +43,7 @@ export type Database = {
         Row: {
           abbandoni: Json
           base_asta: number
+          consuma_turno: boolean
           created_at: string
           giocatore_id: number
           id: string
@@ -55,6 +56,7 @@ export type Database = {
         Insert: {
           abbandoni?: Json
           base_asta?: number
+          consuma_turno?: boolean
           created_at?: string
           giocatore_id: number
           id?: string
@@ -67,6 +69,7 @@ export type Database = {
         Update: {
           abbandoni?: Json
           base_asta?: number
+          consuma_turno?: boolean
           created_at?: string
           giocatore_id?: number
           id?: string
@@ -418,6 +421,7 @@ export type Database = {
         Returns: undefined
       }
       admin_elabora_buste: { Args: never; Returns: Json }
+      admin_imposta_turno: { Args: { p_squadra_id: string }; Returns: Json }
       admin_modifica_budget: {
         Args: { p_delta: number; p_squadra_id: string }
         Returns: undefined
