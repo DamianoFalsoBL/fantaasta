@@ -59,7 +59,7 @@ Aggiornato al 6 agosto 2026, sulla produzione.
 |---|---|
 | A — Accessi e permessi | superato |
 | B — Navigazione e interfaccia | superato |
-| C — Lettura dei dati | da fare |
+| C — Lettura dei dati | superato |
 | D — Asta live | superati D14 (annullamento) e D18 (tempo reale); il resto da fare |
 | E — Modalità delega | superato |
 | F — Buste | da fare |
@@ -190,42 +190,42 @@ Non scrive nulla. È qui che si verifica che la produzione veda gli stessi
 numeri del database.
 
 ### C1 · Tutte le rose
-- [ ] `/rose`: conta le squadre.
+- [x] `/rose`: conta le squadre.
   **Atteso:** 14 schede. Per ciascuna: crediti, slot occupati su totali, spesa.
   I badge di ruolo Mantra hanno colori coerenti (P arancio, D verde, C blu,
   W/T viola, A rosso).
-- [ ] Somma a campione: per una squadra, i crediti residui più la spesa devono
+- [x] Somma a campione: per una squadra, i crediti residui più la spesa devono
   tornare col budget iniziale mostrato in `/admin/riepilogo`.
 
 ### C2 · Svincolati e filtri
-- [ ] `/svincolati`: la lista carica.
-- [ ] Scrivi tre lettere nel campo di ricerca → la lista si restringe.
-- [ ] Filtra per squadra reale → restano solo i suoi giocatori.
-- [ ] Filtra per ruolo → funziona sia sul ruolo classico sia sui ruoli Mantra.
-- [ ] Filtra per età.
-- [ ] **Combina due filtri insieme** → devono valere entrambi, non l'ultimo.
-- [ ] Svuota tutti i filtri → la lista torna completa.
-- [ ] Cerca una stringa senza risultati → messaggio di lista vuota, non tabella
+- [x] `/svincolati`: la lista carica.
+- [x] Scrivi tre lettere nel campo di ricerca → la lista si restringe.
+- [x] Filtra per squadra reale → restano solo i suoi giocatori.
+- [x] Filtra per ruolo → funziona sia sul ruolo classico sia sui ruoli Mantra.
+- [x] Filtra per età.
+- [x] **Combina due filtri insieme** → devono valere entrambi, non l'ultimo.
+- [x] Svuota tutti i filtri → la lista torna completa.
+- [x] Cerca una stringa senza risultati → messaggio di lista vuota, non tabella
   spezzata.
 
 ### C3 · Aste a chiamata
-- [ ] `/aste`: le quattro tessere in cima (i totali) mostrano numeri sensati.
-- [ ] Spunta *solo contesi* → restano i giocatori richiesti da più squadre.
-- [ ] Spunta *solo le mie* → restano quelli nella tua lista.
-- [ ] Spunta entrambe → valgono entrambe.
-- [ ] Usa i due menu a tendina di filtro.
+- [x] `/aste`: le quattro tessere in cima (i totali) mostrano numeri sensati.
+- [x] Spunta *solo contesi* → restano i giocatori richiesti da più squadre.
+- [x] Spunta *solo le mie* → restano quelli nella tua lista.
+- [x] Spunta entrambe → valgono entrambe.
+- [x] Usa i due menu a tendina di filtro.
 
 ### C4 · Storico
-- [ ] `/storico`: le aste concluse sono in ordine dalla più recente.
+- [x] `/storico`: le aste concluse sono in ordine dalla più recente.
   **Atteso:** cinque colonne leggibili, date in formato italiano.
 
 ### C5 · Riepilogo admin
-- [ ] `/admin/riepilogo` da admin.
+- [x] `/admin/riepilogo` da admin.
   **Atteso:** 14 squadre con budget iniziale, residuo, slot. La tabella
   *Ultimi 20 acquisti* mostra gli ultimi acquisti dal più recente.
 
 ### C6 · Slot per squadra
-- [ ] `/debug` da admin.
+- [x] `/debug` da admin.
   **Atteso:** l'elenco delle squadre con slot occupati su totali. I numeri
   devono coincidere con quelli di `/rose` e `/admin/riepilogo`. **Se non
   coincidono**, è il caso d'uso del bottone *Ricalcola slot occupati* (test G3).
