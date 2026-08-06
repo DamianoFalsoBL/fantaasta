@@ -402,6 +402,54 @@ Presuppone una squadra che abbia già il numero massimo di portieri (impostato i
 - [ ] Dalla Regia, avvia l'asta di un portiere: la squadra col reparto saturo
   **non** deve finire in testa alla base.
 
+### D20 · Massimo automatico
+
+Il tetto vive sul server: dichiarato una volta, risponde da solo dentro la
+stessa transazione del rilancio avversario. Servono due manager, A e B.
+
+**Funzionamento base**
+- [ ] Con B in testa a 20, A imposta **50**. A passa in testa **all'istante**,
+  alla prima cifra utile (21 con rilancio minimo 1).
+- [ ] B rilancia a 30 → A torna in testa a 31 **senza che nessuno tocchi la sua
+  pagina**.
+- [ ] B rilancia a 55 → A resta fermo, e sulla sua pagina il tetto diventa
+  **superato** con scritto che da lì in poi decide lui.
+- [ ] A preme *Rimuovi* → al rilancio successivo di B non scatta più niente.
+
+**La prova che conta**
+- [ ] A imposta il tetto e **chiude la scheda**. B rilancia. A deve risultare di
+  nuovo in testa. È ciò che distingue questa soluzione da una che gira nel
+  browser.
+
+**Due tetti insieme**
+- [ ] A imposta 50, B imposta 40 → il prezzo si ferma a **41** con A in testa, e
+  in `/storico` risulta **una sola** offerta automatica, non dieci.
+- [ ] A e B impostano **lo stesso** importo → vince chi lo ha dichiarato per
+  primo, a quella cifra.
+
+**Segretezza**
+- [ ] Dalla console di B: `supabase.from('massimi_asta').select('*')` → **zero
+  righe** relative ad A.
+- [ ] Ripeti da un account **admin**: zero righe ugualmente. Qui l'admin gioca,
+  quindi non ha deroga.
+
+**Ad asta prenotata**
+- [ ] B chiama un giocatore ed è in testa alla base; A dichiara 50 **prima**
+  dell'avvio del timer. Il prezzo **non si muove** finché l'asta resta
+  prenotata. All'avvio, A passa in testa.
+
+**Limiti rispettati**
+- [ ] Imposta un tetto superiore al proprio massimo offribile → rifiutato con i
+  numeri in chiaro.
+- [ ] Con la rosa piena o i portieri esauriti, il tetto non può essere impostato
+  e, se già presente, non piazza più offerte.
+- [ ] Chi si ritira perde il proprio tetto: dopo *Smetti*, nessun rilancio
+  automatico a suo nome.
+
+**Riuso della riga**
+- [ ] Chiudi l'asta senza assegnare, rimetti lo stesso giocatore all'asta e
+  verifica che nessun tetto della tornata precedente sia ancora attivo.
+
 ---
 
 ## Blocco E — Modalità delega
@@ -434,6 +482,14 @@ all'admin, durante un'asta avviata.
 ### E6 · Delega su chi è già in testa
 - [x] Seleziona la squadra che è in testa.
   **Atteso:** i comandi sono disattivati.
+
+### E7 · Massimo automatico in delega
+- [ ] Dal pannello delega, imposta un tetto per la squadra assente: si comporta
+  come il proprio.
+- [ ] Il valore in corso **non** è mostrato, ed è voluto: i tetti li vede solo
+  chi li ha impostati.
+- [ ] Prova un tetto oltre il massimo offribile della squadra delegata →
+  rifiutato. La delega non aggira le regole.
 
 ---
 

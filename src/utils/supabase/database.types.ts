@@ -210,6 +210,42 @@ export type Database = {
           },
         ]
       }
+      massimi_asta: {
+        Row: {
+          asta_id: string
+          created_at: string
+          importo: number
+          squadra_id: string
+        }
+        Insert: {
+          asta_id: string
+          created_at?: string
+          importo: number
+          squadra_id: string
+        }
+        Update: {
+          asta_id?: string
+          created_at?: string
+          importo?: number
+          squadra_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "massimi_asta_asta_id_fkey"
+            columns: ["asta_id"]
+            isOneToOne: false
+            referencedRelation: "aste"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "massimi_asta_squadra_id_fkey"
+            columns: ["squadra_id"]
+            isOneToOne: false
+            referencedRelation: "squadre"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offerte: {
         Row: {
           asta_id: string
@@ -447,6 +483,14 @@ export type Database = {
       genera_ordine_chiamata: { Args: never; Returns: Json }
       hard_reset_sistema: { Args: never; Returns: Json }
       import_giocatori_batch: { Args: { payload: Json }; Returns: Json }
+      imposta_massimo_asta: {
+        Args: {
+          p_asta_id: string
+          p_importo: number
+          p_squadra_delega?: string
+        }
+        Returns: Json
+      }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       mia_squadra_id: { Args: never; Returns: string }
@@ -460,6 +504,11 @@ export type Database = {
       }
       portieri_disponibili: { Args: { p_squadra_id: string }; Returns: number }
       prenota_chiamata: { Args: { p_giocatore_id: number }; Returns: Json }
+      rimuovi_massimo_asta: {
+        Args: { p_asta_id: string; p_squadra_delega?: string }
+        Returns: Json
+      }
+      risolvi_massimi: { Args: { p_asta_id: string }; Returns: undefined }
       rosa_completa: { Args: { p_squadra_id: string }; Returns: boolean }
       ruolo_pieno: {
         Args: { p_giocatore_id: number; p_squadra_id: string }
@@ -473,7 +522,7 @@ export type Database = {
     }
     Enums: {
       esito_busta: "ATTESA" | "VINTO" | "CONTESO" | "PERSO"
-      origine_offerta: "MANAGER" | "ADMIN_PER_CONTO"
+      origine_offerta: "MANAGER" | "ADMIN_PER_CONTO" | "AUTOMATICO"
       ruolo_giocatore: "P" | "D" | "C" | "A"
       ruolo_utente: "ADMIN" | "MANAGER" | "SUPER_ADMIN"
       stato_asta:
@@ -614,7 +663,7 @@ export const Constants = {
   public: {
     Enums: {
       esito_busta: ["ATTESA", "VINTO", "CONTESO", "PERSO"],
-      origine_offerta: ["MANAGER", "ADMIN_PER_CONTO"],
+      origine_offerta: ["MANAGER", "ADMIN_PER_CONTO", "AUTOMATICO"],
       ruolo_giocatore: ["P", "D", "C", "A"],
       ruolo_utente: ["ADMIN", "MANAGER", "SUPER_ADMIN"],
       stato_asta: [

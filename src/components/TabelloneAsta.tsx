@@ -43,6 +43,11 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   // Si chiede al server la stessa funzione che poi rifiuta l'offerta.
   const [ruoloPieno, setRuoloPieno] = useState(false)
   const [portieriDisponibili, setPortieriDisponibili] = useState(0)
+  // Tetto automatico della propria squadra su quest'asta. Le RLS su
+  // massimi_asta fanno vedere solo la propria riga, quindi non serve filtrare
+  // per squadra: la query torna la riga giusta o niente.
+  const [massimoAuto, setMassimoAuto] = useState<number | null>(null)
+  const [campoMassimo, setCampoMassimo] = useState('')
   const [ordineChiamata, setOrdineChiamata] = useState<any[]>([])
   const [indiceChiamata, setIndiceChiamata] = useState(1)
   const [squadreMap, setSquadreMap] = useState<Record<string, string>>({})
@@ -120,6 +125,17 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
     if (squadraId) {
       const { data: disp } = await supabase.rpc('portieri_disponibili', { p_squadra_id: squadraId })
       setPortieriDisponibili(disp ?? 0)
+    }
+
+    if (squadraId && data) {
+      const { data: tetto } = await supabase
+        .from('massimi_asta')
+        .select('importo')
+        .eq('asta_id', data.id)
+        .maybeSingle()
+      setMassimoAuto(tetto?.importo ?? null)
+    } else {
+      setMassimoAuto(null)
     }
   }
 
@@ -282,6 +298,35 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
     setLoading(true)
     setError(null)
     const { error } = await supabase.rpc('prenota_chiamata', { p_giocatore_id: giocatoreId })
+    if (error) setError(error.message)
+    else await fetchAsta()
+    setLoading(false)
+  }
+
+  const impostaMassimo = async (delega?: string) => {
+    if (!asta) return
+    const valore = parseInt(campoMassimo, 10)
+    if (Number.isNaN(valore)) { setError('Inserisci un importo.'); return }
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.rpc('imposta_massimo_asta', {
+      p_asta_id: asta.id,
+      p_importo: valore,
+      ...(delega ? { p_squadra_delega: delega } : {}),
+    })
+    if (error) setError(error.message)
+    else { setCampoMassimo(''); await fetchAsta() }
+    setLoading(false)
+  }
+
+  const rimuoviMassimo = async (delega?: string) => {
+    if (!asta) return
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.rpc('rimuovi_massimo_asta', {
+      p_asta_id: asta.id,
+      ...(delega ? { p_squadra_delega: delega } : {}),
+    })
     if (error) setError(error.message)
     else await fetchAsta()
     setLoading(false)
@@ -522,6 +567,14 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   const rilancioBloccato =
     loading || isWinning || isChiamata || hasAbbandonato || !isParticipant || rosaPiena || ruoloPieno
 
+  // Il tetto si può dichiarare anche ad asta solo prenotata: scatterà quando
+  // l'admin avvia il timer. `isChiamata` blocca i rilanci, non questo.
+  const massimoBloccato = loading || hasAbbandonato || !isParticipant || rosaPiena || ruoloPieno
+  // Superato: il prezzo ha raggiunto il tetto e non siamo più in testa. È lo
+  // stato che va gridato, non sussurrato: chi si crede protetto e non lo è più
+  // deve accorgersene subito.
+  const tettoSuperato = massimoAuto !== null && !isWinning && asta !== null && asta.prezzo_corrente >= massimoAuto
+
   return (
     <div className="flex flex-col gap-6">
       {isAdmin && (
@@ -654,6 +707,56 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
               {nonPuoiRilanciare && (
                 <p className="w-full text-center text-xs font-medium text-ink-dim">{nonPuoiRilanciare}</p>
               )}
+
+              {/* ---- Massimo automatico ----
+                  Il server risponde per conto di chi lo ha dichiarato, dentro
+                  la stessa transazione del rilancio avversario: funziona anche
+                  a pagina chiusa. */}
+              {squadraId && (
+                <div className="mt-2 w-full border-t border-line pt-3">
+                  <p className="fm-label mb-1.5 text-center">Massimo automatico</p>
+
+                  {massimoAuto !== null ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <span className={`fm-chip ${tettoSuperato ? 'fm-chip-rosso' : 'fm-chip-neon'}`}>
+                        {massimoAuto} cr · {tettoSuperato ? 'superato' : 'attivo'}
+                      </span>
+                      <p className="text-center text-[11px] text-ink-dim">
+                        {tettoSuperato
+                          ? 'Il prezzo ha raggiunto il tuo massimo: da qui in poi decidi tu.'
+                          : 'Rilancio da solo fino a questa cifra, anche a pagina chiusa.'}
+                      </p>
+                      <button
+                        onClick={() => rimuoviMassimo()}
+                        disabled={loading}
+                        className="fm-btn fm-btn-ghost fm-btn-sm"
+                      >
+                        Rimuovi
+                      </button>
+                    </div>
+                  ) : (
+                    <form
+                      onSubmit={(e) => { e.preventDefault(); void impostaMassimo() }}
+                      className="flex w-full gap-2"
+                    >
+                      <input
+                        type="number"
+                        min={offertaMinima}
+                        value={campoMassimo}
+                        onChange={(e) => setCampoMassimo(e.target.value)}
+                        placeholder="Fino a…"
+                        disabled={massimoBloccato}
+                        className="fm-input flex-1"
+                        aria-label="Importo massimo automatico"
+                        required
+                      />
+                      <button type="submit" disabled={massimoBloccato} className="fm-btn fm-btn-viola shrink-0">
+                        Imposta
+                      </button>
+                    </form>
+                  )}
+                </div>
+              )}
             </div>
 
           </div>
@@ -753,6 +856,44 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                         Vai (delega)
                       </button>
                     </form>
+
+                    {/* Massimo automatico per la squadra delegata.
+                        Il valore attuale non si può mostrare: le RLS su
+                        massimi_asta rendono i tetti leggibili solo al
+                        proprietario, e l'admin qui e' anche un manager in
+                        gara. Si puo' impostarne uno nuovo o toglierlo. */}
+                    <div className="flex w-full flex-col gap-1.5 border-t border-line pt-3">
+                      <span className="fm-label">Massimo automatico in delega</span>
+                      <div className="flex w-full gap-2">
+                        <input
+                          type="number"
+                          min={offertaMinima}
+                          value={campoMassimo}
+                          onChange={(e) => setCampoMassimo(e.target.value)}
+                          placeholder="Fino a…"
+                          disabled={loading || hasDelegaAbbandonato}
+                          className="fm-input flex-1"
+                          aria-label="Massimo automatico per la squadra delegata"
+                        />
+                        <button
+                          onClick={() => impostaMassimo(squadraDelegaId)}
+                          disabled={loading || hasDelegaAbbandonato}
+                          className="fm-btn fm-btn-viola shrink-0"
+                        >
+                          Imposta
+                        </button>
+                        <button
+                          onClick={() => rimuoviMassimo(squadraDelegaId)}
+                          disabled={loading}
+                          className="fm-btn fm-btn-ghost shrink-0"
+                        >
+                          Rimuovi
+                        </button>
+                      </div>
+                      <span className="text-[11px] text-ink-dim">
+                        Il tetto in corso non è visibile: per scelta lo vede solo la squadra che lo ha impostato.
+                      </span>
+                    </div>
 
                     {!hasDelegaAbbandonato && asta.squadra_in_testa !== squadraDelegaId && (
                       <div className="flex w-full justify-center pt-1">
