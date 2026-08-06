@@ -33,7 +33,11 @@ export default function AdminAstaPage() {
     // righe non terminate per far fallire tutta la Regia.
     const { data: correnti, error: erroreCorrente } = await supabase
       .from('aste')
-      .select('*, giocatori(*), squadre(*)')
+      // `squadre!squadra_in_testa`: da quando esiste massimi_asta, che ha una
+      // chiave verso `aste` e una verso `squadre`, PostgREST vede due percorsi
+      // fra le due tabelle e rifiuta l'incorporamento ambiguo con un 300.
+      // Nominare la chiave toglie l'ambiguita'.
+      .select('*, giocatori(*), squadre!squadra_in_testa(*)')
       .in('stato', ['IN_CORSO', 'CHIAMATA'])
       .order('created_at', { ascending: false })
       .limit(1)
