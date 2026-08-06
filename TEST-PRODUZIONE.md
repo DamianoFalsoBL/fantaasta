@@ -67,6 +67,7 @@ Aggiornato al 6 agosto 2026, sulla produzione.
 | H — Export | da fare |
 | I — Telefono | da fare |
 | J — Distruttivi | da fare, solo a fine stagione |
+| K — Mercato trasferimenti | da fare, funzione nuova mai provata |
 
 Nessun test fallito finora.
 
@@ -728,6 +729,99 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 - [ ] Dopo il reset, esci e rientra come super admin.
   **Atteso:** **il ruolo è ancora SUPER_ADMIN.** È esattamente il punto che si
   rompeva e che aveva richiesto sei script di ripristino.
+
+---
+
+## Blocco K — Mercato trasferimenti
+
+> Serve **il mercato aperto** (`/admin/riepilogo` → *Mercato trasferimenti* →
+> *Apri il mercato*) e **nessuna asta viva**. Da fare in due manager più
+> l'admin, perché ogni scambio attraversa tutti e tre.
+>
+> Uno scambio eseguito **non si può annullare**: non esiste nulla di simile ad
+> *Annulla acquisto*. Fare questo blocco sapendolo.
+
+### K1 · La vetrina
+- [ ] `/mia-rosa`: compare solo la tua rosa, ordinata per reparto.
+- [ ] Metti un giocatore in lista **lasciando il prezzo vuoto**.
+  **Atteso:** il bottone diventa *Rimuovi dalla lista* e compare *In vetrina ·
+  aperto a offerte*.
+- [ ] Mettine un altro **con un prezzo**.
+  **Atteso:** il chip mostra la cifra.
+- [ ] `/trasferimenti` da un **altro manager**: entrambi compaiono, con il
+  proprietario giusto e la colonna *Chiede* coerente.
+- [ ] Togli il primo dalla lista.
+  **Atteso:** sparisce dalla vetrina dell'altro manager **senza ricaricare**.
+- [ ] Con il mercato **chiuso**, i comandi di `/mia-rosa` sono disattivati.
+
+### K2 · Offerta di soli soldi
+- [ ] Da `/trasferimenti`, *Fai un'offerta* su un giocatore in vetrina, solo crediti.
+  **Atteso:** *Valore contropartita* pari alla cifra digitata.
+- [ ] Offri **più crediti di quelli che hai**.
+  **Atteso:** l'invio è bloccato e la riga sotto il campo lo dice.
+- [ ] Invia un'offerta valida → compare fra le *Offerte inviate* come *In attesa*,
+  e fra le *Ricevute* dell'altro manager.
+- [ ] Prova a farne **una seconda sullo stesso giocatore**.
+  **Atteso:** rifiutata con «Hai già un'offerta aperta per questo giocatore».
+
+### K3 · Offerta con calciatori
+- [ ] Costruisci un'offerta con **crediti + due tuoi calciatori**.
+  **Atteso:** il valore mostrato è crediti + le due quotazioni, e la frase sotto
+  dice a quanto risulterà costato il giocatore.
+- [ ] Costruiscine una con **soli calciatori**, zero crediti. Deve essere inviabile.
+- [ ] Prova a inviare un'offerta **vuota**. **Atteso:** bloccata.
+
+### K4 · Rifiuto e ritiro
+- [ ] Il ricevente **rifiuta** una delle offerte.
+  **Atteso:** stato *Rifiutata*, e in `/rose` **non si muove nulla**.
+- [ ] Il proponente **ritira** un'offerta ancora in attesa. **Atteso:** *Ritirata*.
+- [ ] Prova a ritirarne una **già accettata**. **Atteso:** non è più ritirabile.
+
+### K5 · Accettazione e ratifica
+- [ ] Il ricevente **accetta**. **Atteso:** *Accettata · attende l'admin*, e nulla
+  è ancora cambiato in `/rose`.
+- [ ] `/admin/trasferimenti`: l'offerta compare con i due versi, e i numeri di
+  crediti e slot **prima → dopo** per entrambe le squadre.
+- [ ] **Respingi** una prima offerta. **Atteso:** *Non ratificata*, nulla si muove.
+- [ ] **Esegui** la seconda. Poi controlla, uno per uno:
+  - [ ] i giocatori sono passati alle squadre giuste in `/rose`;
+  - [ ] i crediti di entrambe corrispondono a quelli annunciati;
+  - [ ] gli slot di entrambe corrispondono;
+  - [ ] i giocatori scambiati **non sono più in vetrina**;
+  - [ ] il navbar del manager che ha speso mostra subito il nuovo budget.
+
+### K6 · Il prezzo
+- [ ] Offerta di **20 crediti + un calciatore da quotazione 15**, eseguita.
+  **Atteso:** in `/mia-rosa` il giocatore ricevuto risulta *pagato 35 cr*.
+- [ ] Scambio con **due calciatori ceduti** per uno da quotazione 30.
+  **Atteso:** i due, nella rosa di chi li riceve, hanno prezzi che **sommano
+  esattamente 30**. Nessun credito perso per arrotondamento.
+
+### K7 · I limiti
+- [ ] Costruisci uno scambio che porterebbe una squadra a **quattro portieri**.
+  **Atteso:** rifiutato, con il numero e il massimo nel messaggio.
+- [ ] Scambio **portiere per portiere** con una squadra che ne ha già tre.
+  **Atteso:** passa. È il caso che il conteggio secco sbaglierebbe.
+- [ ] Scambio due-per-uno che porterebbe una rosa **oltre i 30**.
+  **Atteso:** rifiutato.
+
+### K8 · Decadenza
+- [ ] Due manager fanno **entrambi un'offerta sullo stesso giocatore**; il
+  proprietario accetta la prima e l'admin la esegue.
+  **Atteso:** la seconda risulta **Decaduta**, senza che nessuno l'abbia toccata.
+
+### K9 · Riservatezza
+- [ ] Da un **terzo manager** estraneo alla trattativa, `/trasferimenti` non
+  mostra le offerte altrui in attesa, ma mostra gli **scambi conclusi**.
+- [ ] Dalla console del browser di quel manager:
+  `await supabase.from('offerte_trasferimento').select('*')`
+  **Atteso:** solo righe con stato `ESEGUITA`.
+
+### K10 · Mercato chiuso
+- [ ] Chiudi il mercato con una trattativa **accettata** in sospeso.
+  **Atteso:** i pulsanti spariscono o si disattivano, e se si forza la ratifica
+  l'errore dice che il mercato è chiuso.
+- [ ] Riapri: la trattativa è ancora lì, ratificabile.
 
 ---
 

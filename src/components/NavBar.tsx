@@ -22,7 +22,9 @@ const VOCI_UTENTE: Voce[] = [
   { href: '/asta', label: 'Tabellone Live' },
   { href: '/aste', label: 'Aste a Chiamata' },
   { href: '/rose', label: 'Tutte le Rose' },
+  { href: '/mia-rosa', label: 'La mia Rosa' },
   { href: '/svincolati', label: 'Lista Svincolati' },
+  { href: '/trasferimenti', label: '🤝 Lista Trasferimenti' },
   { href: '/storico', label: 'Storico Aste' },
   { href: '/buste', label: '✉️ Buste Riparazione' },
 ]
@@ -30,6 +32,7 @@ const VOCI_UTENTE: Voce[] = [
 const VOCI_ADMIN: Voce[] = [
   { href: '/admin/setup', label: '⚙️ Setup Sistema', soloSuper: true },
   { href: '/admin/asta', label: '🎮 Regia Asta Live' },
+  { href: '/admin/trasferimenti', label: '🤝 Ratifica Trasferimenti' },
   { href: '/admin/riepilogo', label: '📊 Riepilogo e Budget' },
 ]
 

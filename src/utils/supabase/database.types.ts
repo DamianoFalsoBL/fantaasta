@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -288,6 +288,97 @@ export type Database = {
           },
         ]
       }
+      offerte_trasferimento: {
+        Row: {
+          created_at: string
+          crediti: number
+          deciso_at: string | null
+          eseguito_at: string | null
+          giocatore_id: number
+          id: string
+          messaggio: string | null
+          squadra_a: string
+          squadra_da: string
+          stato: Database["public"]["Enums"]["stato_offerta_trasf"]
+        }
+        Insert: {
+          created_at?: string
+          crediti?: number
+          deciso_at?: string | null
+          eseguito_at?: string | null
+          giocatore_id: number
+          id?: string
+          messaggio?: string | null
+          squadra_a: string
+          squadra_da: string
+          stato?: Database["public"]["Enums"]["stato_offerta_trasf"]
+        }
+        Update: {
+          created_at?: string
+          crediti?: number
+          deciso_at?: string | null
+          eseguito_at?: string | null
+          giocatore_id?: number
+          id?: string
+          messaggio?: string | null
+          squadra_a?: string
+          squadra_da?: string
+          stato?: Database["public"]["Enums"]["stato_offerta_trasf"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offerte_trasferimento_giocatore_id_fkey"
+            columns: ["giocatore_id"]
+            isOneToOne: false
+            referencedRelation: "giocatori"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offerte_trasferimento_squadra_a_fkey"
+            columns: ["squadra_a"]
+            isOneToOne: false
+            referencedRelation: "squadre"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offerte_trasferimento_squadra_da_fkey"
+            columns: ["squadra_da"]
+            isOneToOne: false
+            referencedRelation: "squadre"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offerte_trasferimento_giocatori: {
+        Row: {
+          giocatore_id: number
+          offerta_id: string
+        }
+        Insert: {
+          giocatore_id: number
+          offerta_id: string
+        }
+        Update: {
+          giocatore_id?: number
+          offerta_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offerte_trasferimento_giocatori_giocatore_id_fkey"
+            columns: ["giocatore_id"]
+            isOneToOne: false
+            referencedRelation: "giocatori"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offerte_trasferimento_giocatori_offerta_id_fkey"
+            columns: ["offerta_id"]
+            isOneToOne: false
+            referencedRelation: "offerte_trasferimento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profili: {
         Row: {
           created_at: string
@@ -323,6 +414,7 @@ export type Database = {
           costo_minimo_giocatore: number
           durata_timer: number
           fase_buste_aperta: boolean | null
+          fase_mercato_aperta: boolean
           id: string
           indice_chiamata: number | null
           ordine_chiamata: string[] | null
@@ -340,6 +432,7 @@ export type Database = {
           costo_minimo_giocatore?: number
           durata_timer?: number
           fase_buste_aperta?: boolean | null
+          fase_mercato_aperta?: boolean
           id?: string
           indice_chiamata?: number | null
           ordine_chiamata?: string[] | null
@@ -357,6 +450,7 @@ export type Database = {
           costo_minimo_giocatore?: number
           durata_timer?: number
           fase_buste_aperta?: boolean | null
+          fase_mercato_aperta?: boolean
           id?: string
           indice_chiamata?: number | null
           ordine_chiamata?: string[] | null
@@ -406,7 +500,9 @@ export type Database = {
           created_at: string
           giocatore_id: number
           id: string
+          in_vendita: boolean
           prezzo_pagato: number
+          prezzo_richiesto: number | null
           squadra_id: string
           stagione: string
         }
@@ -414,7 +510,9 @@ export type Database = {
           created_at?: string
           giocatore_id: number
           id?: string
+          in_vendita?: boolean
           prezzo_pagato: number
+          prezzo_richiesto?: number | null
           squadra_id: string
           stagione?: string
         }
@@ -422,7 +520,9 @@ export type Database = {
           created_at?: string
           giocatore_id?: number
           id?: string
+          in_vendita?: boolean
           prezzo_pagato?: number
+          prezzo_richiesto?: number | null
           squadra_id?: string
           stagione?: string
         }
@@ -472,6 +572,7 @@ export type Database = {
         Returns: undefined
       }
       admin_toggle_buste: { Args: { p_stato: boolean }; Returns: undefined }
+      admin_toggle_mercato: { Args: { p_stato: boolean }; Returns: Json }
       avanza_turno_chiamata: { Args: never; Returns: undefined }
       avvia_asta_admin: { Args: { p_giocatore_id: number }; Returns: Json }
       avvia_timer_chiamata: { Args: { p_asta_id: string }; Returns: Json }
@@ -480,6 +581,19 @@ export type Database = {
         Returns: number
       }
       chiudi_asta: { Args: { p_asta_id: string }; Returns: Json }
+      crea_offerta_trasferimento: {
+        Args: {
+          p_crediti?: number
+          p_giocatore_id: number
+          p_giocatori_offerti?: number[]
+          p_messaggio?: string
+        }
+        Returns: Json
+      }
+      esegui_trasferimento: {
+        Args: { p_approva?: boolean; p_offerta_id: string }
+        Returns: Json
+      }
       genera_ordine_chiamata: { Args: never; Returns: Json }
       hard_reset_sistema: { Args: never; Returns: Json }
       import_giocatori_batch: { Args: { payload: Json }; Returns: Json }
@@ -488,6 +602,14 @@ export type Database = {
           p_asta_id: string
           p_importo: number
           p_squadra_delega?: string
+        }
+        Returns: Json
+      }
+      imposta_vetrina: {
+        Args: {
+          p_giocatore_id: number
+          p_in_vendita: boolean
+          p_prezzo?: number
         }
         Returns: Json
       }
@@ -509,6 +631,14 @@ export type Database = {
         Returns: Json
       }
       risolvi_massimi: { Args: { p_asta_id: string }; Returns: undefined }
+      rispondi_offerta_trasferimento: {
+        Args: { p_accetta: boolean; p_offerta_id: string }
+        Returns: Json
+      }
+      ritira_offerta_trasferimento: {
+        Args: { p_offerta_id: string }
+        Returns: Json
+      }
       rosa_completa: { Args: { p_squadra_id: string }; Returns: boolean }
       ruolo_pieno: {
         Args: { p_giocatore_id: number; p_squadra_id: string }
@@ -519,6 +649,16 @@ export type Database = {
         Returns: boolean
       }
       submit_buste: { Args: { p_giocatori_ids: number[] }; Returns: Json }
+      verifica_scambio: {
+        Args: {
+          p_crediti: number
+          p_giocatore_id: number
+          p_offerti: number[]
+          p_squadra_a: string
+          p_squadra_da: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       esito_busta: "ATTESA" | "VINTO" | "CONTESO" | "PERSO"
@@ -532,6 +672,14 @@ export type Database = {
         | "ANNULLATA"
         | "CHIAMATA"
       stato_giocatore: "LIBERO" | "TESSERATO" | "IN_ASTA"
+      stato_offerta_trasf:
+        | "ATTESA"
+        | "ACCETTATA"
+        | "RIFIUTATA"
+        | "RITIRATA"
+        | "RESPINTA"
+        | "DECADUTA"
+        | "ESEGUITA"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -674,6 +822,15 @@ export const Constants = {
         "CHIAMATA",
       ],
       stato_giocatore: ["LIBERO", "TESSERATO", "IN_ASTA"],
+      stato_offerta_trasf: [
+        "ATTESA",
+        "ACCETTATA",
+        "RIFIUTATA",
+        "RITIRATA",
+        "RESPINTA",
+        "DECADUTA",
+        "ESEGUITA",
+      ],
     },
   },
 } as const
