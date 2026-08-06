@@ -1,6 +1,6 @@
 # Piano di test — FantaAsta in produzione
 
-Collaudo completo del sito pubblicato su **https://fantaasta-zeta.vercel.app**.
+Collaudo completo del sito pubblicato su **https://asta.damianofalso.com**.
 Copre ogni pagina, ogni bottone e i casi limite di ciascuna funzione.
 
 Il documento più vecchio, [COLLAUDO.md](COLLAUDO.md), resta valido come giro
@@ -69,6 +69,11 @@ Aggiornato al 6 agosto 2026, sulla produzione.
 | J — Distruttivi | da fare, solo a fine stagione |
 
 Nessun test fallito finora.
+
+**Giro completo in programma**: domenica, in due, su tutti i blocchi. Le caselle
+qui sotto restano quelle effettivamente verificate finora — i blocchi D (dal
+rilancio in poi), F, G, H e I sono ancora da percorrere, e vanno spuntati solo
+dopo averli eseguiti davvero.
 
 ---
 
