@@ -325,27 +325,49 @@ due finestre separate. Chiamiamoli **M1** e **M2**.
 
 **Cosa si sta provando.** L'asta si aggiorna da sola perché ogni pagina tiene
 una connessione permanente aperta verso Supabase. Quella connessione può cadere
-senza avvisare: schermo del telefono spento, computer che va in sospensione,
-passaggio dal wi-fi alla rete dati. Se cade e non si riaggancia, la pagina
-continua a mostrare l'ultimo prezzo che ha ricevuto — **senza nessun segnale che
-è vecchio**. È il guasto peggiore che possa capitare in un'asta dal vivo:
+senza avvisare: schermo del telefono spento, computer in sospensione, passaggio
+dal wi-fi alla rete dati. Se cade e non si riaggancia, la pagina continua a
+mostrare l'ultimo prezzo ricevuto **senza nessun segnale che è vecchio** —
 qualcuno rilancia guardando un numero che non è più quello vero.
 
-C'è una rete di sicurezza: ogni **15 secondi** la pagina richiede comunque lo
-stato dell'asta. Serve proprio a coprire questo caso.
+**Le due spie, che vanno guardate insieme.**
 
-**Come si prova.** Due finestre sulla stessa asta. Lascia la prima **ferma e in
-secondo piano per cinque minuti** — se è un telefono, spegni lo schermo. Poi,
-dalla seconda, fai un rilancio. Torna sulla prima **senza ricaricarla**.
+| Dove | Come si aggiorna |
+|---|---|
+| Tabellone dell'asta | connessione permanente **più** una rete di sicurezza che ogni 15 secondi richiede comunque lo stato |
+| Barra del budget in alto | **solo** connessione permanente, nessuna rete di sicurezza |
 
-- [ ] **Si aggiorna entro un secondo** → tutto a posto, la connessione ha retto.
-- [ ] **Si aggiorna dopo qualche secondo, entro quindici** → la connessione era
-  caduta ma la rete di sicurezza ha funzionato. Utilizzabile, ma **annotalo**.
-- [ ] **Non si aggiorna affatto** → guasto vero. Annota per quanto tempo era
-  rimasta ferma, se era telefono o computer, e se la rete era cambiata.
+Da qui il senso del test: se dopo l'attesa il tabellone si aggiorna ma il budget
+in alto resta fermo, la connessione è morta e stai vedendo solo il salvagente.
 
-Il secondo caso è quello da tenere d'occhio: in un'asta con timer da 10 secondi,
-un ritardo fino a 15 significa vedere il prezzo giusto quando l'asta è già finita.
+**Attenzione a come si costruisce l'attesa.** Non far scadere un'asta viva per
+poi rilanciare: dopo la scadenza il server rifiuta le offerte con *"L'asta è
+scaduta!"*, e non avresti provato nulla. Serve invece qualcosa che possa
+succedere **dopo** i cinque minuti, e lo stato *prenotata* è perfetto perché non
+ha countdown e non scade.
+
+**Procedura**
+
+1. Un manager chiama un giocatore. L'asta resta in *prenotata · in attesa di
+   avvio*: nessun timer parte.
+2. Lascia la finestra del manager **ferma e in secondo piano per cinque
+   minuti**. Se è un telefono, spegni lo schermo e mettilo giù.
+3. Dalla Regia premi **Avvia timer**.
+4. Guarda la finestra del manager **senza toccarla e senza ricaricarla**.
+
+- [ ] Il countdown parte **entro un secondo** → connessione integra.
+- [ ] Parte **dopo qualche secondo, entro quindici** → era caduta, l'ha salvata
+  la rete di sicurezza. Utilizzabile, ma **annotalo**: con un timer da 10
+  secondi, un ritardo fino a 15 significa vedere il prezzo giusto quando l'asta
+  è già finita.
+- [ ] **Non parte affatto** → guasto vero. Annota per quanto era rimasta ferma,
+  se telefono o computer, e se la rete era cambiata.
+
+5. Porta l'asta a termine e fai assegnare il giocatore dall'admin.
+
+- [ ] **I crediti del vincitore nella barra in alto cambiano da soli**, senza
+  ricaricare. È la prova che la connessione permanente è viva davvero, non che
+  a coprirla sia il salvagente.
 
 ---
 
