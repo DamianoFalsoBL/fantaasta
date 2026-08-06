@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import MantraBadge from '@/components/MantraBadge'
+import Conferma from '@/components/Conferma'
 
 type Squadra = {
   id: string
@@ -47,6 +48,9 @@ export default function BustePage() {
   const [risultati, setRisultati] = useState<BustaConGiocatore[]>([])
 
   const [loading, setLoading] = useState(true)
+  // Al posto di `alert()`: erano le ultime finestre di sistema rimaste
+  // nell'app, disegnate dal sistema operativo e fuori tema.
+  const [avviso, setAvviso] = useState<{ tono: 'ok' | 'errore'; titolo: string; testo: string } | null>(null)
 
   useEffect(() => {
     loadData()
@@ -181,23 +185,35 @@ export default function BustePage() {
     if (!squadra) return
     const slotLiberi = slotTotali - squadra.slot_occupati
     if (selezionati.length !== slotLiberi) {
-      alert(`Errore: Devi selezionare ESATTAMENTE ${slotLiberi} giocatori.`)
+      setAvviso({
+        tono: 'errore',
+        titolo: 'Selezione incompleta',
+        testo: `Devi selezionare esattamente ${slotLiberi} giocatori: adesso ne hai ${selezionati.length}.`,
+      })
       return
     }
 
     const costoTotale = selezionati.reduce((sum, g) => sum + g.quotazione, 0)
     if (costoTotale > squadra.crediti_residui) {
-      alert(`Errore: Il costo totale (${costoTotale}) supera il tuo budget (${squadra.crediti_residui}).`)
+      setAvviso({
+        tono: 'errore',
+        titolo: 'Budget superato',
+        testo: `Il costo totale è ${costoTotale} cr, ma hai ${squadra.crediti_residui} cr disponibili.`,
+      })
       return
     }
 
     const ids = selezionati.map(g => g.id)
     const { error } = await supabase.rpc('submit_buste', { p_giocatori_ids: ids })
-    
+
     if (error) {
-      alert("Errore salvataggio: " + error.message)
+      setAvviso({ tono: 'errore', titolo: 'Salvataggio non riuscito', testo: error.message })
     } else {
-      alert("Buste salvate con successo!")
+      setAvviso({
+        tono: 'ok',
+        titolo: 'Lista salvata',
+        testo: `Le tue ${selezionati.length} selezioni sono state registrate. Puoi modificarle finché la fase buste resta aperta.`,
+      })
       loadData()
     }
   }
@@ -414,6 +430,17 @@ export default function BustePage() {
 
         </div>
       )}
+
+      <Conferma
+        aperta={avviso !== null}
+        titolo={avviso?.titolo ?? ''}
+        messaggio={avviso?.testo ?? ''}
+        tono={avviso?.tono === 'errore' ? 'pericolo' : 'neutro'}
+        soloConferma
+        testoConferma="Ho capito"
+        onConferma={() => setAvviso(null)}
+        onAnnulla={() => setAvviso(null)}
+      />
     </div>
   )
 }

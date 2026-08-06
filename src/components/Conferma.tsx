@@ -23,6 +23,7 @@ export default function Conferma({
   testoConferma = 'Conferma',
   testoAnnulla = 'Annulla',
   tono = 'neutro',
+  soloConferma = false,
   onConferma,
   onAnnulla,
 }: {
@@ -32,6 +33,8 @@ export default function Conferma({
   testoConferma?: string
   testoAnnulla?: string
   tono?: TonoConferma
+  /** Un solo pulsante: la finestra comunica un esito, non chiede una scelta. */
+  soloConferma?: boolean
   onConferma: () => void
   onAnnulla: () => void
 }) {
@@ -68,9 +71,11 @@ export default function Conferma({
           <div className="text-sm text-ink-mid">{messaggio}</div>
 
           <div className="mt-5 flex gap-2">
-            <button onClick={onAnnulla} className="fm-btn fm-btn-ghost flex-1">
-              {testoAnnulla}
-            </button>
+            {!soloConferma && (
+              <button onClick={onAnnulla} className="fm-btn fm-btn-ghost flex-1">
+                {testoAnnulla}
+              </button>
+            )}
             <button
               ref={bottoneRef}
               onClick={onConferma}

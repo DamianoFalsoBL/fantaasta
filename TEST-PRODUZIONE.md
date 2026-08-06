@@ -645,7 +645,6 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 
 | Cosa | Stato |
 |---|---|
-| `/buste` mostra ancora finestre di sistema del browser al posto delle finestre in tema (4 punti: numero slot sbagliato, budget superato, errore di salvataggio, conferma di invio) | Da sistemare. Le altre schermate sono già state convertite |
 | I secondi del contatore non sono modificabili da interfaccia | Già in lavorazione — vedi attività *Timer asta configurabile* |
 | `npm audit` segnala 5 vulnerabilità nella libreria che legge gli Excel | Preesistenti. L'upload è riservato al super admin, quindi il rischio è basso ma non nullo |
 | Le emoji nei menu e nei pulsanti | Da sostituire con il nuovo marchio |
