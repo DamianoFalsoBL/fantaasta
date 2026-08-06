@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import MantraBadge from '@/components/MantraBadge'
+import Conferma from '@/components/Conferma'
 
 export default function AdminAstaPage() {
   const supabase = createClient()
@@ -20,6 +21,10 @@ export default function AdminAstaPage() {
   // ricomparivano in "Prossime chiamate" identici a chi non è mai stato
   // chiamato, e sembravano voci fantasma.
   const [deserti, setDeserti] = useState<Set<number>>(new Set())
+  // Spostamento manuale del turno: finora l'unico modo di toccarlo era
+  // risorteggiare tutto l'ordine.
+  const [turnoDaImpostare, setTurnoDaImpostare] = useState<{ id: string; nome: string } | null>(null)
+  const [esito, setEsito] = useState<string | null>(null)
 
   const loadData = async () => {
     // 1. Carica asta in corso o in chiamata
@@ -140,6 +145,14 @@ export default function AdminAstaPage() {
     loadData()
   }
 
+  const impostaTurno = async (squadraId: string, nome: string) => {
+    setError(null)
+    const { error } = await supabase.rpc('admin_imposta_turno', { p_squadra_id: squadraId })
+    if (error) setError(`Errore spostamento turno: ${error.message}`)
+    else setEsito(`Turno di chiamata spostato a ${nome}.`)
+    loadData()
+  }
+
   const sorteggiaOrdine = async () => {
     setLoading(true)
     const { data, error } = await supabase.rpc('genera_ordine_chiamata')
@@ -168,28 +181,48 @@ export default function AdminAstaPage() {
           </button>
         </div>
         {ordineChiamata.length > 0 ? (
-          <div className="flex gap-2 overflow-x-auto p-3 md:flex-wrap md:overflow-visible">
-            {ordineChiamata.map((sqId, idx) => {
-              const isTurno = (idx + 1) === indiceChiamata;
-              return (
-                <div
-                  key={idx}
-                  className={`fm-chip shrink-0 ${isTurno ? 'fm-chip-attivo' : ''}`}
-                >
-                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
-                    isTurno ? 'bg-void text-neon' : 'bg-panel-hover text-ink-dim'
-                  }`}>
-                    {idx + 1}
-                  </span>
-                  {squadreMap[sqId] || 'Squadra'}
-                </div>
-              );
-            })}
-          </div>
+          <>
+            <div className="flex gap-2 overflow-x-auto p-3 pb-1 md:flex-wrap md:overflow-visible">
+              {ordineChiamata.map((sqId, idx) => {
+                const isTurno = (idx + 1) === indiceChiamata;
+                const nome = squadreMap[sqId] || 'Squadra'
+                return (
+                  /* Le pillole sono diventate cliccabili: servono a spostare il
+                     turno senza risorteggiare tutto l'ordine, per esempio dopo
+                     l'annullamento di un acquisto. */
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => !isTurno && setTurnoDaImpostare({ id: sqId, nome })}
+                    disabled={isTurno}
+                    title={isTurno ? 'È già il suo turno' : `Sposta il turno di chiamata a ${nome}`}
+                    className={`fm-chip shrink-0 ${isTurno ? 'fm-chip-attivo cursor-default' : 'cursor-pointer hover:border-neon hover:text-ink'}`}
+                  >
+                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
+                      isTurno ? 'bg-void text-neon' : 'bg-panel-hover text-ink-dim'
+                    }`}>
+                      {idx + 1}
+                    </span>
+                    {nome}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="px-3 pb-3 text-[11px] text-ink-dim">
+              Tocca una squadra per spostarle il turno di chiamata.
+            </p>
+          </>
         ) : (
           <div className="p-3 text-sm text-ink-dim">Nessun ordine impostato. Clicca su Sorteggia.</div>
         )}
       </div>
+
+      {esito && (
+        <div className="fm-alert fm-alert-ok flex items-start justify-between gap-3">
+          <span className="font-semibold">{esito}</span>
+          <button onClick={() => setEsito(null)} aria-label="Chiudi avviso" className="shrink-0 opacity-70 hover:opacity-100">✕</button>
+        </div>
+      )}
 
       {astaCorrente ? (
         <div className="fm-panel overflow-hidden">
@@ -304,6 +337,25 @@ export default function AdminAstaPage() {
         </div>
         )}
       </div>
+
+      <Conferma
+        aperta={turnoDaImpostare !== null}
+        titolo="Spostare il turno di chiamata"
+        messaggio={
+          <>
+            Il turno passerà a <strong className="text-ink">{turnoDaImpostare?.nome}</strong>, che sarà
+            la prossima squadra a poter chiamare. Non cambia l&apos;ordine delle altre e non tocca le
+            aste già concluse.
+          </>
+        }
+        testoConferma="Sposta il turno"
+        onAnnulla={() => setTurnoDaImpostare(null)}
+        onConferma={() => {
+          const scelta = turnoDaImpostare
+          setTurnoDaImpostare(null)
+          if (scelta) void impostaTurno(scelta.id, scelta.nome)
+        }}
+      />
     </div>
   )
 }

@@ -321,12 +321,31 @@ due finestre separate. Chiamiamoli **M1** e **M2**.
   **Atteso:** i bottoni *Avvia asta* sono disattivati. Si lavora un giocatore
   per volta.
 
-### D18 · Tenuta del tempo reale
-- [ ] Lascia una finestra aperta e inattiva per cinque minuti, poi fai un
-  rilancio dall'altra.
-  **Atteso:** la finestra ferma si aggiorna lo stesso. Se non lo fa, il
-  WebSocket è caduto senza riconnettersi: **annotalo**, è il difetto più
-  insidioso da avere durante un'asta vera.
+### D18 · Tenuta del tempo reale dopo una pausa
+
+**Cosa si sta provando.** L'asta si aggiorna da sola perché ogni pagina tiene
+una connessione permanente aperta verso Supabase. Quella connessione può cadere
+senza avvisare: schermo del telefono spento, computer che va in sospensione,
+passaggio dal wi-fi alla rete dati. Se cade e non si riaggancia, la pagina
+continua a mostrare l'ultimo prezzo che ha ricevuto — **senza nessun segnale che
+è vecchio**. È il guasto peggiore che possa capitare in un'asta dal vivo:
+qualcuno rilancia guardando un numero che non è più quello vero.
+
+C'è una rete di sicurezza: ogni **15 secondi** la pagina richiede comunque lo
+stato dell'asta. Serve proprio a coprire questo caso.
+
+**Come si prova.** Due finestre sulla stessa asta. Lascia la prima **ferma e in
+secondo piano per cinque minuti** — se è un telefono, spegni lo schermo. Poi,
+dalla seconda, fai un rilancio. Torna sulla prima **senza ricaricarla**.
+
+- [ ] **Si aggiorna entro un secondo** → tutto a posto, la connessione ha retto.
+- [ ] **Si aggiorna dopo qualche secondo, entro quindici** → la connessione era
+  caduta ma la rete di sicurezza ha funzionato. Utilizzabile, ma **annotalo**.
+- [ ] **Non si aggiorna affatto** → guasto vero. Annota per quanto tempo era
+  rimasta ferma, se era telefono o computer, e se la rete era cambiata.
+
+Il secondo caso è quello da tenere d'occhio: in un'asta con timer da 10 secondi,
+un ritardo fino a 15 significa vedere il prezzo giusto quando l'asta è già finita.
 
 ---
 
