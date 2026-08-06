@@ -51,7 +51,10 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
       <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4">
         <Metrica etichetta="Giocatori in lista" valore={righe.length} />
         <Metrica etichetta="Contesi" valore={contesi} accento />
-        <Metrica etichetta="Senza contendenti" valore={righe.length - contesi} />
+        {/* Non "senza contendenti": ogni riga di liste_aste ha almeno una
+            squadra, quindi il contendente c'è sempre. Questi sono i giocatori
+            richiesti da una sola squadra, cioè quelli che non finiranno in gara. */}
+        <Metrica etichetta="Non contesi" valore={righe.length - contesi} />
         <Metrica etichetta="Valore base mostrato" valore={`${spesaPotenziale} cr`} />
       </div>
 
