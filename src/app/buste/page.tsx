@@ -37,6 +37,11 @@ export default function BustePage() {
   const [faseAperta, setFaseAperta] = useState(false)
   const [squadra, setSquadra] = useState<Squadra | null>(null)
   const [slotTotali, setSlotTotali] = useState(30)
+  // Quanti portieri la squadra puo' ancora prendere. Si chiede al server
+  // invece di ricalcolarlo qui: e' la stessa funzione che poi rifiuta il
+  // salvataggio, quindi i due numeri non possono divergere.
+  const [portieriDisponibili, setPortieriDisponibili] = useState(0)
+  const [maxPortieri, setMaxPortieri] = useState(3)
 
   // Per fase aperta
   const [ricerca, setRicerca] = useState('')
@@ -106,12 +111,16 @@ export default function BustePage() {
 
     const { data: rData } = await supabase
       .from('regole_lega')
-      .select('fase_buste_aperta, slot_totali')
+      .select('fase_buste_aperta, slot_totali, slot_p')
       .limit(1)
       .maybeSingle()
     const aperta = rData?.fase_buste_aperta || false
     setSlotTotali(rData?.slot_totali ?? 30)
+    setMaxPortieri(rData?.slot_p ?? 3)
     setFaseAperta(aperta)
+
+    const { data: pDisp } = await supabase.rpc('portieri_disponibili', { p_squadra_id: sq.id })
+    setPortieriDisponibili(pDisp ?? 0)
 
     if (aperta) {
       // Carica i liberi, escludendo chi è fuori lista
@@ -223,7 +232,12 @@ export default function BustePage() {
 
   const slotLiberi = slotTotali - squadra.slot_occupati
   const costoTotale = selezionati.reduce((sum, g) => sum + g.quotazione, 0)
-  const isValida = selezionati.length === slotLiberi && costoTotale <= squadra.crediti_residui
+  const portieriScelti = selezionati.filter(g => g.ruolo === 'P').length
+  const portieriResidui = portieriDisponibili - portieriScelti
+  const isValida =
+    selezionati.length === slotLiberi &&
+    costoTotale <= squadra.crediti_residui &&
+    portieriResidui >= 0
 
   return (
     <div className="mx-auto w-full max-w-7xl p-3 sm:p-6 md:p-8">
@@ -337,14 +351,22 @@ export default function BustePage() {
               )}
               {liberiFiltrati.map(g => {
                   const isSelected = selezionati.find(s => s.id === g.id)
+                  // Un portiere in piu' non e' selezionabile quando il reparto
+                  // e' saturo: il server rifiuterebbe comunque il salvataggio,
+                  // ma scoprirlo premendo Salva sarebbe tardi.
+                  const bloccato = !isSelected && g.ruolo === 'P' && portieriResidui <= 0
                   return (
                     <div
                       key={g.id}
-                      onClick={() => toggleSelezionato(g)}
-                      className={`flex cursor-pointer items-center justify-between gap-3 rounded-md border p-2.5 transition ${
-                        isSelected
-                          ? 'border-neon bg-panel-hover'
-                          : 'border-line bg-panel-hi hover:border-line-hi hover:bg-panel-hover'
+                      onClick={() => { if (!bloccato) toggleSelezionato(g) }}
+                      title={bloccato ? `Hai gia' il numero massimo di portieri (${maxPortieri}).` : undefined}
+                      aria-disabled={bloccato}
+                      className={`flex items-center justify-between gap-3 rounded-md border p-2.5 transition ${
+                        bloccato
+                          ? 'cursor-not-allowed border-line bg-panel-hi opacity-45'
+                          : isSelected
+                            ? 'cursor-pointer border-neon bg-panel-hover'
+                            : 'cursor-pointer border-line bg-panel-hi hover:border-line-hi hover:bg-panel-hover'
                       }`}
                     >
                       <div className="min-w-0">
@@ -416,6 +438,14 @@ export default function BustePage() {
                       {selezionati.length} / {slotLiberi}
                     </span>
                   </div>
+                  {portieriDisponibili > 0 || portieriScelti > 0 ? (
+                    <div className="mt-1.5 flex items-center justify-between">
+                      <span className="fm-label">Portieri</span>
+                      <span className={`text-lg font-bold tabular-nums ${portieriResidui < 0 ? 'text-rosso' : 'text-ink'}`}>
+                        {portieriScelti} / {portieriDisponibili}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
 
                 <button
@@ -427,7 +457,9 @@ export default function BustePage() {
                 </button>
                 {!isValida && (
                   <p className="mt-2.5 text-center text-xs font-semibold text-rosso">
-                    Devi riempire esattamente tutti gli slot e non superare il budget.
+                    {portieriResidui < 0
+                      ? `Puoi prendere al massimo ${portieriDisponibili} portier${portieriDisponibili === 1 ? 'e' : 'i'}.`
+                      : 'Devi riempire esattamente tutti gli slot e non superare il budget.'}
                   </p>
                 )}
               </div>

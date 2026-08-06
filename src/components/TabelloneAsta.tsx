@@ -39,6 +39,10 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   // piazza_offerta_asta): senza questo flag i comandi restavano attivi e ogni
   // click finiva in errore.
   const [rosaPiena, setRosaPiena] = useState(false)
+  // Reparto saturo per il giocatore in asta: oggi vale solo per i portieri.
+  // Si chiede al server la stessa funzione che poi rifiuta l'offerta.
+  const [ruoloPieno, setRuoloPieno] = useState(false)
+  const [portieriDisponibili, setPortieriDisponibili] = useState(0)
   const [ordineChiamata, setOrdineChiamata] = useState<any[]>([])
   const [indiceChiamata, setIndiceChiamata] = useState(1)
   const [squadreMap, setSquadreMap] = useState<Record<string, string>>({})
@@ -102,6 +106,21 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
     // Stesso criterio di `rosa_completa()` lato server.
     const mia = squadraId ? (squadreDati ?? []).find((s) => s.id === squadraId) : null
     setRosaPiena(Boolean(mia) && (mia!.slot_occupati ?? 0) >= slotTotali)
+
+    if (squadraId && data) {
+      const { data: pieno } = await supabase.rpc('ruolo_pieno', {
+        p_squadra_id: squadraId,
+        p_giocatore_id: data.giocatore_id,
+      })
+      setRuoloPieno(Boolean(pieno))
+    } else {
+      setRuoloPieno(false)
+    }
+
+    if (squadraId) {
+      const { data: disp } = await supabase.rpc('portieri_disponibili', { p_squadra_id: squadraId })
+      setPortieriDisponibili(disp ?? 0)
+    }
   }
 
   const fetchLista = async () => {
@@ -412,8 +431,11 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                 // Prima si filtrava su `item.squadre?.nome`, che fetchLista non
                 // seleziona mai: la propria squadra restava fra i contendenti.
                 const contendenti: string[] = (item.contendenti ?? []).filter((c: string) => c !== mioNomeSquadra)
-                // `prenota_chiamata` ha lo stesso controllo sulla rosa completa.
-                const bloccato = loading || rosaPiena || (!isAdmin && !isMioTurno)
+                // `prenota_chiamata` ha gli stessi controlli su rosa completa e
+                // reparto saturo: qui si anticipano, per non far scoprire il
+                // rifiuto solo dopo aver premuto.
+                const portiereDiTroppo = item.giocatori.ruolo === 'P' && portieriDisponibili <= 0
+                const bloccato = loading || rosaPiena || portiereDiTroppo || (!isAdmin && !isMioTurno)
                 return (
                 <div key={item.id} className="flex flex-col gap-3 p-3 transition hover:bg-panel-hover sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="min-w-0">
@@ -446,7 +468,13 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                     disabled={bloccato}
                     className="fm-btn fm-btn-primary w-full shrink-0 sm:w-auto"
                   >
-                    {rosaPiena ? 'Rosa completa' : !isAdmin && !isMioTurno ? 'Non è il tuo turno' : 'Chiama'}
+                    {rosaPiena
+                      ? 'Rosa completa'
+                      : portiereDiTroppo
+                        ? 'Portieri al completo'
+                        : !isAdmin && !isMioTurno
+                          ? 'Non è il tuo turno'
+                          : 'Chiama'}
                   </button>
                 </div>
                 )
@@ -482,6 +510,7 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   // non aveva modo di capire cosa mancasse.
   const nonPuoiRilanciare =
     rosaPiena ? 'La tua rosa è al completo: non puoi aggiudicarti altri giocatori.'
+    : ruoloPieno ? 'Hai già il numero massimo di portieri.'
     : !isParticipant ? 'Non sei fra i contendenti per questo giocatore.'
     : hasAbbandonato ? 'Ti sei ritirato da quest\'asta.'
     : isChiamata ? 'In attesa che l\'admin avvii il timer.'
@@ -490,7 +519,8 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
       ? `Il tuo massimo (${massimoOffribile} cr) non arriva all'offerta minima.`
     : null
 
-  const rilancioBloccato = loading || isWinning || isChiamata || hasAbbandonato || !isParticipant || rosaPiena
+  const rilancioBloccato =
+    loading || isWinning || isChiamata || hasAbbandonato || !isParticipant || rosaPiena || ruoloPieno
 
   return (
     <div className="flex flex-col gap-6">

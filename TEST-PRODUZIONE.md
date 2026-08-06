@@ -389,6 +389,19 @@ ha countdown e non scade.
   ricaricare. È la prova che la connessione permanente è viva davvero, non che
   a coprirla sia il salvagente.
 
+### D19 · Tetto ai portieri, in asta
+
+Presuppone una squadra che abbia già il numero massimo di portieri (impostato in
+`/admin/setup` → *Regole di lega*).
+
+- [ ] Da quella squadra, guarda la propria lista chiamate: un portiere ha il
+  pulsante spento con scritto **Portieri al completo**.
+- [ ] Con un portiere all'asta, i comandi di rilancio sono spenti e sotto c'è
+  scritto *Hai già il numero massimo di portieri*.
+- [ ] Un giocatore di movimento resta chiamabile e rilanciabile normalmente.
+- [ ] Dalla Regia, avvia l'asta di un portiere: la squadra col reparto saturo
+  **non** deve finire in testa alla base.
+
 ---
 
 ## Blocco E — Modalità delega
@@ -494,6 +507,15 @@ riassegnare.
   **Atteso:** si apre un **turno nuovo**; gli esiti del turno precedente
   restano consultabili e non vengono confusi con i nuovi.
 
+### F14 · Tetto ai portieri, nelle buste
+
+- [ ] Da una squadra col reparto portieri saturo, apri `/buste` a fase aperta:
+  le schede dei portieri sono spente e non si selezionano.
+- [ ] Da una squadra che può ancora prenderne uno, il riepilogo mostra la riga
+  **Portieri** col conteggio selezionati su disponibili.
+- [ ] Seleziona più portieri di quanti puoi: il pulsante di salvataggio resta
+  spento e il messaggio dice quanti ne puoi prendere.
+
 ---
 
 ## Blocco G — Manutenzione admin
@@ -525,6 +547,13 @@ riassegnare.
 - [ ] Guarda la tabella utenti in `/admin/setup`.
   **Atteso:** il profilo super admin **non** compare. Non deve essere
   retrocedibile da interfaccia.
+
+### G6 · Cambio del limite portieri
+- [ ] `/admin/setup` → *Regole di lega*: cambia il massimo, salva, ricarica.
+  **Atteso:** il valore resta, e i controlli in asta e nelle buste seguono il
+  numero nuovo.
+- [ ] Prova da un account **admin non super**: la pagina non è nemmeno
+  raggiungibile.
 
 ---
 

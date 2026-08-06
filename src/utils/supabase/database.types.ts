@@ -421,6 +421,7 @@ export type Database = {
         Returns: undefined
       }
       admin_elabora_buste: { Args: never; Returns: Json }
+      admin_imposta_max_portieri: { Args: { p_max: number }; Returns: Json }
       admin_imposta_turno: { Args: { p_squadra_id: string }; Returns: Json }
       admin_modifica_budget: {
         Args: { p_delta: number; p_squadra_id: string }
@@ -457,8 +458,13 @@ export type Database = {
         }
         Returns: Json
       }
+      portieri_disponibili: { Args: { p_squadra_id: string }; Returns: number }
       prenota_chiamata: { Args: { p_giocatore_id: number }; Returns: Json }
       rosa_completa: { Args: { p_squadra_id: string }; Returns: boolean }
+      ruolo_pieno: {
+        Args: { p_giocatore_id: number; p_squadra_id: string }
+        Returns: boolean
+      }
       squadra_in_gara: {
         Args: { p_giocatore_id: number; p_squadra_id: string }
         Returns: boolean

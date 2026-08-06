@@ -82,6 +82,9 @@ export default function AdminSetupPage() {
   // Al posto di `alert()`: le finestre native non sono stilizzabili e i
   // browser in automazione le respingono.
   const [esito, setEsito] = useState<{ tipo: 'ok' | 'errore'; testo: string } | null>(null)
+  // Tetto ai portieri. Vive in regole_lega.slot_p, che esisteva gia' ma era
+  // informativa: dalla migration 20260806210000 e' vincolante.
+  const [maxPortieri, setMaxPortieri] = useState('')
 
   // L'accesso è già garantito dal gate server-side in setup/layout.tsx:
   // qui non serve più ricontrollare il ruolo lato client.
@@ -95,6 +98,14 @@ export default function AdminSetupPage() {
 
     if (error) setError(error.message)
     else setProfili((data as unknown as ProfiloRiga[]) || [])
+
+    const { data: regole } = await supabase
+      .from('regole_lega')
+      .select('slot_p')
+      .limit(1)
+      .maybeSingle()
+    if (regole) setMaxPortieri(String(regole.slot_p))
+
     setLoading(false)
   }
 
@@ -115,6 +126,20 @@ export default function AdminSetupPage() {
       fetchProfili()
     }
     setLoading(false)
+  }
+
+  const salvaMaxPortieri = async () => {
+    const valore = parseInt(maxPortieri, 10)
+    if (Number.isNaN(valore)) {
+      setEsito({ tipo: 'errore', testo: 'Inserisci un numero.' })
+      return
+    }
+    const { error: rpcErr } = await supabase.rpc('admin_imposta_max_portieri', { p_max: valore })
+    if (rpcErr) setEsito({ tipo: 'errore', testo: rpcErr.message })
+    else {
+      setEsito({ tipo: 'ok', testo: `Massimo portieri impostato a ${valore}.` })
+      await fetchProfili()
+    }
   }
 
   // Sostituisce lo script fix_slots.js che veniva lanciato a mano da terminale.
@@ -225,7 +250,37 @@ export default function AdminSetupPage() {
 
       <div className="fm-panel overflow-hidden">
         <div className="fm-panel-head">
-          <span>3 · Manutenzione</span>
+          <span>3 · Regole di lega</span>
+        </div>
+        <div className="fm-panel-body">
+          <p className="mb-3 text-sm text-ink-mid">
+            Numero massimo di portieri per squadra. Il limite viene applicato alla chiamata,
+            alle offerte, al salvataggio delle buste e allo spoglio. Le squadre che sono già
+            oltre soglia non vengono toccate: semplicemente non possono aggiungerne altri.
+          </p>
+          <div className="flex flex-wrap items-end gap-2">
+            <div>
+              <label htmlFor="max-portieri" className="fm-label mb-1 block">Massimo portieri</label>
+              <input
+                id="max-portieri"
+                type="number"
+                min="1"
+                max="10"
+                value={maxPortieri}
+                onChange={(e) => setMaxPortieri(e.target.value)}
+                className="fm-input w-24"
+              />
+            </div>
+            <button onClick={salvaMaxPortieri} disabled={loading} className="fm-btn fm-btn-ghost">
+              Salva
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="fm-panel overflow-hidden">
+        <div className="fm-panel-head">
+          <span>4 · Manutenzione</span>
         </div>
         <div className="fm-panel-body">
           <p className="mb-3 text-sm text-ink-mid">
@@ -240,7 +295,7 @@ export default function AdminSetupPage() {
 
       <div className="fm-panel overflow-hidden border-rosso/40">
         <div className="fm-panel-head fm-panel-head--rosso">
-          <span className="text-rosso">4 · Zona pericolosa (super admin)</span>
+          <span className="text-rosso">5 · Zona pericolosa (super admin)</span>
         </div>
         <div className="fm-panel-body">
           <p className="mb-3 text-sm text-ink-mid">
