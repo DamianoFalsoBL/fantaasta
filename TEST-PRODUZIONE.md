@@ -50,6 +50,26 @@ scrivi nella tabella in fondo: **codice, cosa ti aspettavi, cosa è successo,
 ruolo con cui eri collegato**. Quest'ultimo dato è quello che si dimentica
 sempre ed è quasi sempre quello che spiega il problema.
 
+
+### Stato del collaudo
+
+Aggiornato al 6 agosto 2026, sulla produzione.
+
+| Blocco | Esito |
+|---|---|
+| A — Accessi e permessi | superato |
+| B — Navigazione e interfaccia | superato |
+| C — Lettura dei dati | da fare |
+| D — Asta live | superati D14 (annullamento) e D18 (tempo reale); il resto da fare |
+| E — Modalità delega | superato |
+| F — Buste | da fare |
+| G — Manutenzione admin | da fare |
+| H — Export | da fare |
+| I — Telefono | da fare |
+| J — Distruttivi | da fare, solo a fine stagione |
+
+Nessun test fallito finora.
+
 ---
 
 ## Blocco A — Accessi e permessi
@@ -57,7 +77,7 @@ sempre ed è quasi sempre quello che spiega il problema.
 Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
 
 ### A1 · Rotte protette senza sessione
-- [ ] In una finestra in incognito, **senza fare login**, apri a mano:
+- [x] In una finestra in incognito, **senza fare login**, apri a mano:
   `/asta`, `/aste`, `/rose`, `/svincolati`, `/storico`, `/buste`,
   `/admin/asta`, `/admin/riepilogo`, `/admin/setup`, `/debug`.
 
@@ -65,64 +85,64 @@ Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
   mostrare, nemmeno per un istante, nomi di squadre, budget o pulsanti admin.
 
 ### A2 · Endpoint di ripristino disattivato
-- [ ] Apri `/api/magic?email=superadmin@fantacalcio.local`.
+- [x] Apri `/api/magic?email=superadmin@fantacalcio.local`.
 
   **Atteso:** `404` con `{"error":"Endpoint disattivato: MAGIC_RECOVERY_TOKEN non configurato."}`.
   Se risponde qualcosa di diverso, fermati: significa che su Vercel è stata
   configurata quella variabile, e va rimossa.
 
 ### A3 · Export riservato
-- [ ] Sempre da sloggato, apri `/api/export/rose`.
+- [x] Sempre da sloggato, apri `/api/export/rose`.
 
   **Atteso:** `401` con `{"error":"Non autenticato."}`. Nessun file scaricato.
 
 ### A4 · Login sbagliato
-- [ ] Username giusto, password sbagliata.
+- [x] Username giusto, password sbagliata.
   **Atteso:** messaggio d'errore rosso dentro il riquadro *Accedi*, si resta
   sulla pagina.
-- [ ] Username inesistente.
+- [x] Username inesistente.
   **Atteso:** stesso comportamento, nessuna pagina bianca.
-- [ ] Campi vuoti → *Entra nell'asta*.
+- [x] Campi vuoti → *Entra nell'asta*.
   **Atteso:** il browser blocca l'invio (i campi sono obbligatori).
 
 ### A5 · Login manager
-- [ ] Entra come manager.
+- [x] Entra come manager.
   **Atteso:** atterri su `/asta`. La barra in alto mostra il nome della tua
   squadra, i crediti residui e gli slot. **Non** compare il menu
   *Amministrazione*.
 
 ### A6 · Login admin
-- [ ] Entra come admin.
+- [x] Entra come admin.
   **Atteso:** atterri su `/asta`. Compare il menu *Amministrazione* con
   **due** voci: *Regia Asta Live* e *Riepilogo e Budget*. **Non** c'è *Setup
   Sistema*.
 
 ### A7 · Login super admin
-- [ ] Entra come super admin.
+- [x] Entra come super admin.
   **Atteso:** atterri su `/admin/setup`. Nella barra compare 👑. Il menu
   *Amministrazione* ha **tre** voci, *Setup Sistema* inclusa.
 
 ### A8 · Il super admin non entra in asta
-- [ ] Da super admin, apri `/asta` a mano.
+- [x] Da super admin, apri `/asta` a mano.
   **Atteso:** vieni rimandato a `/admin/setup`. Il super admin non ha una
   squadra e non deve poter partecipare.
 
 ### A9 · Il manager non entra nell'area admin
-- [ ] Da manager, apri a mano `/admin/asta`, `/admin/riepilogo`, `/admin/setup`
+- [x] Da manager, apri a mano `/admin/asta`, `/admin/riepilogo`, `/admin/setup`
   e `/debug`.
   **Atteso:** tutte rimandano a `/asta`. Nessun contenuto riservato.
 
 ### A10 · L'admin non entra nel setup
-- [ ] Da admin (non super), apri `/admin/setup`.
+- [x] Da admin (non super), apri `/admin/setup`.
   **Atteso:** rimandato a `/asta`. Import ed hard reset sono solo del super admin.
 
 ### A11 · Persistenza della sessione
-- [ ] Da loggato, ricarica con F5. Poi chiudi la scheda e riaprila.
+- [x] Da loggato, ricarica con F5. Poi chiudi la scheda e riaprila.
   **Atteso:** resti dentro. È il test che vale solo in produzione: su HTTPS i
   cookie hanno regole diverse che su `localhost`.
 
 ### A12 · Uscita
-- [ ] Premi *Esci*.
+- [x] Premi *Esci*.
   **Atteso:** torni alla home. Premi il tasto "indietro" del browser: **non**
   devi rientrare in una pagina riservata.
 
@@ -133,33 +153,33 @@ Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
 Non scrive nulla.
 
 ### B1 · Tutte le voci di menu
-- [ ] Da manager, apri una per una le sei voci: *Tabellone Live*, *Aste a
+- [x] Da manager, apri una per una le sei voci: *Tabellone Live*, *Aste a
   Chiamata*, *Tutte le Rose*, *Lista Svincolati*, *Storico Aste*,
   *Buste Riparazione*.
   **Atteso:** ogni pagina carica, la voce attiva è evidenziata, nessuna pagina
   di errore.
-- [ ] Da admin, aggiungi *Regia Asta Live* e *Riepilogo e Budget*.
-- [ ] Da super admin, aggiungi *Setup Sistema*.
+- [x] Da admin, aggiungi *Regia Asta Live* e *Riepilogo e Budget*.
+- [x] Da super admin, aggiungi *Setup Sistema*.
 
 ### B2 · Metriche di budget sempre visibili
-- [ ] Guarda la barra in alto da manager, su computer e su telefono.
+- [x] Guarda la barra in alto da manager, su computer e su telefono.
   **Atteso:** crediti residui e slot si leggono in entrambi i casi. Durante
   un'asta il budget residuo è il dato più importante dello schermo e non deve
   mai sparire.
-- [ ] Se una squadra ha extra budget negativo, controlla che il numero si legga
+- [x] Se una squadra ha extra budget negativo, controlla che il numero si legga
   col segno meno e non venga tagliato.
 
 ### B3 · Rotta morta
-- [ ] Apri `/login`.
+- [x] Apri `/login`.
   **Atteso:** una pagina coerente col tema scuro. Non è la pagina di accesso
   vera (quella è la home) ma non deve essere rotta né mezza bianca.
 
 ### B4 · Pagina inesistente
-- [ ] Apri `/qualcosa-che-non-esiste`.
+- [x] Apri `/qualcosa-che-non-esiste`.
   **Atteso:** pagina 404, con lo stesso tema del resto.
 
 ### B5 · Nessun errore in console
-- [ ] Su ogni pagina, apri gli strumenti da sviluppatore → *Console*.
+- [x] Su ogni pagina, apri gli strumenti da sviluppatore → *Console*.
   **Atteso:** nessun messaggio rosso. Gli avvisi gialli si possono ignorare.
 
 ---
@@ -294,7 +314,7 @@ due finestre separate. Chiamiamoli **M1** e **M2**.
   coincidere fra loro.
 
 ### D14 · Annullamento dell'acquisto
-- [ ] `/admin/riepilogo` → sulla riga dell'acquisto appena fatto → *Annulla
+- [x] `/admin/riepilogo` → sulla riga dell'acquisto appena fatto → *Annulla
   acquisto* → conferma nella finestra rossa.
   **Atteso:** crediti restituiti per l'importo esatto, slot -1, giocatore di
   nuovo libero, riga sparita dagli ultimi acquisti, e il giocatore **torna in
@@ -355,7 +375,7 @@ ha countdown e non scade.
 3. Dalla Regia premi **Avvia timer**.
 4. Guarda la finestra del manager **senza toccarla e senza ricaricarla**.
 
-- [ ] Il countdown parte **entro un secondo** → connessione integra.
+- [x] Il countdown parte **entro un secondo** → connessione integra.
 - [ ] Parte **dopo qualche secondo, entro quindici** → era caduta, l'ha salvata
   la rete di sicurezza. Utilizzabile, ma **annotalo**: con un timer da 10
   secondi, un ritardo fino a 15 significa vedere il prezzo giusto quando l'asta
@@ -365,7 +385,7 @@ ha countdown e non scade.
 
 5. Porta l'asta a termine e fai assegnare il giocatore dall'admin.
 
-- [ ] **I crediti del vincitore nella barra in alto cambiano da soli**, senza
+- [x] **I crediti del vincitore nella barra in alto cambiano da soli**, senza
   ricaricare. È la prova che la connessione permanente è viva davvero, non che
   a coprirla sia il salvagente.
 
@@ -377,29 +397,29 @@ Serve quando un manager è assente e l'admin offre per lui. Visibile solo
 all'admin, durante un'asta avviata.
 
 ### E1 · Comparsa del pannello
-- [ ] Da admin, durante un'asta in corso, scorri in fondo al tabellone.
+- [x] Da admin, durante un'asta in corso, scorri in fondo al tabellone.
   **Atteso:** il pannello ambra *Modalità delega (assenti)* con la tendina delle
   squadre.
 
 ### E2 · Selezione della squadra
-- [ ] Scegli una squadra dalla tendina.
+- [x] Scegli una squadra dalla tendina.
   **Atteso:** compaiono i suoi comandi di rilancio, e il suo massimo offribile.
 
 ### E3 · Rilancio per conto terzi
-- [ ] Usa *+1* e *+5* dal pannello delega.
+- [x] Usa *+1* e *+5* dal pannello delega.
   **Atteso:** il rilancio risulta a nome della squadra delegata, non
   dell'admin, e si vede su tutti gli schermi.
 
 ### E4 · Ritiro per conto terzi
-- [ ] Ritira la squadra delegata.
+- [x] Ritira la squadra delegata.
   **Atteso:** risulta ritirata come se l'avesse fatto lei.
 
 ### E5 · Limiti anche in delega
-- [ ] Prova a superare il massimo offribile della squadra delegata.
+- [x] Prova a superare il massimo offribile della squadra delegata.
   **Atteso:** rifiutato. La delega non aggira le regole.
 
 ### E6 · Delega su chi è già in testa
-- [ ] Seleziona la squadra che è in testa.
+- [x] Seleziona la squadra che è in testa.
   **Atteso:** i comandi sono disattivati.
 
 ---
