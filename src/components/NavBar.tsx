@@ -28,7 +28,7 @@ const VOCI_UTENTE: Voce[] = [
   { href: '/mia-rosa', label: 'La mia Rosa' },
   { href: '/svincolati', label: 'Svincolati' },
   { href: '/trasferimenti', label: 'Lista Trasferimenti' },
-  { href: '/storico', label: 'Storico Aste' },
+  // "Storico Aste" non c'e' piu': e' una scheda dentro Sommario Aste.
   { href: '/buste', label: 'Buste' },
 ]
 
@@ -39,11 +39,11 @@ const VOCI_ADMIN: Voce[] = [
   { href: '/admin/setup', label: 'Impostazioni', soloSuper: true },
   { href: '/admin/asta', label: 'Regia Aste' },
   { href: '/admin/trasferimenti', label: 'Ratifica Scambi' },
+  // "Controllo Slot" e' durata un commit: /admin/riepilogo mostrava gia' gli
+  // slot per squadra, e bastava aggiungerci il totale per rendere l'altra
+  // pagina superflua. Meglio un dato in un posto solo che due pagine da
+  // ricordarsi di confrontare.
   { href: '/admin/riepilogo', label: 'Budget e Fasi' },
-  // /debug esisteva gia' ma non era raggiungibile da nessun collegamento.
-  // E' protetta da requireAdmin(), quindi metterla nel menu non apre nulla
-  // che non fosse gia' raggiungibile scrivendo l'indirizzo a mano.
-  { href: '/debug', label: 'Controllo Slot' },
 ]
 
 export default function NavBar() {

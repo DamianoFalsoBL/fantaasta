@@ -53,13 +53,13 @@ sempre ed è quasi sempre quello che spiega il problema.
 
 ### Stato del collaudo
 
-Aggiornato al 6 agosto 2026, sulla produzione.
+Aggiornato all'8 agosto 2026, sulla produzione.
 
 | Blocco | Esito |
 |---|---|
-| A — Accessi e permessi | superato |
-| B — Navigazione e interfaccia | superato |
-| C — Lettura dei dati | superato |
+| A — Accessi e permessi | superato, tranne A6 e A7: i menu sono stati rinominati |
+| B — Navigazione e interfaccia | superato, tranne B1: voci nuove da riaprire |
+| C — Lettura dei dati | superato, tranne C4/C5/C6: Storico e Controllo Slot sono stati assorbiti in altre pagine |
 | D — Asta live | superati D14 (annullamento) e D18 (tempo reale); il resto da fare |
 | E — Modalità delega | superato |
 | F — Buste | da fare |
@@ -114,19 +114,19 @@ Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
 ### A5 · Login manager
 - [x] Entra come manager.
   **Atteso:** atterri su `/asta`. La barra in alto mostra il nome della tua
-  squadra, i crediti residui e gli slot. **Non** compare il menu
-  *Amministrazione*.
+  squadra, i crediti residui e gli slot. **Non** compare il menu *Admin*.
 
 ### A6 · Login admin
-- [x] Entra come admin.
-  **Atteso:** atterri su `/asta`. Compare il menu *Amministrazione* con
-  **due** voci: *Regia Asta Live* e *Riepilogo e Budget*. **Non** c'è *Setup
-  Sistema*.
+- [ ] Entra come admin.
+  **Atteso:** atterri su `/asta`. Compare il menu *Admin* con **tre** voci:
+  *Regia Aste*, *Ratifica Scambi* e *Budget e Fasi*. **Non** c'è
+  *Impostazioni*.
 
 ### A7 · Login super admin
-- [x] Entra come super admin.
+- [ ] Entra come super admin.
   **Atteso:** atterri su `/admin/setup`. Nella barra compare 👑. Il menu
-  *Amministrazione* ha **tre** voci, *Setup Sistema* inclusa.
+  *Admin* ha **quattro** voci, *Impostazioni* inclusa. Il menu *Manager* non
+  c'è per niente: il super admin non ha una squadra.
 
 ### A8 · Il super admin non entra in asta
 - [x] Da super admin, apri `/asta` a mano.
@@ -159,13 +159,14 @@ Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
 Non scrive nulla.
 
 ### B1 · Tutte le voci di menu
-- [x] Da manager, apri una per una le sei voci: *Tabellone Live*, *Aste a
-  Chiamata*, *Tutte le Rose*, *Lista Svincolati*, *Storico Aste*,
-  *Buste Riparazione*.
+- [ ] Da manager, apri una per una le sette voci: *Asta Live*, *Sommario Aste*,
+  *Tutte le Rose*, *La mia Rosa*, *Svincolati*, *Lista Trasferimenti*, *Buste*.
+  Da admin, le quattro voci: *Impostazioni* (solo super), *Regia Aste*,
+  *Ratifica Scambi*, *Budget e Fasi*.
   **Atteso:** ogni pagina carica, la voce attiva è evidenziata, nessuna pagina
   di errore.
-- [x] Da admin, aggiungi *Regia Asta Live* e *Riepilogo e Budget*.
-- [x] Da super admin, aggiungi *Setup Sistema*.
+- [ ] Nessuna voce si chiama più *Storico Aste* o *Controllo Slot*: sono
+  diventate schede e colonne dentro altre pagine.
 
 ### B2 · Metriche di budget sempre visibili
 - [x] Guarda la barra in alto da manager, su computer e su telefono.
@@ -232,20 +233,29 @@ numeri del database.
 - [x] Spunta entrambe → valgono entrambe.
 - [x] Usa i due menu a tendina di filtro.
 
-### C4 · Storico
-- [x] `/storico`: le aste concluse sono in ordine dalla più recente.
-  **Atteso:** cinque colonne leggibili, date in formato italiano.
+### C4 · Assegnati (era la pagina Storico)
+- [ ] `/aste`, scheda **Assegnati**: le aste concluse sono in ordine dalla più
+  recente. Cinque colonne leggibili, date in formato italiano.
+- [ ] Le due tessere in cima dicono quante assegnazioni e quanto è stato speso.
+- [ ] Torna alla scheda **Da assegnare** e poi di nuovo su Assegnati.
+  **Atteso:** il passaggio è immediato, senza ricaricare: i dati arrivano già
+  tutti insieme dal server.
+- [ ] Apri a mano il vecchio indirizzo `/storico`.
+  **Atteso:** ti porta su `/aste`, non a una pagina di errore.
 
 ### C5 · Riepilogo admin
-- [x] `/admin/riepilogo` da admin.
-  **Atteso:** 14 squadre con budget iniziale, residuo, slot. La tabella
-  *Ultimi 20 acquisti* mostra gli ultimi acquisti dal più recente.
+- [ ] `/admin/riepilogo` da admin.
+  **Atteso:** 14 squadre con budget iniziale, residuo e **slot nella forma
+  `24 / 30`**, con la pastiglia che cambia colore quando la rosa è completa.
+  La tabella *Ultimi 20 acquisti* mostra gli ultimi acquisti dal più recente.
 
 ### C6 · Slot per squadra
-- [x] `/debug` da admin.
-  **Atteso:** l'elenco delle squadre con slot occupati su totali. I numeri
-  devono coincidere con quelli di `/rose` e `/admin/riepilogo`. **Se non
-  coincidono**, è il caso d'uso del bottone *Ricalcola slot occupati* (test G3).
+- [ ] Sempre in `/admin/riepilogo`: i numeri della colonna Slot devono
+  coincidere con quelli di `/rose`. **Se non coincidono**, è il caso d'uso del
+  bottone *Ricalcola slot occupati* (test G3).
+- [ ] Apri a mano il vecchio indirizzo `/debug`.
+  **Atteso:** ti porta su `/admin/riepilogo`. Da manager, invece, ti rimanda a
+  `/asta`: il controllo del ruolo viene prima del rimando.
 
 ---
 
@@ -330,7 +340,7 @@ due finestre separate. Chiamiamoli **M1** e **M2**.
 - [ ] Admin → *Chiudi asta e assegna*.
   **Atteso, tutto insieme:** il giocatore entra nella rosa del vincitore, i
   crediti calano dell'importo esatto, gli slot salgono di uno, il turno di
-  chiamata avanza, l'asta compare in `/storico`.
+  chiamata avanza, l'asta compare nella scheda *Assegnati* di `/aste`.
 - [ ] Verifica i numeri in `/admin/riepilogo` **e** in `/rose`: devono
   coincidere fra loro.
 
@@ -444,7 +454,7 @@ stessa transazione del rilancio avversario. Servono due manager, A e B.
 
 **Due tetti insieme**
 - [ ] A imposta 50, B imposta 40 → il prezzo si ferma a **41** con A in testa, e
-  in `/storico` risulta **una sola** offerta automatica, non dieci.
+  nella scheda *Assegnati* risulta **una sola** offerta automatica, non dieci.
 - [ ] A e B impostano **lo stesso** importo → vince chi lo ha dichiarato per
   primo, a quella cifra.
 
@@ -611,7 +621,7 @@ riassegnare.
 
 ### G3 · Ricalcolo degli slot
 - [ ] `/admin/setup` → *Ricalcola slot occupati*.
-  **Atteso:** messaggio di completamento, e i numeri di `/debug` coincidono con
+  **Atteso:** messaggio di completamento, e i numeri della colonna Slot in `/admin/riepilogo` coincidono con
   i giocatori realmente tesserati.
 
 ### G4 · Promozione e retrocessione
@@ -692,7 +702,7 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
   loro riquadro**, non trascinano tutto lo schermo.
 
 ### I3 · Tabelle
-- [ ] `/storico`, `/svincolati`, `/aste`: le righe si leggono come schede
+- [ ] `/svincolati` e `/aste` (entrambe le schede): le righe si leggono come schede
   impilate, ogni valore con la sua etichetta.
 - [ ] `/admin/riepilogo` e `/admin/setup`: scorrono in orizzontale con la prima
   colonna che resta ferma.

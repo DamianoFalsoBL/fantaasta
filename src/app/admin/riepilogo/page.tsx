@@ -54,6 +54,10 @@ export default function AdminRiepilogoPage() {
   const [loading, setLoading] = useState(true)
   const [faseBusteAperta, setFaseBusteAperta] = useState(false)
   const [mercatoAperto, setMercatoAperto] = useState(false)
+  // Serve a mostrare gli slot come "24 / 30". Il solo numero degli occupati
+  // non dice se una rosa e' completa, ed era l'unica ragione per cui esisteva
+  // la pagina /debug, ora assorbita qui.
+  const [slotTotali, setSlotTotali] = useState(30)
   const [azione, setAzione] = useState<AzioneInAttesa | null>(null)
   // Al posto di `alert()`: un avviso in pagina, che il tema può raggiungere.
   const [esito, setEsito] = useState<{ tipo: 'ok' | 'errore'; testo: string } | null>(null)
@@ -80,11 +84,12 @@ export default function AdminRiepilogoPage() {
 
     // Fetch regole_lega
     const { data: rData } = await supabase
-      .from('regole_lega').select('fase_buste_aperta, fase_mercato_aperta').limit(1).maybeSingle()
+      .from('regole_lega').select('fase_buste_aperta, fase_mercato_aperta, slot_totali').limit(1).maybeSingle()
     // La colonna ammette NULL: qui vale "fase chiusa", come il default.
     if (rData) {
       setFaseBusteAperta(rData.fase_buste_aperta ?? false)
       setMercatoAperto(rData.fase_mercato_aperta ?? false)
+      setSlotTotali(rData.slot_totali ?? 30)
     }
 
     setLoading(false)
@@ -276,7 +281,11 @@ export default function AdminRiepilogoPage() {
                     <td className="text-center">
                       <BudgetAdjuster onApply={(delta) => modificaBudget(s.id, delta)} />
                     </td>
-                    <td className="fm-num text-ink-mid">{s.slot_occupati}</td>
+                    <td className="fm-num">
+                      <span className={`fm-badge ${(s.slot_occupati ?? 0) < slotTotali ? 'fm-badge-mid' : 'fm-badge-top'}`}>
+                        {s.slot_occupati ?? 0} / {slotTotali}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>

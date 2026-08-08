@@ -17,12 +17,34 @@ export type RigaAsta = {
   inMiaLista: boolean
 }
 
-export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
+/** Un'asta gia' chiusa e aggiudicata. Veniva dalla pagina /storico. */
+export type RigaStorico = {
+  id: string
+  nome: string
+  ruolo: string
+  ruolo_mantra: string[] | null
+  eta: number | null
+  fantasquadra: string
+  prezzo: number
+  quando: string
+}
+
+export default function AsteClient({
+  righe,
+  storico,
+  erroreStorico,
+}: {
+  righe: RigaAsta[]
+  storico: RigaStorico[]
+  erroreStorico: string | null
+}) {
   const [nome, setNome] = useState('')
   const [ruolo, setRuolo] = useState('')
   const [squadraFanta, setSquadraFanta] = useState('')
   const [soloContesi, setSoloContesi] = useState(false)
   const [soloMie, setSoloMie] = useState(false)
+  // Le due meta' della stessa domanda, una accanto all'altra.
+  const [scheda, setScheda] = useState<'aperte' | 'assegnati'>('aperte')
 
   const ruoliMantra = useMemo(() => mantraPresenti(righe), [righe])
 
@@ -46,8 +68,40 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
   const contesi = righe.filter((r) => r.contendenti.length > 1).length
   const spesaPotenziale = filtrate.reduce((s, r) => s + r.quotazione, 0)
 
+  const spesaTotale = storico.reduce((s, r) => s + r.prezzo, 0)
+
   return (
     <div className="p-3 sm:p-4">
+
+      {/* Le due schede. Sono pulsanti e non collegamenti perche' i dati
+          arrivano gia' tutti insieme dal server: cambiare scheda non deve
+          costare un giro di rete. */}
+      <div className="mb-4 flex gap-1 border-b border-line" role="tablist">
+        {([
+          ['aperte', 'Da assegnare', righe.length],
+          ['assegnati', 'Assegnati', storico.length],
+        ] as const).map(([chiave, etichetta, quanti]) => (
+          <button
+            key={chiave}
+            type="button"
+            role="tab"
+            aria-selected={scheda === chiave}
+            onClick={() => setScheda(chiave)}
+            className={`-mb-px border-b-2 px-3 py-2 text-sm font-semibold transition ${
+              scheda === chiave
+                ? 'border-neon text-neon'
+                : 'border-transparent text-ink-mid hover:text-ink'
+            }`}
+          >
+            {etichetta} <span className="fm-label">{quanti}</span>
+          </button>
+        ))}
+      </div>
+
+      {scheda === 'assegnati' ? (
+        <SchedaAssegnati righe={storico} errore={erroreStorico} spesaTotale={spesaTotale} />
+      ) : (
+      <>
       <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4">
         <Metrica etichetta="Giocatori in lista" valore={righe.length} />
         <Metrica etichetta="Contesi" valore={contesi} accento />
@@ -171,6 +225,8 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
       <div className="mt-3 text-right">
         <span className="fm-label">Mostrati {filtrate.length} di {righe.length}</span>
       </div>
+      </>
+      )}
     </div>
   )
 }
@@ -181,5 +237,75 @@ function Metrica({ etichetta, valore, accento }: { etichetta: string; valore: st
       <div className="fm-metric-label">{etichetta}</div>
       <div className={`fm-metric-value ${accento ? 'fm-metric-value--neon' : ''}`}>{valore}</div>
     </div>
+  )
+}
+
+/**
+ * Le aste gia' aggiudicate. Era la pagina /storico, ora una scheda qui.
+ */
+function SchedaAssegnati({
+  righe, errore, spesaTotale,
+}: { righe: RigaStorico[]; errore: string | null; spesaTotale: number }) {
+  if (errore) {
+    return (
+      <div className="fm-alert fm-alert-danger font-semibold">
+        Errore nel caricamento dello storico: {errore}
+      </div>
+    )
+  }
+
+  if (righe.length === 0) {
+    return <div className="py-10 text-center text-ink-mid">Non è stata ancora assegnata alcuna asta.</div>
+  }
+
+  return (
+    <>
+      <div className="mb-4 grid grid-cols-2 gap-2">
+        <Metrica etichetta="Assegnazioni" valore={righe.length} />
+        <Metrica etichetta="Speso in asta" valore={`${spesaTotale} cr`} accento />
+      </div>
+
+      <div className="fm-table-scroll rounded-md border border-line">
+        <table className="fm-table fm-table-cards">
+          <thead>
+            <tr>
+              <th scope="col">Calciatore</th>
+              <th scope="col">Ruoli</th>
+              <th scope="col">Fantasquadra</th>
+              <th scope="col">Prezzo</th>
+              <th scope="col">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            {righe.map((r) => (
+              <tr key={r.id}>
+                <td data-label="Calciatore" className="fm-nome">
+                  <span className="flex items-center gap-2">
+                    {r.nome}
+                    {r.eta ? <span className="fm-label">{r.eta}</span> : null}
+                  </span>
+                </td>
+                <td data-label="Ruoli">
+                  <span className="flex items-center justify-end gap-2 md:justify-start">
+                    <span className="text-ink-mid">{r.ruolo}</span>
+                    {r.ruolo_mantra && r.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.ruolo_mantra} />}
+                  </span>
+                </td>
+                <td data-label="Fantasquadra" className="font-semibold text-viola-hi">{r.fantasquadra}</td>
+                <td data-label="Prezzo" className="tabular-nums">
+                  <span className="fm-badge fm-badge-top">{r.prezzo}</span>
+                </td>
+                {/* Niente `whitespace-nowrap`: la data in formato italiano è la
+                    cella più larga, e lasciarla andare a capo è ciò che toglie
+                    lo sforamento su schermo stretto. */}
+                <td data-label="Data" className="text-ink-dim">
+                  {new Date(r.quando).toLocaleString('it-IT')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   )
 }

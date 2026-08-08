@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { requireUtente } from '@/utils/auth'
-import AsteClient, { type RigaAsta } from './AsteClient'
+import AsteClient, { type RigaAsta, type RigaStorico } from './AsteClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,18 +29,46 @@ export default async function AstePage() {
 
   const righe = (data ?? []) as unknown as RigaLista[]
 
+  // Lo storico viveva in una pagina a sé. Sono le due metà della stessa
+  // domanda — cosa resta e cosa è già andato — e per confrontarle bisognava
+  // cambiare pagina proprio nel momento in cui servono insieme.
+  const { data: chiuse, error: erroreStorico } = await supabase
+    .from('aste')
+    .select('id, prezzo_corrente, created_at, scadenza_corrente, squadre!squadra_in_testa(nome), giocatori(nome, ruolo, ruolo_mantra, eta)')
+    .eq('stato', 'CHIUSA')
+    .not('squadra_in_testa', 'is', null)
+    .order('created_at', { ascending: false })
+
+  const storico: RigaStorico[] = (chiuse ?? []).map((a) => {
+    const riga = a as unknown as {
+      id: string
+      prezzo_corrente: number
+      created_at: string
+      scadenza_corrente: string | null
+      squadre: { nome: string } | null
+      giocatori: { nome: string; ruolo: string; ruolo_mantra: string[] | null; eta: number | null } | null
+    }
+    return {
+      id: riga.id,
+      nome: riga.giocatori?.nome ?? 'Giocatore rimosso',
+      ruolo: riga.giocatori?.ruolo ?? '',
+      ruolo_mantra: riga.giocatori?.ruolo_mantra ?? null,
+      eta: riga.giocatori?.eta ?? null,
+      fantasquadra: riga.squadre?.nome ?? '—',
+      prezzo: riga.prezzo_corrente,
+      // La data mostrata è quella della chiusura, non della creazione.
+      quando: riga.scadenza_corrente ?? riga.created_at,
+    }
+  })
+
   // Una riga per giocatore, con l'elenco delle squadre che lo hanno in lista.
   const perGiocatore = new Map<number, RigaAsta>()
-  let concluse = 0
   for (const r of righe) {
     if (!r.giocatori) continue
-    // Le aste già concluse finiscono nello storico: qui restano solo quelle
-    // ancora da giocare. `chiudi_asta` ripulisce liste_aste, ma un giocatore
-    // può risultare tesserato anche per altre vie (buste, import rose).
-    if (r.giocatori.stato === 'TESSERATO') {
-      if (!perGiocatore.has(r.giocatore_id)) concluse++
-      continue
-    }
+    // Chi è già tesserato compare nella scheda "Assegnati" e non qui.
+    // `chiudi_asta` ripulisce liste_aste, ma un giocatore può risultare
+    // tesserato anche per altre vie (buste, import rose).
+    if (r.giocatori.stato === 'TESSERATO') continue
     const esistente = perGiocatore.get(r.giocatore_id)
     const nomeSquadra = r.squadre?.nome
     if (esistente) {
@@ -80,8 +108,7 @@ export default async function AstePage() {
             <div>
               <h1 className="fm-title text-xl">Sommario aste</h1>
               <p className="mt-0.5 text-xs font-normal normal-case tracking-normal text-ink-dim">
-                I giocatori ancora da assegnare, con chi se li contende.
-                {concluse > 0 && ` ${concluse} già aggiudicati sono nello storico.`}
+                Chi resta da assegnare e chi è già stato aggiudicato.
               </p>
             </div>
           </div>
@@ -93,7 +120,11 @@ export default async function AstePage() {
               </div>
             </div>
           ) : (
-            <AsteClient righe={lista} />
+            <AsteClient
+              righe={lista}
+              storico={storico}
+              erroreStorico={erroreStorico?.message ?? null}
+            />
           )}
         </div>
       </div>
