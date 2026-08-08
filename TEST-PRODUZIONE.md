@@ -740,8 +740,12 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 
 ### J2 · Import listone
 - [ ] Carica il listone Mantra.
-  **Atteso:** **1014 giocatori, 420 tesseramenti**. Se compaiono avvisi su
-  fantasquadre non trovate, annota i nomi: non coincidono con quelli in anagrafica.
+  **Atteso:** **1014 giocatori, 420 tesseramenti**. Attenzione: quei numeri
+  valgono per il file usato allora. Letto l'8 agosto 2026, `DFL - Dolomiti
+  Fanta League (2).xlsx` contiene **924 righe e 383 con FantaSquadra**: prima
+  di dire che l'import ha sbagliato, controlla quale file stai caricando.
+  Se compaiono avvisi su fantasquadre non trovate, annota i nomi: non
+  coincidono con quelli in anagrafica.
 - [ ] Ricarica **lo stesso file due volte**.
   **Atteso:** non si creano doppioni.
 
@@ -868,8 +872,8 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 | Cosa | Stato |
 |---|---|
 | I due contatori si regolano da `/admin/setup` → *Regole di lega* | Risolto: prima chiamata e dopo-rilancio sono due valori distinti |
-| `npm audit` segnala 5 vulnerabilità nella libreria che legge gli Excel | Preesistenti. L'upload è riservato al super admin, quindi il rischio è basso ma non nullo |
-| Le emoji nei menu e nei pulsanti | Da sostituire con il nuovo marchio |
+| `npm audit` non segnala più nulla | Risolto l'8 agosto 2026: `npm audit fix`, Next a 16.3.0, e `xlsx` preso dal CDN di SheetJS, dove esistono le versioni corrette |
+| Le emoji nei menu e nei pulsanti | Risolto: marchio disegnato, emoji rimosse da menu e pulsanti |
 
 ---
 
