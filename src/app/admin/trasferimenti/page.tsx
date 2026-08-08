@@ -133,7 +133,7 @@ export default function AdminTrasferimentiPage() {
       <div className="mx-auto w-full max-w-6xl space-y-4">
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="fm-title text-2xl sm:text-3xl">🤝 Ratifica trasferimenti</h1>
+          <h1 className="fm-title text-2xl sm:text-3xl">Ratifica trasferimenti</h1>
           <Link href="/admin/riepilogo" className="fm-btn fm-btn-ghost">Riepilogo e budget</Link>
         </div>
 

@@ -213,6 +213,17 @@ numeri del database.
 - [x] Svuota tutti i filtri → la lista torna completa.
 - [x] Cerca una stringa senza risultati → messaggio di lista vuota, non tabella
   spezzata.
+- [ ] **Ordinamento (nuovo).** Tocca l'intestazione *Quotazione*: la lista si
+  ordina dal più caro, e la freccia lo indica. Toccala di nuovo: si inverte.
+- [ ] Ordina per *Nome*, poi per *Squadra*, poi per *Età*.
+  **Atteso:** chi non ha l'età resta **in fondo** in entrambi i versi, non in
+  cima.
+- [ ] Ordina per *Ruoli*: l'ordine è portieri, difensori, centrocampisti,
+  attaccanti — non alfabetico.
+- [ ] Applica un filtro **e** un ordinamento: devono valere insieme.
+- [ ] **Da telefono**, dove la tabella diventa una pila di schede: c'è la
+  tendina *Ordina per* e funziona. Senza quella, sul telefono l'ordinamento non
+  esisterebbe, perché le intestazioni sono nascoste.
 
 ### C3 · Aste a chiamata
 - [x] `/aste`: le quattro tessere in cima (i totali) mostrano numeri sensati.
@@ -252,6 +263,10 @@ due finestre separate. Chiamiamoli **M1** e **M2**.
   evidenziata.
 - [ ] **Senza ricaricare**, guarda la finestra di M1 su `/asta`: la barra
   dell'ordine deve aggiornarsi da sola. È il primo test del tempo reale.
+- [ ] **Squadre concluse (nuovo).** Quando una squadra ha la rosa piena o non ha
+  più nessuno in lista, nella barra della Regia diventa **sbiadita con una
+  spunta**, ma resta cliccabile: l'admin deve poterle comunque assegnare il
+  turno dopo un annullamento.
 
 ### D2 · Barra ordine dal lato manager
 - [ ] Su `/asta`, la barra mostra solo chi deve ancora chiamare, con
@@ -617,6 +632,19 @@ riassegnare.
 - [ ] Prova da un account **admin non super**: la pagina non è nemmeno
   raggiungibile.
 
+### G7 · I due contatori
+- [ ] `/admin/setup` → *Regole di lega*: imposta **20** alla prima chiamata e
+  **10** dopo un rilancio, salva, ricarica. I valori restano.
+- [ ] Prova a salvare **1 secondo**. **Atteso:** rifiutato, minimo 3.
+- [ ] Avvia un'asta e cronometra: il primo conto alla rovescia parte da **20**.
+- [ ] Rilancia: il contatore riparte da **10**, non da 20.
+- [ ] Fai scattare un **rilancio automatico** (tetto massimo di un altro
+  manager). **Atteso:** anche quello ricarica da 10.
+
+### G8 · Elenco utenti in ordine
+- [ ] `/admin/setup` → *Gestione utenti*: le fantasquadre sono in ordine
+  alfabetico, non sparse. Chi non ha squadra sta in fondo.
+
 ---
 
 ## Blocco H — Export
@@ -829,7 +857,7 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 
 | Cosa | Stato |
 |---|---|
-| I secondi del contatore non sono modificabili da interfaccia | Già in lavorazione — vedi attività *Timer asta configurabile* |
+| I due contatori si regolano da `/admin/setup` → *Regole di lega* | Risolto: prima chiamata e dopo-rilancio sono due valori distinti |
 | `npm audit` segnala 5 vulnerabilità nella libreria che legge gli Excel | Preesistenti. L'upload è riservato al super admin, quindi il rischio è basso ma non nullo |
 | Le emoji nei menu e nei pulsanti | Da sostituire con il nuovo marchio |
 

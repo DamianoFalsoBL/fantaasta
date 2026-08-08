@@ -413,6 +413,7 @@ export type Database = {
           budget_standard: number
           costo_minimo_giocatore: number
           durata_timer: number
+          durata_timer_rilancio: number
           fase_buste_aperta: boolean | null
           fase_mercato_aperta: boolean
           id: string
@@ -431,6 +432,7 @@ export type Database = {
           budget_standard?: number
           costo_minimo_giocatore?: number
           durata_timer?: number
+          durata_timer_rilancio?: number
           fase_buste_aperta?: boolean | null
           fase_mercato_aperta?: boolean
           id?: string
@@ -449,6 +451,7 @@ export type Database = {
           budget_standard?: number
           costo_minimo_giocatore?: number
           durata_timer?: number
+          durata_timer_rilancio?: number
           fase_buste_aperta?: boolean | null
           fase_mercato_aperta?: boolean
           id?: string
@@ -558,6 +561,10 @@ export type Database = {
       }
       admin_elabora_buste: { Args: never; Returns: Json }
       admin_imposta_max_portieri: { Args: { p_max: number }; Returns: Json }
+      admin_imposta_timer: {
+        Args: { p_primo: number; p_rilancio: number }
+        Returns: Json
+      }
       admin_imposta_turno: { Args: { p_squadra_id: string }; Returns: Json }
       admin_modifica_budget: {
         Args: { p_delta: number; p_squadra_id: string }

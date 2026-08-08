@@ -25,6 +25,10 @@ export default function AdminAstaPage() {
   // risorteggiare tutto l'ordine.
   const [turnoDaImpostare, setTurnoDaImpostare] = useState<{ id: string; nome: string } | null>(null)
   const [esito, setEsito] = useState<string | null>(null)
+  // Chi non ha più nulla da chiamare, o ha la rosa piena. Restano nell'ordine
+  // e restano cliccabili — l'admin deve poterle comunque selezionare — ma
+  // sbiadite, perché a colpo d'occhio si veda chi è ancora in gara.
+  const [concluse, setConcluse] = useState<Set<string>>(new Set())
 
   const loadData = async () => {
     // 1. Carica asta in corso o in chiamata.
@@ -71,29 +75,35 @@ export default function AdminAstaPage() {
     // 2. Carica i giocatori dalle liste_aste che sono ancora LIBERI e non hanno un'asta in corso
     const { data: liste, error: dbError } = await supabase
       .from('liste_aste')
-      .select('giocatore_id, giocatori(*), squadre(nome)')
+      // `squadra_id` serve a capire chi ha ancora qualcuno da chiamare: senza,
+      // nella barra dell'ordine tutte le squadre si somigliano fino alla fine.
+      .select('giocatore_id, squadra_id, giocatori(*), squadre(nome)')
     
     if (dbError) {
       setError(`Errore DB: ${dbError.message}`)
       return
     }
 
+    // Chi ha ancora almeno un giocatore libero in lista è ancora in gara.
+    const conQualcunoDaChiamare = new Set<string>()
+
     if (liste) {
       let tesseratiCount = 0
       const map = new Map()
-      
+
       liste.forEach((r: any) => {
         if (r.giocatori) {
           if (r.giocatori.stato === 'LIBERO') {
             const player = map.get(r.giocatore_id) || { ...r.giocatori, contendenti: [] }
             if (r.squadre) player.contendenti.push(r.squadre.nome)
             map.set(r.giocatore_id, player)
+            if (r.squadra_id) conQualcunoDaChiamare.add(r.squadra_id)
           } else {
             tesseratiCount++
           }
         }
       })
-      
+
       if (corrente) {
          map.delete(corrente.giocatore_id)
       }
@@ -111,18 +121,28 @@ export default function AdminAstaPage() {
     }
 
     // 3. Carica regole_lega per ordine chiamata
-    const { data: regole } = await supabase.from('regole_lega').select('ordine_chiamata, indice_chiamata').limit(1).single()
+    const { data: regole } = await supabase
+      .from('regole_lega').select('ordine_chiamata, indice_chiamata, slot_totali').limit(1).single()
     if (regole) {
       setOrdineChiamata(regole.ordine_chiamata || [])
       setIndiceChiamata(regole.indice_chiamata || 1)
     }
+    const slotTotali = regole?.slot_totali ?? 30
 
     // 4. Carica squadre per la mappa dei nomi
-    const { data: teams } = await supabase.from('squadre').select('id, nome')
+    const { data: teams } = await supabase.from('squadre').select('id, nome, slot_occupati')
     if (teams) {
       const sMap: Record<string, string> = {}
       teams.forEach((t: any) => sMap[t.id] = t.nome)
       setSquadreMap(sMap)
+
+      // Due modi di aver finito, entrambi definitivi per la chiamata: non
+      // avere più nessuno in lista, o avere la rosa piena.
+      setConcluse(new Set(
+        teams
+          .filter((t: any) => !conQualcunoDaChiamare.has(t.id) || (t.slot_occupati ?? 0) >= slotTotali)
+          .map((t: any) => t.id)
+      ))
     }
   }
 
@@ -195,7 +215,7 @@ export default function AdminAstaPage() {
             disabled={loading}
             className="fm-btn fm-btn-ghost fm-btn-sm"
           >
-            🎲 Sorteggia nuovo ordine
+            Sorteggia nuovo ordine
           </button>
         </div>
         {ordineChiamata.length > 0 ? (
@@ -204,6 +224,10 @@ export default function AdminAstaPage() {
               {ordineChiamata.map((sqId, idx) => {
                 const isTurno = (idx + 1) === indiceChiamata;
                 const nome = squadreMap[sqId] || 'Squadra'
+                // Sbiadita, non nascosta e non disattivata: chi ha finito serve
+                // ancora, perché l'admin può doverle riassegnare il turno dopo
+                // un annullamento.
+                const haFinito = concluse.has(sqId)
                 return (
                   /* Le pillole sono diventate cliccabili: servono a spostare il
                      turno senza risorteggiare tutto l'ordine, per esempio dopo
@@ -213,8 +237,14 @@ export default function AdminAstaPage() {
                     type="button"
                     onClick={() => !isTurno && setTurnoDaImpostare({ id: sqId, nome })}
                     disabled={isTurno}
-                    title={isTurno ? 'È già il suo turno' : `Sposta il turno di chiamata a ${nome}`}
-                    className={`fm-chip shrink-0 ${isTurno ? 'fm-chip-attivo cursor-default' : 'cursor-pointer hover:border-neon hover:text-ink'}`}
+                    title={
+                      isTurno ? 'È già il suo turno'
+                      : haFinito ? `${nome} ha finito le chiamate — puoi comunque spostarle il turno`
+                      : `Sposta il turno di chiamata a ${nome}`
+                    }
+                    className={`fm-chip shrink-0 ${
+                      isTurno ? 'fm-chip-attivo cursor-default' : 'cursor-pointer hover:border-neon hover:text-ink'
+                    } ${haFinito && !isTurno ? 'opacity-40 hover:opacity-100' : ''}`}
                   >
                     <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
                       isTurno ? 'bg-void text-neon' : 'bg-panel-hover text-ink-dim'
@@ -222,12 +252,14 @@ export default function AdminAstaPage() {
                       {idx + 1}
                     </span>
                     {nome}
+                    {haFinito && <span className="ml-1 text-[9px] text-ink-dim">✓</span>}
                   </button>
                 );
               })}
             </div>
             <p className="px-3 pb-3 text-[11px] text-ink-dim">
               Tocca una squadra per spostarle il turno di chiamata.
+              {concluse.size > 0 && ' Le squadre sbiadite con la spunta hanno finito: rosa piena o nessuno più in lista.'}
             </p>
           </>
         ) : (

@@ -187,7 +187,7 @@ export default function AdminRiepilogoPage() {
     <div className="px-3 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="fm-title text-2xl sm:text-3xl">📊 Riepilogo lega e budget</h1>
+          <h1 className="fm-title text-2xl sm:text-3xl">Riepilogo lega e budget</h1>
           <Link href="/admin/asta" className="fm-btn fm-btn-ghost">
             Vai alla regia asta
           </Link>
@@ -340,7 +340,7 @@ export default function AdminRiepilogoPage() {
                         onClick={() => annullaAcquisto(a.id, a.giocatori?.nome, a.squadre?.nome)}
                         className="fm-btn fm-btn-danger fm-btn-sm"
                       >
-                        ⚠️ Annulla acquisto
+                        Annulla acquisto
                       </button>
                     </td>
                   </tr>

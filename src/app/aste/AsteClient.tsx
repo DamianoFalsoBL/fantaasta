@@ -111,9 +111,13 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
             <tr>
               <th>Nome</th>
               <th>Ruoli</th>
-              <th className="fm-num">Età</th>
+              {/* Niente `fm-num`: allineava a destra due sole colonne in mezzo
+                  alle altre, spezzando la colonna del testo. Le cifre restano
+                  tabulari, così incolonnano lo stesso. Stessa scelta fatta in
+                  /svincolati. */}
+              <th>Età</th>
               <th>Squadra</th>
-              <th className="fm-num">Prezzo</th>
+              <th>Prezzo</th>
               <th>Conteso tra</th>
             </tr>
           </thead>
@@ -139,9 +143,9 @@ export default function AsteClient({ righe }: { righe: RigaAsta[] }) {
                       {r.ruolo_mantra && r.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.ruolo_mantra} />}
                     </span>
                   </td>
-                  <td data-label="Età" className="fm-num text-ink-mid">{r.eta ? String(r.eta) : '—'}</td>
+                  <td data-label="Età" className="tabular-nums text-ink-mid">{r.eta ? String(r.eta) : '—'}</td>
                   <td data-label="Squadra" className="text-ink-mid">{r.squadra ?? '—'}</td>
-                  <td data-label="Prezzo" className="fm-num">
+                  <td data-label="Prezzo" className="tabular-nums">
                     <span className="fm-badge fm-badge-good">{r.quotazione}</span>
                   </td>
                   <td data-label="Conteso tra">

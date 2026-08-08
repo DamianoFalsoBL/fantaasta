@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { RealtimeChannel, User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
+import Marchio from '@/components/Marchio'
 import { isAdminRole, isSuperAdminRole } from '@/utils/auth-shared'
 
 type ProfiloNavBar = {
@@ -24,16 +25,19 @@ const VOCI_UTENTE: Voce[] = [
   { href: '/rose', label: 'Tutte le Rose' },
   { href: '/mia-rosa', label: 'La mia Rosa' },
   { href: '/svincolati', label: 'Lista Svincolati' },
-  { href: '/trasferimenti', label: '🤝 Lista Trasferimenti' },
+  { href: '/trasferimenti', label: 'Lista Trasferimenti' },
   { href: '/storico', label: 'Storico Aste' },
-  { href: '/buste', label: '✉️ Buste Riparazione' },
+  { href: '/buste', label: 'Buste Riparazione' },
 ]
 
+// Senza emoji: erano un segnaposto in attesa di un'identita' visiva, e
+// accanto al marchio facevano rumore. Le voci si distinguono gia' per
+// posizione e per la tinta della tendina che le contiene.
 const VOCI_ADMIN: Voce[] = [
-  { href: '/admin/setup', label: '⚙️ Setup Sistema', soloSuper: true },
-  { href: '/admin/asta', label: '🎮 Regia Asta Live' },
-  { href: '/admin/trasferimenti', label: '🤝 Ratifica Trasferimenti' },
-  { href: '/admin/riepilogo', label: '📊 Riepilogo e Budget' },
+  { href: '/admin/setup', label: 'Setup Sistema', soloSuper: true },
+  { href: '/admin/asta', label: 'Regia Asta Live' },
+  { href: '/admin/trasferimenti', label: 'Ratifica Trasferimenti' },
+  { href: '/admin/riepilogo', label: 'Riepilogo e Budget' },
 ]
 
 export default function NavBar() {
@@ -290,8 +294,9 @@ export default function NavBar() {
               <span className="text-lg leading-none">{menuAperto ? '✕' : '☰'}</span>
             </button>
 
-            <Link href="/asta" className="fm-title shrink-0 text-lg sm:text-xl">
-              ⚽ Fanta<span className="text-neon">Asta</span>
+            <Link href="/asta" className="fm-title flex shrink-0 items-center gap-2 text-lg sm:text-xl">
+              <Marchio />
+              <span>Fanta<span className="text-neon">Asta</span></span>
             </Link>
 
             <div className="hidden items-center gap-1 md:flex">

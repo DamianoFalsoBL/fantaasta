@@ -85,6 +85,9 @@ export default function AdminSetupPage() {
   // Tetto ai portieri. Vive in regole_lega.slot_p, che esisteva gia' ma era
   // informativa: dalla migration 20260806210000 e' vincolante.
   const [maxPortieri, setMaxPortieri] = useState('')
+  // I due contatori d'asta. Erano un unico valore scritto a mano nel database.
+  const [timerPrimo, setTimerPrimo] = useState('')
+  const [timerRilancio, setTimerRilancio] = useState('')
 
   // L'accesso è già garantito dal gate server-side in setup/layout.tsx:
   // qui non serve più ricontrollare il ruolo lato client.
@@ -94,17 +97,30 @@ export default function AdminSetupPage() {
       .from('profili')
       .select('id, ruolo, squadra_id, squadre(nome)')
       .neq('ruolo', 'SUPER_ADMIN')
-      .order('squadra_id')
 
     if (error) setError(error.message)
-    else setProfili((data as unknown as ProfiloRiga[]) || [])
+    // L'ordine si fa qui e non nella query: ordinare per `squadra_id`
+    // significava ordinare per UUID, cioè non ordinare affatto, e PostgREST non
+    // sa ordinare le righe padre per una colonna incorporata. Le righe sono
+    // quattordici, il costo è nullo. Chi non ha squadra finisce in fondo.
+    else setProfili(((data as unknown as ProfiloRiga[]) || []).sort((a, b) => {
+      const na = a.squadre?.nome ?? ''
+      const nb = b.squadre?.nome ?? ''
+      if (na === '') return nb === '' ? 0 : 1
+      if (nb === '') return -1
+      return na.localeCompare(nb, 'it')
+    }))
 
     const { data: regole } = await supabase
       .from('regole_lega')
-      .select('slot_p')
+      .select('slot_p, durata_timer, durata_timer_rilancio')
       .limit(1)
       .maybeSingle()
-    if (regole) setMaxPortieri(String(regole.slot_p))
+    if (regole) {
+      setMaxPortieri(String(regole.slot_p))
+      setTimerPrimo(String(regole.durata_timer))
+      setTimerRilancio(String(regole.durata_timer_rilancio))
+    }
 
     setLoading(false)
   }
@@ -138,6 +154,24 @@ export default function AdminSetupPage() {
     if (rpcErr) setEsito({ tipo: 'errore', testo: rpcErr.message })
     else {
       setEsito({ tipo: 'ok', testo: `Massimo portieri impostato a ${valore}.` })
+      await fetchProfili()
+    }
+  }
+
+  const salvaTimer = async () => {
+    const primo = parseInt(timerPrimo, 10)
+    const rilancio = parseInt(timerRilancio, 10)
+    if (Number.isNaN(primo) || Number.isNaN(rilancio)) {
+      setEsito({ tipo: 'errore', testo: 'Inserisci due numeri.' })
+      return
+    }
+    const { error: rpcErr } = await supabase.rpc('admin_imposta_timer', {
+      p_primo: primo,
+      p_rilancio: rilancio,
+    })
+    if (rpcErr) setEsito({ tipo: 'errore', testo: rpcErr.message })
+    else {
+      setEsito({ tipo: 'ok', testo: `Contatore: ${primo}s alla chiamata, ${rilancio}s dopo un rilancio.` })
       await fetchProfili()
     }
   }
@@ -275,6 +309,47 @@ export default function AdminSetupPage() {
               Salva
             </button>
           </div>
+
+          <hr className="my-4 border-line" />
+
+          <p className="mb-3 text-sm text-ink-mid">
+            I secondi del contatore d&apos;asta. Il primo vale all&apos;avvio, perché tutti si
+            accorgano che l&apos;asta è partita; il secondo dopo ogni rilancio, manuale o
+            automatico, perché una battuta non si trascini.
+          </p>
+          <div className="flex flex-wrap items-end gap-2">
+            <div>
+              <label htmlFor="timer-primo" className="fm-label mb-1 block">Alla prima chiamata</label>
+              <input
+                id="timer-primo"
+                type="number"
+                min="3"
+                max="600"
+                value={timerPrimo}
+                onChange={(e) => setTimerPrimo(e.target.value)}
+                className="fm-input w-24"
+              />
+            </div>
+            <div>
+              <label htmlFor="timer-rilancio" className="fm-label mb-1 block">Dopo un rilancio</label>
+              <input
+                id="timer-rilancio"
+                type="number"
+                min="3"
+                max="600"
+                value={timerRilancio}
+                onChange={(e) => setTimerRilancio(e.target.value)}
+                className="fm-input w-24"
+              />
+            </div>
+            <button onClick={salvaTimer} disabled={loading} className="fm-btn fm-btn-ghost">
+              Salva
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-ink-dim">
+            I nuovi valori si applicano dalla chiamata successiva: un&apos;asta già avviata
+            mantiene la scadenza che ha.
+          </p>
         </div>
       </div>
 
