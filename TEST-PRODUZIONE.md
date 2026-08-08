@@ -160,7 +160,7 @@ Non scrive nulla.
 
 ### B1 · Tutte le voci di menu
 - [ ] Da manager, apri una per una le sette voci: *Asta Live*, *Sommario Aste*,
-  *Tutte le Rose*, *La mia Rosa*, *Svincolati*, *Lista Trasferimenti*, *Buste*.
+  *Svincolati*, *Tutte le Rose*, *La mia Rosa*, *Lista Trasferimenti*, *Buste*.
   Da admin, le quattro voci: *Impostazioni* (solo super), *Regia Aste*,
   *Ratifica Scambi*, *Budget e Fasi*.
   **Atteso:** ogni pagina carica, la voce attiva è evidenziata, nessuna pagina

@@ -24,9 +24,11 @@ const VOCI_UTENTE: Voce[] = [
   // "Sommario Aste" e non piu' "Aste a Chiamata": con /asta accanto, due nomi
   // che differiscono per una lettera costringevano a fermarsi a pensare.
   { href: '/aste', label: 'Sommario Aste' },
+  // Svincolati sta con le aste, non con le rose: sono i giocatori ancora da
+  // prendere, e si consultano insieme al sommario delle chiamate.
+  { href: '/svincolati', label: 'Svincolati' },
   { href: '/rose', label: 'Tutte le Rose' },
   { href: '/mia-rosa', label: 'La mia Rosa' },
-  { href: '/svincolati', label: 'Svincolati' },
   { href: '/trasferimenti', label: 'Lista Trasferimenti' },
   // "Storico Aste" non c'e' piu': e' una scheda dentro Sommario Aste.
   { href: '/buste', label: 'Buste' },
