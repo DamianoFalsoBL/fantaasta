@@ -20,7 +20,7 @@ export default async function StoricoPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-3 py-6 sm:px-6 sm:py-8">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h1 className="fm-title text-2xl sm:text-3xl">📜 Storico aste</h1>
+        <h1 className="fm-title text-2xl sm:text-3xl">Storico aste</h1>
         {asteChiuse && asteChiuse.length > 0 && (
           <span className="fm-chip">{asteChiuse.length} assegnazioni</span>
         )}

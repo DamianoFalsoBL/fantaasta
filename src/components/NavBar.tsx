@@ -20,24 +20,30 @@ type Voce = { href: string; label: string; soloSuper?: boolean }
 // ogni ternario di stato attivo. Elencandole qui si restilizzano una volta
 // sola e il menu mobile non può divergere da quello desktop.
 const VOCI_UTENTE: Voce[] = [
-  { href: '/asta', label: 'Tabellone Live' },
-  { href: '/aste', label: 'Aste a Chiamata' },
+  { href: '/asta', label: 'Asta Live' },
+  // "Sommario Aste" e non piu' "Aste a Chiamata": con /asta accanto, due nomi
+  // che differiscono per una lettera costringevano a fermarsi a pensare.
+  { href: '/aste', label: 'Sommario Aste' },
   { href: '/rose', label: 'Tutte le Rose' },
   { href: '/mia-rosa', label: 'La mia Rosa' },
-  { href: '/svincolati', label: 'Lista Svincolati' },
+  { href: '/svincolati', label: 'Svincolati' },
   { href: '/trasferimenti', label: 'Lista Trasferimenti' },
   { href: '/storico', label: 'Storico Aste' },
-  { href: '/buste', label: 'Buste Riparazione' },
+  { href: '/buste', label: 'Buste' },
 ]
 
 // Senza emoji: erano un segnaposto in attesa di un'identita' visiva, e
 // accanto al marchio facevano rumore. Le voci si distinguono gia' per
 // posizione e per la tinta della tendina che le contiene.
 const VOCI_ADMIN: Voce[] = [
-  { href: '/admin/setup', label: 'Setup Sistema', soloSuper: true },
-  { href: '/admin/asta', label: 'Regia Asta Live' },
-  { href: '/admin/trasferimenti', label: 'Ratifica Trasferimenti' },
-  { href: '/admin/riepilogo', label: 'Riepilogo e Budget' },
+  { href: '/admin/setup', label: 'Impostazioni', soloSuper: true },
+  { href: '/admin/asta', label: 'Regia Aste' },
+  { href: '/admin/trasferimenti', label: 'Ratifica Scambi' },
+  { href: '/admin/riepilogo', label: 'Budget e Fasi' },
+  // /debug esisteva gia' ma non era raggiungibile da nessun collegamento.
+  // E' protetta da requireAdmin(), quindi metterla nel menu non apre nulla
+  // che non fosse gia' raggiungibile scrivendo l'indirizzo a mano.
+  { href: '/debug', label: 'Controllo Slot' },
 ]
 
 export default function NavBar() {

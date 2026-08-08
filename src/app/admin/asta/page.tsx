@@ -204,7 +204,7 @@ export default function AdminAstaPage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 px-3 py-6 sm:px-6 sm:py-8">
-      <h1 className="fm-title text-2xl sm:text-3xl">Regia asta live</h1>
+      <h1 className="fm-title text-2xl sm:text-3xl">Regia aste</h1>
 
       {/* SEZIONE ORDINE DI CHIAMATA */}
       <div className="fm-panel overflow-hidden">

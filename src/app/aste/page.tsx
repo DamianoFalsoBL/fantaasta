@@ -78,7 +78,7 @@ export default async function AstePage() {
         <div className="fm-panel overflow-hidden">
           <div className="fm-panel-head">
             <div>
-              <h1 className="fm-title text-xl">Aste a chiamata</h1>
+              <h1 className="fm-title text-xl">Sommario aste</h1>
               <p className="mt-0.5 text-xs font-normal normal-case tracking-normal text-ink-dim">
                 I giocatori ancora da assegnare, con chi se li contende.
                 {concluse > 0 && ` ${concluse} già aggiudicati sono nello storico.`}
