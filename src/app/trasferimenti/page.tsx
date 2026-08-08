@@ -7,7 +7,8 @@ import MantraBadge from '@/components/MantraBadge'
 import Conferma from '@/components/Conferma'
 import OffertaTrasferimento from '@/components/OffertaTrasferimento'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
-import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
+import { mantraPresenti } from '@/utils/ruoli'
+import { passaFiltri } from '@/utils/filtri'
 import {
   badgeRuolo,
   ETICHETTA_STATO,
@@ -163,13 +164,12 @@ export default function TrasferimentiPage() {
   }, [vetrina])
 
   const vetrinaFiltrata = useMemo(() => {
-    const q = ricerca.toLowerCase().trim()
     return vetrina.filter((v) => {
       if (!mostraTutti && !v.in_vendita) return false
+      // Il filtro fantasquadra è specifico di questa pagina; ricerca e ruolo
+      // vengono dal predicato condiviso.
       if (filtroSquadra && v.proprietario.id !== filtroSquadra) return false
-      if (filtroRuolo && !ruoloCorrisponde(filtroRuolo, v.giocatore.ruolo, v.giocatore.ruolo_mantra)) return false
-      if (q && !v.giocatore.nome.toLowerCase().includes(q) && !(v.giocatore.squadra ?? '').toLowerCase().includes(q)) return false
-      return true
+      return passaFiltri(v.giocatore, ricerca, filtroRuolo)
     })
   }, [vetrina, mostraTutti, filtroSquadra, filtroRuolo, ricerca])
 

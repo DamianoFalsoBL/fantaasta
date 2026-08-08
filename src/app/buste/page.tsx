@@ -5,6 +5,9 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import MantraBadge from '@/components/MantraBadge'
 import Conferma from '@/components/Conferma'
+import OpzioniRuolo from '@/components/OpzioniRuolo'
+import { mantraPresenti } from '@/utils/ruoli'
+import { passaFiltri } from '@/utils/filtri'
 
 type Squadra = {
   id: string
@@ -170,17 +173,11 @@ export default function BustePage() {
     return [...gruppi.entries()].sort((a, b) => b[0] - a[0])
   }, [risultati])
 
-  const liberiFiltrati = useMemo(() => {
-    const q = ricerca.toLowerCase().trim()
-    return giocatoriLiberi.filter(g => {
-      if (q && !g.nome.toLowerCase().includes(q) && !(g.squadra ?? '').toLowerCase().includes(q)) return false
-      if (filtroRuolo) {
-        const mantra = g.ruolo_mantra?.map(m => m.toUpperCase()) ?? []
-        if (g.ruolo !== filtroRuolo && !mantra.includes(filtroRuolo)) return false
-      }
-      return true
-    })
-  }, [giocatoriLiberi, ricerca, filtroRuolo])
+  const ruoliMantra = useMemo(() => mantraPresenti(giocatoriLiberi), [giocatoriLiberi])
+
+  const liberiFiltrati = useMemo(
+    () => giocatoriLiberi.filter((g) => passaFiltri(g, ricerca, filtroRuolo)),
+    [giocatoriLiberi, ricerca, filtroRuolo])
 
   const toggleSelezionato = (giocatore: Giocatore) => {
     if (selezionati.find(s => s.id === giocatore.id)) {
@@ -322,14 +319,17 @@ export default function BustePage() {
                 onChange={e => setRicerca(e.target.value)}
                 aria-label="Cerca calciatore svincolato"
               />
+              {/* Prima era un elenco fatto a mano di P/D/C/A, e i ruoli Mantra
+                  non si potevano filtrare: qui si compilano le buste guardando
+                  i reparti scoperti, ed era proprio la pagina in cui servivano
+                  di più. */}
               <select
-                className="fm-select sm:w-40"
+                className="fm-select sm:w-52"
                 value={filtroRuolo}
                 onChange={e => setFiltroRuolo(e.target.value)}
                 aria-label="Filtra per ruolo"
               >
-                <option value="">Tutti i ruoli</option>
-                {['P', 'D', 'C', 'A'].map(r => <option key={r} value={r}>{r}</option>)}
+                <OpzioniRuolo presenti={ruoliMantra} />
               </select>
             </div>
 

@@ -758,6 +758,13 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 - [ ] `/svincolati`: **455** giocatori.
 - [ ] Un giocatore noto mostra i ruoli Mantra e l'età giusti.
 
+### J4b · Filtro Mantra nelle buste
+- [ ] `/buste` a fase aperta: la tendina *Ruolo* ora ha due gruppi, reparto e
+  ruolo Mantra, come in `/svincolati`.
+  **Atteso:** filtrare per un ruolo Mantra funziona. Prima la tendina offriva
+  solo P/D/C/A, ed era proprio la pagina in cui i reparti scoperti si guardano
+  di più.
+
 ### J5 · Hard reset
 - [ ] `/admin/setup` → *Hard reset lega*.
   **Atteso:** la finestra rossa chiede di scrivere `CONFERMO`; il bottone di
@@ -766,6 +773,10 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 - [ ] Premi *Annulla* → non succede nulla.
 - [ ] Scrivi `CONFERMO` ed esegui.
   **Atteso:** squadre, giocatori e aste cancellati.
+- [ ] Prima del reset **apri il mercato trasferimenti**; dopo il reset
+  ricontrolla `/admin/riepilogo`.
+  **Atteso:** il mercato risulta **chiuso**. Prima restava aperto: il reset
+  chiudeva la fase buste ma non quella del mercato.
 
 ### J6 · La prova del nove
 - [ ] Dopo il reset, esci e rientra come super admin.
