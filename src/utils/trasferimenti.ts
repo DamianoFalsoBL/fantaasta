@@ -6,6 +6,26 @@
 // stessa offerta compare nella lista del proponente, in quella del ricevente
 // e nella coda di ratifica dell'admin.
 
+/**
+ * I trasferimenti sono una funzione che il super admin accende e spegne, non
+ * una fase del gioco. Da spenta le pagine spariscono dai menu e gli indirizzi
+ * rimandano altrove.
+ *
+ * La colonna si chiama ancora `fase_mercato_aperta` per ragioni storiche:
+ * rinominarla costerebbe di toccare sei punti fra migration e client, e il
+ * significato lo dice questa funzione.
+ *
+ * Sta qui perché la leggono cinque punti diversi — NavBar, /mia-rosa,
+ * /trasferimenti, /admin/trasferimenti, /admin/setup — e cinque copie della
+ * stessa query sono cinque occasioni di divergere.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function trasferimentiAttivi(supabase: any): Promise<boolean> {
+  const { data } = await supabase
+    .from('regole_lega').select('fase_mercato_aperta').limit(1).maybeSingle()
+  return data?.fase_mercato_aperta ?? false
+}
+
 export type StatoOfferta =
   | 'ATTESA'
   | 'ACCETTATA'

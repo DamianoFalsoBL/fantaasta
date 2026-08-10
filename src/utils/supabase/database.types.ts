@@ -656,6 +656,7 @@ export type Database = {
         Returns: boolean
       }
       submit_buste: { Args: { p_giocatori_ids: number[] }; Returns: Json }
+      trattative_in_sospeso: { Args: never; Returns: number }
       verifica_scambio: {
         Args: {
           p_crediti: number

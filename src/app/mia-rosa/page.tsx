@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import MantraBadge from '@/components/MantraBadge'
 import Conferma from '@/components/Conferma'
-import { badgeRuolo, ORDINE_RUOLI, type GiocatoreMercato } from '@/utils/trasferimenti'
+import { badgeRuolo, ORDINE_RUOLI, trasferimentiAttivi, type GiocatoreMercato } from '@/utils/trasferimenti'
 
 type RigaRosa = GiocatoreMercato & {
   prezzo_pagato: number
@@ -22,6 +22,9 @@ export default function MiaRosaPage() {
 
   const [squadra, setSquadra] = useState<Squadra | null>(null)
   const [rosa, setRosa] = useState<RigaRosa[]>([])
+  // Quando i trasferimenti sono spenti questa pagina è solo la propria rosa:
+  // niente comandi disabilitati, niente avvisi. Un divieto si comunica dove
+  // c'è qualcosa da vietare.
   const [mercatoAperto, setMercatoAperto] = useState(false)
   const [loading, setLoading] = useState(true)
   const [errore, setErrore] = useState<string | null>(null)
@@ -44,9 +47,7 @@ export default function MiaRosaPage() {
       .eq('id', prof.squadra_id).maybeSingle()
     if (sq) setSquadra(sq as Squadra)
 
-    const { data: regole } = await supabase
-      .from('regole_lega').select('fase_mercato_aperta').limit(1).maybeSingle()
-    setMercatoAperto(regole?.fase_mercato_aperta ?? false)
+    setMercatoAperto(await trasferimentiAttivi(supabase))
 
     // L'errore non si ingoia: una policy che cambia o una colonna che manca
     // devono comparire in pagina, non lasciare una rosa misteriosamente vuota.
@@ -117,28 +118,21 @@ export default function MiaRosaPage() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="fm-title text-2xl sm:text-3xl">La mia rosa</h1>
-          <Link href="/trasferimenti" className="fm-btn fm-btn-ghost">
-            Vai alla lista trasferimenti
-          </Link>
+          {mercatoAperto && (
+            <Link href="/trasferimenti" className="fm-btn fm-btn-ghost">
+              Vai alla lista trasferimenti
+            </Link>
+          )}
         </div>
 
         {errore && <div className="fm-alert fm-alert-danger font-semibold">{errore}</div>}
-
-        {!mercatoAperto && (
-          <div className="fm-alert fm-alert-warn">
-            <h2 className="fm-title text-base">Il mercato è chiuso</h2>
-            <p className="mt-1 text-sm">
-              Puoi consultare la tua rosa, ma finché l’admin non apre il mercato non si può mettere
-              nessuno in vetrina né trattare.
-            </p>
-          </div>
-        )}
 
         <div className="fm-panel overflow-hidden">
           <div className="fm-panel-head fm-panel-head--neon">
             <span className="truncate">{squadra.nome}</span>
             <span className="fm-label shrink-0">
-              {squadra.slot_occupati} giocatori · {squadra.crediti_residui} cr · {inVetrina} in vetrina
+              {squadra.slot_occupati} giocatori · {squadra.crediti_residui} cr
+              {mercatoAperto && ` · ${inVetrina} in vetrina`}
             </span>
           </div>
 
@@ -169,6 +163,10 @@ export default function MiaRosaPage() {
                         </div>
                       </div>
 
+                      {/* Tutta la colonna dei comandi esiste solo a
+                          trasferimenti accesi: da spenti la riga mostra il
+                          giocatore e nient'altro. */}
+                      {mercatoAperto && (
                       <div className="flex shrink-0 flex-wrap items-center gap-2">
                         {g.in_vendita && (
                           <span className="fm-chip fm-chip-neon">
@@ -186,13 +184,13 @@ export default function MiaRosaPage() {
                           className="fm-input h-9 w-24 min-h-0 py-0 text-sm"
                           aria-label={`Prezzo richiesto per ${g.nome}`}
                           value={prezzi[g.id] ?? ''}
-                          disabled={!mercatoAperto || occupato}
+                          disabled={occupato}
                           onChange={(e) => setPrezzi((p) => ({ ...p, [g.id]: e.target.value }))}
                         />
 
                         <button
                           onClick={() => aggiorna(g.id, true)}
-                          disabled={!mercatoAperto || occupato}
+                          disabled={occupato}
                           className={`fm-btn fm-btn-sm ${g.in_vendita ? 'fm-btn-ghost' : 'fm-btn-primary'}`}
                         >
                           {g.in_vendita ? 'Aggiorna prezzo' : 'Lista trasferimenti'}
@@ -201,13 +199,14 @@ export default function MiaRosaPage() {
                         {g.in_vendita && (
                           <button
                             onClick={() => aggiorna(g.id, false)}
-                            disabled={!mercatoAperto || occupato}
+                            disabled={occupato}
                             className="fm-btn fm-btn-ghost fm-btn-sm"
                           >
                             Rimuovi dalla lista
                           </button>
                         )}
                       </div>
+                      )}
                     </li>
                   )
                 })}
@@ -216,10 +215,12 @@ export default function MiaRosaPage() {
           </div>
         </div>
 
-        <p className="text-xs text-ink-dim">
-          Il prezzo è facoltativo: lasciandolo vuoto il giocatore compare come «aperto a offerte».
-          In entrambi i casi è solo indicativo e non vincola quanto gli altri possono offrirti.
-        </p>
+        {mercatoAperto && (
+          <p className="text-xs text-ink-dim">
+            Il prezzo è facoltativo: lasciandolo vuoto il giocatore compare come «aperto a offerte».
+            In entrambi i casi è solo indicativo e non vincola quanto gli altri possono offrirti.
+          </p>
+        )}
       </div>
 
       <Conferma

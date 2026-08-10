@@ -773,10 +773,10 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 - [ ] Premi *Annulla* → non succede nulla.
 - [ ] Scrivi `CONFERMO` ed esegui.
   **Atteso:** squadre, giocatori e aste cancellati.
-- [ ] Prima del reset **apri il mercato trasferimenti**; dopo il reset
-  ricontrolla `/admin/riepilogo`.
-  **Atteso:** il mercato risulta **chiuso**. Prima restava aperto: il reset
-  chiudeva la fase buste ma non quella del mercato.
+- [ ] Prima del reset **attiva i trasferimenti**; dopo il reset ricontrolla
+  `/admin/setup` → *Funzioni attive*.
+  **Atteso:** risultano **spenti**. Prima restavano accesi: il reset chiudeva la
+  fase buste ma non quella del mercato.
 
 ### J6 · La prova del nove
 - [ ] Dopo il reset, esci e rientra come super admin.
@@ -787,12 +787,28 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 
 ## Blocco K — Mercato trasferimenti
 
-> Serve **il mercato aperto** (`/admin/riepilogo` → *Mercato trasferimenti* →
-> *Apri il mercato*) e **nessuna asta viva**. Da fare in due manager più
-> l'admin, perché ogni scambio attraversa tutti e tre.
+> Serve la funzione **attivata** dal super admin (`/admin/setup` → *4 · Funzioni
+> attive* → *Attiva i trasferimenti*) e **nessuna asta viva**. Da fare in due
+> manager più l'admin, perché ogni scambio attraversa tutti e tre.
 >
 > Uno scambio eseguito **non si può annullare**: non esiste nulla di simile ad
 > *Annulla acquisto*. Fare questo blocco sapendolo.
+
+### K0 · La funzione spenta non esiste
+- [ ] Con i trasferimenti **spenti**, da manager: nel menu *Manager* non c'è
+  *Lista Trasferimenti*, e nel menu *Admin* non c'è *Ratifica Scambi*.
+- [ ] `/mia-rosa` mostra la rosa e **nient'altro**: niente campi prezzo, niente
+  pulsanti, niente avviso giallo, niente conteggio «in vetrina».
+- [ ] Apri a mano `/trasferimenti` e `/admin/trasferimenti`.
+  **Atteso:** rimandano altrove, non caricano.
+- [ ] **La porta di servizio.** Dalla console del browser, da manager:
+  `await supabase.rpc('imposta_vetrina', { p_giocatore_id: <un tuo giocatore>, p_in_vendita: true })`
+  **Atteso:** «I trasferimenti non sono attivi.» Senza questo, nascondere i
+  pulsanti sarebbe solo apparenza.
+- [ ] Da **admin non super**, `/admin/setup` rimanda a `/asta`: l'interruttore
+  è del solo super admin.
+- [ ] Con un manager fermo su `/mia-rosa`, **attiva** la funzione da un'altra
+  finestra. **Atteso:** la voce di menu compare **senza ricaricare**.
 
 ### K1 · La vetrina
 - [ ] `/mia-rosa`: compare solo la tua rosa, ordinata per reparto.
@@ -805,7 +821,8 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
   proprietario giusto e la colonna *Chiede* coerente.
 - [ ] Togli il primo dalla lista.
   **Atteso:** sparisce dalla vetrina dell'altro manager **senza ricaricare**.
-- [ ] Con il mercato **chiuso**, i comandi di `/mia-rosa` sono disattivati.
+- [ ] Con la funzione **spenta**, i comandi di `/mia-rosa` non ci sono proprio
+  (già coperto da K0, qui si ricontrolla dopo aver usato la vetrina).
 
 ### K2 · Offerta di soli soldi
 - [ ] Da `/trasferimenti`, *Fai un'offerta* su un giocatore in vetrina, solo crediti.
@@ -870,11 +887,15 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
   `await supabase.from('offerte_trasferimento').select('*')`
   **Atteso:** solo righe con stato `ESEGUITA`.
 
-### K10 · Mercato chiuso
-- [ ] Chiudi il mercato con una trattativa **accettata** in sospeso.
-  **Atteso:** i pulsanti spariscono o si disattivano, e se si forza la ratifica
-  l'errore dice che il mercato è chiuso.
-- [ ] Riapri: la trattativa è ancora lì, ratificabile.
+### K10 · Spegnere e riaccendere non perde niente
+- [ ] Con due giocatori in vetrina e una trattativa **accettata** in sospeso,
+  disattiva la funzione da *Impostazioni*.
+  **Atteso:** la finestra di conferma **annuncia il numero** di trattative
+  aperte prima di procedere. Da provare con una trattativa fra **altri due**
+  manager, non tue: è il caso in cui un conteggio letto dal browser sbaglierebbe.
+- [ ] Riattiva.
+  **Atteso:** le due vetrine e la trattativa sono ancora lì, intatte. Spegnere
+  nasconde, non cancella.
 
 ---
 

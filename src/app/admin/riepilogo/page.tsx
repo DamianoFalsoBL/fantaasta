@@ -53,7 +53,6 @@ export default function AdminRiepilogoPage() {
   const [acquisti, setAcquisti] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [faseBusteAperta, setFaseBusteAperta] = useState(false)
-  const [mercatoAperto, setMercatoAperto] = useState(false)
   // Serve a mostrare gli slot come "24 / 30". Il solo numero degli occupati
   // non dice se una rosa e' completa, ed era l'unica ragione per cui esisteva
   // la pagina /debug, ora assorbita qui.
@@ -84,11 +83,10 @@ export default function AdminRiepilogoPage() {
 
     // Fetch regole_lega
     const { data: rData } = await supabase
-      .from('regole_lega').select('fase_buste_aperta, fase_mercato_aperta, slot_totali').limit(1).maybeSingle()
+      .from('regole_lega').select('fase_buste_aperta, slot_totali').limit(1).maybeSingle()
     // La colonna ammette NULL: qui vale "fase chiusa", come il default.
     if (rData) {
       setFaseBusteAperta(rData.fase_buste_aperta ?? false)
-      setMercatoAperto(rData.fase_mercato_aperta ?? false)
       setSlotTotali(rData.slot_totali ?? 30)
     }
 
@@ -154,22 +152,6 @@ export default function AdminRiepilogoPage() {
     })
   }
 
-  const toggleMercato = () => {
-    const nuovoStato = !mercatoAperto
-    setAzione({
-      titolo: nuovoStato ? 'Aprire il mercato trasferimenti' : 'Chiudere il mercato trasferimenti',
-      messaggio: nuovoStato
-        ? 'I manager potranno mettere i propri giocatori in lista trasferimenti e trattare fra loro. Gli scambi restano comunque da ratificare qui.'
-        : 'Le trattative in corso restano dove sono, ma nessuno potrà più farne di nuove né accettarle, e nessuno scambio potrà essere eseguito.',
-      testoConferma: nuovoStato ? 'Apri' : 'Chiudi',
-      esegui: async () => {
-        const { error } = await supabase.rpc('admin_toggle_mercato', { p_stato: nuovoStato })
-        if (error) setEsito({ tipo: 'errore', testo: `Errore: ${error.message}` })
-        else { setEsito({ tipo: 'ok', testo: `Mercato ${nuovoStato ? 'aperto' : 'chiuso'}.` }); await fetchData() }
-      },
-    })
-  }
-
   const elaboraBuste = () => {
     if (faseBusteAperta) {
       setEsito({ tipo: 'errore', testo: 'Devi prima chiudere la fase buste per poter effettuare lo spoglio.' })
@@ -226,28 +208,9 @@ export default function AdminRiepilogoPage() {
           </div>
         </div>
 
-        {/* CONTROLLI MERCATO TRASFERIMENTI */}
-        <div className="fm-panel overflow-hidden">
-          <div className="fm-panel-head">
-            <span>Mercato trasferimenti</span>
-            <span className={`fm-chip ${mercatoAperto ? 'fm-chip-neon' : 'fm-chip-rosso'}`}>
-              {mercatoAperto ? 'Aperto' : 'Chiuso'}
-            </span>
-          </div>
-          <div className="flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm text-ink-mid">
-              Scambi fra manager. Il mercato precede le aste: tienilo chiuso mentre si gioca.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={toggleMercato} className="fm-btn fm-btn-ghost">
-                {mercatoAperto ? 'Chiudi il mercato' : 'Apri il mercato'}
-              </button>
-              <Link href="/admin/trasferimenti" className="fm-btn fm-btn-primary">
-                Scambi da ratificare
-              </Link>
-            </div>
-          </div>
-        </div>
+        {/* I trasferimenti non stanno più qui: sono una funzione, non una fase,
+            e si accendono da Impostazioni. Questa pagina governa le fasi del
+            gioco e i budget. */}
 
         {/* TABELLA SQUADRE */}
         <div className="fm-panel overflow-hidden">

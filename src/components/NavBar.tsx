@@ -7,6 +7,7 @@ import type { RealtimeChannel, User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import Marchio from '@/components/Marchio'
 import { isAdminRole, isSuperAdminRole } from '@/utils/auth-shared'
+import { trasferimentiAttivi } from '@/utils/trasferimenti'
 
 type ProfiloNavBar = {
   ruolo: 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER'
@@ -14,7 +15,13 @@ type ProfiloNavBar = {
   squadre: { nome: string; crediti_residui: number; slot_occupati: number } | null
 }
 
-type Voce = { href: string; label: string; soloSuper?: boolean }
+type Voce = {
+  href: string
+  label: string
+  soloSuper?: boolean
+  /** Compare solo quando il super admin ha acceso i trasferimenti. */
+  soloSeTrasferimenti?: boolean
+}
 
 // Le voci stavano scritte a mano due volte, una per il menu desktop e una per
 // ogni ternario di stato attivo. Elencandole qui si restilizzano una volta
@@ -29,7 +36,7 @@ const VOCI_UTENTE: Voce[] = [
   { href: '/svincolati', label: 'Svincolati' },
   { href: '/rose', label: 'Tutte le Rose' },
   { href: '/mia-rosa', label: 'La mia Rosa' },
-  { href: '/trasferimenti', label: 'Lista Trasferimenti' },
+  { href: '/trasferimenti', label: 'Lista Trasferimenti', soloSeTrasferimenti: true },
   // "Storico Aste" non c'e' piu': e' una scheda dentro Sommario Aste.
   { href: '/buste', label: 'Buste' },
 ]
@@ -40,7 +47,7 @@ const VOCI_UTENTE: Voce[] = [
 const VOCI_ADMIN: Voce[] = [
   { href: '/admin/setup', label: 'Impostazioni', soloSuper: true },
   { href: '/admin/asta', label: 'Regia Aste' },
-  { href: '/admin/trasferimenti', label: 'Ratifica Scambi' },
+  { href: '/admin/trasferimenti', label: 'Ratifica Scambi', soloSeTrasferimenti: true },
   // "Controllo Slot" e' durata un commit: /admin/riepilogo mostrava gia' gli
   // slot per squadra, e bastava aggiungerci il totale per rendere l'altra
   // pagina superflua. Meglio un dato in un posto solo che due pagine da
@@ -61,6 +68,9 @@ export default function NavBar() {
   // Serve per sottoscriversi ai cambiamenti della propria squadra.
   const [squadraId, setSquadraId] = useState<string | null>(null)
   const [menuAperto, setMenuAperto] = useState(false)
+  // Decide se le voci dei trasferimenti compaiono. Parte da false: meglio una
+  // voce che appare un istante dopo che una che sparisce sotto il dito.
+  const [conTrasferimenti, setConTrasferimenti] = useState(false)
 
   const smontato = useRef(false)
   useEffect(() => {
@@ -103,6 +113,8 @@ export default function NavBar() {
       azzera()
       return
     }
+
+    setConTrasferimenti(await trasferimentiAttivi(supabase))
 
     setUtente(user)
     // isAdmin include il SUPER_ADMIN, coerentemente con il resto dell'app.
@@ -174,6 +186,12 @@ export default function NavBar() {
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'profili', filter: `id=eq.${idUtente}` },
         () => { void caricaDati() })
+      // Il super admin accende i trasferimenti da un'altra pagina: senza questo
+      // la voce di menu comparirebbe solo al prossimo ricaricamento, e chi sta
+      // guardando la propria rosa non se ne accorgerebbe.
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'regole_lega' },
+        () => { void caricaDati() })
 
     if (squadraId) {
       canale = canale
@@ -204,8 +222,14 @@ export default function NavBar() {
 
   const isActive = (path: string) => pathname === path
 
-  const vociUtente = isSuperAdmin ? [] : VOCI_UTENTE
-  const vociAdmin = isAdmin ? VOCI_ADMIN.filter((v) => !v.soloSuper || isSuperAdmin) : []
+  // Una voce compare se il ruolo la consente e se la funzione a cui rimanda è
+  // accesa. Le pagine hanno comunque la loro guardia lato server: nascondere
+  // una voce non è una protezione, è cortesia.
+  const visibile = (v: Voce) =>
+    (!v.soloSuper || isSuperAdmin) && (!v.soloSeTrasferimenti || conTrasferimenti)
+
+  const vociUtente = isSuperAdmin ? [] : VOCI_UTENTE.filter(visibile)
+  const vociAdmin = isAdmin ? VOCI_ADMIN.filter(visibile) : []
 
   // Voce di una tendina desktop
   const voceTendina = (v: Voce, tinta: 'viola' | 'rosso') => (

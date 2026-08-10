@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { importBudget, importListone, importAste, ricalcolaSlot, type RisultatoImport } from '../actions'
+import Conferma from '@/components/Conferma'
+import { trasferimentiAttivi } from '@/utils/trasferimenti'
 
 function Uploader({ title, description, action }: { title: string, description: string, action: (formData: FormData) => Promise<RisultatoImport> }) {
   const [status, setStatus] = useState<{type: 'idle' | 'loading' | 'success' | 'error', message: string, dettagli?: string[]}>({ type: 'idle', message: '' })
@@ -88,6 +90,10 @@ export default function AdminSetupPage() {
   // I due contatori d'asta. Erano un unico valore scritto a mano nel database.
   const [timerPrimo, setTimerPrimo] = useState('')
   const [timerRilancio, setTimerRilancio] = useState('')
+  // I trasferimenti sono una funzione, non una fase: da spenta le pagine
+  // spariscono dai menu invece di mostrarsi disabilitate.
+  const [trasferimentiOn, setTrasferimentiOn] = useState(false)
+  const [azione, setAzione] = useState<{ titolo: string; messaggio: React.ReactNode; testoConferma: string; pericolo?: boolean; esegui: () => Promise<void> } | null>(null)
 
   // L'accesso è già garantito dal gate server-side in setup/layout.tsx:
   // qui non serve più ricontrollare il ruolo lato client.
@@ -121,6 +127,8 @@ export default function AdminSetupPage() {
       setTimerPrimo(String(regole.durata_timer))
       setTimerRilancio(String(regole.durata_timer_rilancio))
     }
+
+    setTrasferimentiOn(await trasferimentiAttivi(supabase))
 
     setLoading(false)
   }
@@ -174,6 +182,52 @@ export default function AdminSetupPage() {
       setEsito({ tipo: 'ok', testo: `Contatore: ${primo}s alla chiamata, ${rilancio}s dopo un rilancio.` })
       await fetchProfili()
     }
+  }
+
+  const toggleTrasferimenti = async () => {
+    const nuovoStato = !trasferimentiOn
+
+    // Il conteggio arriva dal server e non da una query qui: la policy su
+    // offerte_trasferimento mostra a ciascuno solo le proprie trattative, e il
+    // super admin non è parte di nessuna. Letto dal browser sarebbe sempre zero,
+    // cioè proprio il numero che non deve essere sbagliato.
+    let inSospeso = 0
+    if (!nuovoStato) {
+      const { data } = await supabase.rpc('trattative_in_sospeso')
+      inSospeso = data ?? 0
+    }
+
+    setAzione({
+      titolo: nuovoStato ? 'Attivare i trasferimenti' : 'Disattivare i trasferimenti',
+      pericolo: !nuovoStato && inSospeso > 0,
+      messaggio: nuovoStato ? (
+        <>
+          Le voci <strong className="text-ink">Lista Trasferimenti</strong> e{' '}
+          <strong className="text-ink">Ratifica Scambi</strong> compariranno nei menu, e i manager
+          potranno mettere i propri giocatori in vetrina e trattare fra loro.
+        </>
+      ) : inSospeso > 0 ? (
+        <>
+          Ci sono <strong className="text-ink">{inSospeso} trattative aperte</strong>. Disattivando
+          restano dove sono — non vengono cancellate — ma <strong className="text-ink">nessuno
+          potrà più vederle</strong> finché non riattivi la funzione.
+        </>
+      ) : (
+        <>
+          Le pagine dei trasferimenti spariranno dai menu per tutti. Vetrine e trattative restano
+          nel database e si ritrovano intatte alla riattivazione.
+        </>
+      ),
+      testoConferma: nuovoStato ? 'Attiva' : 'Disattiva',
+      esegui: async () => {
+        const { error: rpcErr } = await supabase.rpc('admin_toggle_mercato', { p_stato: nuovoStato })
+        if (rpcErr) setEsito({ tipo: 'errore', testo: rpcErr.message })
+        else {
+          setEsito({ tipo: 'ok', testo: `Trasferimenti ${nuovoStato ? 'attivati' : 'disattivati'}.` })
+          await fetchProfili()
+        }
+      },
+    })
   }
 
   // Sostituisce lo script fix_slots.js che veniva lanciato a mano da terminale.
@@ -355,7 +409,27 @@ export default function AdminSetupPage() {
 
       <div className="fm-panel overflow-hidden">
         <div className="fm-panel-head">
-          <span>4 · Manutenzione</span>
+          <span>4 · Funzioni attive</span>
+          <span className={`fm-chip ${trasferimentiOn ? 'fm-chip-neon' : 'fm-chip-rosso'}`}>
+            Trasferimenti {trasferimentiOn ? 'attivi' : 'spenti'}
+          </span>
+        </div>
+        <div className="fm-panel-body">
+          <p className="mb-3 text-sm text-ink-mid">
+            Il mercato fra manager: vetrina dei giocatori in vendita, offerte di scambio e ratifica.
+            Da spento le pagine <strong className="text-ink">spariscono dai menu</strong> per tutti,
+            gli indirizzi diretti rimandano altrove e nella pagina <em>La mia Rosa</em> non compare
+            nessun comando. Quello che è già stato inserito non viene cancellato.
+          </p>
+          <button onClick={toggleTrasferimenti} disabled={loading} className="fm-btn fm-btn-ghost">
+            {trasferimentiOn ? 'Disattiva i trasferimenti' : 'Attiva i trasferimenti'}
+          </button>
+        </div>
+      </div>
+
+      <div className="fm-panel overflow-hidden">
+        <div className="fm-panel-head">
+          <span>5 · Manutenzione</span>
         </div>
         <div className="fm-panel-body">
           <p className="mb-3 text-sm text-ink-mid">
@@ -370,7 +444,7 @@ export default function AdminSetupPage() {
 
       <div className="fm-panel overflow-hidden border-rosso/40">
         <div className="fm-panel-head fm-panel-head--rosso">
-          <span className="text-rosso">5 · Zona pericolosa (super admin)</span>
+          <span className="text-rosso">6 · Zona pericolosa (super admin)</span>
         </div>
         <div className="fm-panel-body">
           <p className="mb-3 text-sm text-ink-mid">
@@ -382,6 +456,21 @@ export default function AdminSetupPage() {
           </button>
         </div>
       </div>
+
+      <Conferma
+        aperta={azione !== null}
+        titolo={azione?.titolo ?? ''}
+        messaggio={azione?.messaggio ?? ''}
+        testoConferma={azione?.testoConferma ?? 'Conferma'}
+        tono={azione?.pericolo ? 'pericolo' : 'neutro'}
+        onAnnulla={() => setAzione(null)}
+        onConferma={async () => {
+          const inCorso = azione
+          setAzione(null)
+          setEsito(null)
+          await inCorso?.esegui()
+        }}
+      />
 
       {showConfirmModal && (
         <div
