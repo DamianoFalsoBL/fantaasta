@@ -59,7 +59,11 @@ async function leggiFoglio(
   for (const nome of wb.SheetNames) {
     const righe = xlsx.utils.sheet_to_json(wb.Sheets[nome]) as Record<string, unknown>[]
     if (righe.length === 0) continue
-    const colonne = Object.keys(righe[0]).map((c) => c.toLowerCase().trim())
+    // Anche qui l'unione di tutte le righe e non solo la prima: se nel foglio
+    // giusto il primo calciatore avesse una cella vuota fra quelle cercate, il
+    // foglio non verrebbe riconosciuto e l'errore indicherebbe la cosa
+    // sbagliata. E' lo stesso difetto corretto in importAste.
+    const colonne = [...new Set(righe.flatMap((r) => Object.keys(r)))].map((c) => c.toLowerCase().trim())
     if (riconosci(colonne)) return righe
   }
 
@@ -369,7 +373,13 @@ export async function importAste(formData: FormData): Promise<RisultatoImport> {
     nomePerId.set(s.id as string, String(s.nome))
   }
 
-  const intestazioni = Object.keys(righe[0])
+  // L'unione delle colonne di TUTTE le righe, non quelle della prima.
+  // `sheet_to_json` non produce una chiave per le celle vuote: se il primo
+  // calciatore del file ha due contendenti, dedurre le colonne da lui
+  // significa non leggere mai "utente 3" e seguenti, per nessuna riga. Il file
+  // della lega arriva fino a "utente 5", e l'import ne perdeva 13 su 45 senza
+  // segnalare nulla — il sito mostrava al massimo due contendenti.
+  const intestazioni = [...new Set(righe.flatMap((r) => Object.keys(r)))]
   // La colonna dell'id: quella intestata "id", altrimenti la prima.
   const colonnaId = intestazioni.find((c) => c.toLowerCase().trim() === 'id') ?? intestazioni[0]
   const altreColonne = intestazioni.filter((c) => c !== colonnaId)
