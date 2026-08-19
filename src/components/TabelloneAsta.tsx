@@ -693,13 +693,6 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
             <div className="text-center">
               <p className="fm-label">Offerta attuale</p>
               <div className="mt-1 text-4xl font-bold tabular-nums text-ink sm:text-6xl">{asta.prezzo_corrente}</div>
-              {asta.squadre ? (
-                <div className={`fm-chip mt-2 ${isWinning ? 'fm-chip-neon' : 'fm-chip-ambra'}`}>
-                  In testa: {asta.squadre.nome} {isWinning && '(Tu)'}
-                </div>
-              ) : (
-                <div className="fm-chip mt-2">Base d&apos;asta</div>
-              )}
             </div>
 
             <div className="border-l border-line pl-3 text-center md:min-h-[140px] md:border-x md:px-4">
@@ -716,6 +709,39 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                  <div className={`mt-1 text-5xl font-bold tabular-nums sm:text-7xl ${timeLeft <= 5 ? 'animate-battito text-rosso' : 'text-neon'}`}>
                    {timeLeft}
                  </div>
+              )}
+            </div>
+
+            {/* Chi è in testa: una fascia a tutta larghezza, non più una
+                pillola sotto il prezzo. La pillola ha `white-space: nowrap` e
+                con un nome lungo sfondava la propria colonna finendo sopra il
+                timer; e soprattutto, spenta com'era, un rilancio passava
+                inosservato.
+
+                `key` sul prezzo: cambiando prezzo React rimonta il nodo e
+                l'animazione riparte da capo. È il modo più semplice di far
+                lampeggiare a ogni rilancio senza tenere in memoria il prezzo
+                precedente né toccare lo stato dentro un effetto. */}
+            <div
+              key={asta.prezzo_corrente}
+              className={`col-span-2 flex animate-lampo items-center justify-center gap-2 rounded-md border px-3 py-2 text-center text-sm font-semibold md:order-last md:col-span-3 ${
+                !asta.squadre
+                  ? 'border-line bg-panel-hi text-ink-mid'
+                  : isWinning
+                    ? 'border-neon/50 bg-neon/10 text-neon'
+                    : 'border-ambra/50 bg-ambra/10 text-ambra'
+              }`}
+            >
+              {!asta.squadre ? (
+                <span>Nessuna offerta · si parte dalla base d&apos;asta</span>
+              ) : (
+                <>
+                  <span className="shrink-0">{isWinning ? '👑' : '⬆'}</span>
+                  <span className="min-w-0 break-words">
+                    {isWinning ? 'Sei in testa' : 'In testa'}
+                    {!isWinning && <> · <strong>{asta.squadre.nome}</strong></>}
+                  </span>
+                </>
               )}
             </div>
 

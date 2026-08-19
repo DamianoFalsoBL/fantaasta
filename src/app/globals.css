@@ -90,6 +90,20 @@
     50%      { color: #ffd9d9; }
   }
 
+  /* Lampo su un rilancio: l'alone si allarga e svanisce una volta sola.
+     Usa `currentColor`, così prende il colore dello stato in cui si trova —
+     verde quando sei in testa, ambra quando ci sta qualcun altro — invece di
+     imporne uno che contraddirebbe il riquadro.
+
+     Un alone e non un cambio di sfondo: il fondo porta il colore di stato, e
+     animarlo lo renderebbe illeggibile proprio nell'istante in cui si guarda. */
+  --animate-lampo: lampo .9s ease-out 1;
+
+  @keyframes lampo {
+    0%   { box-shadow: 0 0 0 0 currentColor; }
+    100% { box-shadow: 0 0 0 10px transparent; }
+  }
+
   /* NON RIMUOVERE: `bg-background` è usata in page.tsx e (auth)/login/page.tsx,
      `text-foreground` in page.tsx. In Tailwind v4 una utility sconosciuta non
      dà errore: semplicemente non emette nulla, in silenzio. Si cambiano i

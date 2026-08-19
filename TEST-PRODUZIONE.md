@@ -714,6 +714,12 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 - [ ] I bottoni si toccano senza sbagliare mira.
 - [ ] "Il tuo massimo" ora sta sopra i pulsanti: è lì che serve, mentre si
   decide quanto offrire.
+- [ ] Chi è in testa sta in una **fascia a tutta larghezza** sotto prezzo e
+  tempo: verde con la corona quando sei tu, ambra col nome dell'avversario
+  altrimenti. Con un nome di squadra lungo **non deve sfondare** il riquadro.
+- [ ] **A ogni rilancio la fascia lampeggia** una volta. Fallo verificare a chi
+  guarda senza toccare niente: il punto è accorgersi che qualcosa è cambiato
+  senza fissare il numero.
 
 ### I4b · A chi tocca, sul telefono
 - [ ] Senza aste in corso, guarda l'ordine di chiamata.
