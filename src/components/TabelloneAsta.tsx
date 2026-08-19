@@ -680,74 +680,83 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
         </div>
 
         <div className="p-3 sm:p-6">
-          {/* I bordi laterali della colonna centrale, da impilata su mobile,
-              diventavano due barre verticali senza senso: sotto md separa un
-              bordo orizzontale. */}
-          {/* Griglia e non colonna impilata: sul telefono prezzo e tempo — i
-              due numeri che si guardano davvero — stanno affiancati sulla
-              stessa riga, e i comandi di rilancio salgono sopra la piega. Prima
-              erano tre blocchi in colonna con "il tuo massimo" in mezzo, e per
-              rilanciare bisognava scorrere. */}
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6">
+          {/* Due blocchi affiancati, non tre celle di una griglia unica.
+              Con la griglia a tre colonne i comandi — alti il triplo — tiravano
+              in lungo l'intera riga: su desktop il bordo del tempo correva per
+              mezzo schermo nel vuoto e la fascia "In testa" finiva lontanissima
+              dal prezzo a cui si riferisce. Qui l'altezza dei comandi non
+              contagia più i numeri (`items-start`), e la fascia resta attaccata
+              a ciò che descrive. */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-6">
 
-            <div className="text-center">
-              <p className="fm-label">Offerta attuale</p>
-              <div className="mt-1 text-4xl font-bold tabular-nums text-ink sm:text-6xl">{asta.prezzo_corrente}</div>
+            {/* A sinistra ciò che si guarda: i due numeri e chi è in testa. */}
+            <div className="flex min-w-0 flex-col gap-3 md:flex-1">
+
+              {/* Prezzo e tempo affiancati anche sul telefono: sono i due
+                  numeri che si leggono davvero, e impilati spingevano i
+                  comandi di rilancio sotto la piega. */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center">
+                  <p className="fm-label">Offerta attuale</p>
+                  <div className="mt-1 text-4xl font-bold tabular-nums text-ink sm:text-6xl">{asta.prezzo_corrente}</div>
+                </div>
+
+                <div className="border-l border-line pl-3 text-center">
+                  <p className="fm-label">Tempo rimasto</p>
+                  {isChiamata ? (
+                     <div className="mt-3 text-base font-semibold leading-tight text-ink-dim sm:mt-5">
+                       In attesa che l&apos;admin<br />avvii il timer…
+                     </div>
+                  ) : (
+                     /* Prima qui c'era `animate-pulse`, che anima l'opacità da 1 a
+                        0.5: per metà di ogni secondo il numero più importante della
+                        schermata scendeva sotto soglia di contrasto. Ora lampeggia
+                        il colore, non la trasparenza. */
+                     <div className={`mt-1 text-5xl font-bold tabular-nums sm:text-7xl ${timeLeft <= 5 ? 'animate-battito text-rosso' : 'text-neon'}`}>
+                       {timeLeft}
+                     </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Chi è in testa: una fascia a tutta larghezza, non più una
+                  pillola sotto il prezzo. La pillola ha `white-space: nowrap` e
+                  con un nome lungo sfondava la propria colonna finendo sopra il
+                  timer; e soprattutto, spenta com'era, un rilancio passava
+                  inosservato.
+
+                  `key` sul prezzo: cambiando prezzo React rimonta il nodo e
+                  l'animazione riparte da capo. È il modo più semplice di far
+                  lampeggiare a ogni rilancio senza tenere in memoria il prezzo
+                  precedente né toccare lo stato dentro un effetto. */}
+              <div
+                key={asta.prezzo_corrente}
+                className={`flex animate-lampo items-center justify-center gap-2 rounded-md border px-3 py-2 text-center text-sm font-semibold ${
+                  !asta.squadre
+                    ? 'border-line bg-panel-hi text-ink-mid'
+                    : isWinning
+                      ? 'border-neon/50 bg-neon/10 text-neon'
+                      : 'border-ambra/50 bg-ambra/10 text-ambra'
+                }`}
+              >
+                {!asta.squadre ? (
+                  <span>Nessuna offerta · si parte dalla base d&apos;asta</span>
+                ) : (
+                  <>
+                    <span className="shrink-0">{isWinning ? '👑' : '⬆'}</span>
+                    <span className="min-w-0 break-words">
+                      {isWinning ? 'Sei in testa' : 'In testa'}
+                      {!isWinning && <> · <strong>{asta.squadre.nome}</strong></>}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="border-l border-line pl-3 text-center md:min-h-[140px] md:border-x md:px-4">
-              <p className="fm-label">Tempo rimasto</p>
-              {isChiamata ? (
-                 <div className="mt-3 text-base font-semibold leading-tight text-ink-dim sm:mt-5">
-                   In attesa che l&apos;admin<br />avvii il timer…
-                 </div>
-              ) : (
-                 /* Prima qui c'era `animate-pulse`, che anima l'opacità da 1 a
-                    0.5: per metà di ogni secondo il numero più importante della
-                    schermata scendeva sotto soglia di contrasto. Ora lampeggia
-                    il colore, non la trasparenza. */
-                 <div className={`mt-1 text-5xl font-bold tabular-nums sm:text-7xl ${timeLeft <= 5 ? 'animate-battito text-rosso' : 'text-neon'}`}>
-                   {timeLeft}
-                 </div>
-              )}
-            </div>
-
-            {/* Chi è in testa: una fascia a tutta larghezza, non più una
-                pillola sotto il prezzo. La pillola ha `white-space: nowrap` e
-                con un nome lungo sfondava la propria colonna finendo sopra il
-                timer; e soprattutto, spenta com'era, un rilancio passava
-                inosservato.
-
-                `key` sul prezzo: cambiando prezzo React rimonta il nodo e
-                l'animazione riparte da capo. È il modo più semplice di far
-                lampeggiare a ogni rilancio senza tenere in memoria il prezzo
-                precedente né toccare lo stato dentro un effetto. */}
-            <div
-              key={asta.prezzo_corrente}
-              className={`col-span-2 flex animate-lampo items-center justify-center gap-2 rounded-md border px-3 py-2 text-center text-sm font-semibold md:order-last md:col-span-3 ${
-                !asta.squadre
-                  ? 'border-line bg-panel-hi text-ink-mid'
-                  : isWinning
-                    ? 'border-neon/50 bg-neon/10 text-neon'
-                    : 'border-ambra/50 bg-ambra/10 text-ambra'
-              }`}
-            >
-              {!asta.squadre ? (
-                <span>Nessuna offerta · si parte dalla base d&apos;asta</span>
-              ) : (
-                <>
-                  <span className="shrink-0">{isWinning ? '👑' : '⬆'}</span>
-                  <span className="min-w-0 break-words">
-                    {isWinning ? 'Sei in testa' : 'In testa'}
-                    {!isWinning && <> · <strong>{asta.squadre.nome}</strong></>}
-                  </span>
-                </>
-              )}
-            </div>
-
-            {/* Occupa tutta la larghezza sotto md: i pulsanti sono la cosa che
-                si tocca, e vanno larghi e a portata di pollice. */}
-            <div className="col-span-2 flex flex-col items-center gap-2 border-t border-line pt-3 sm:gap-2.5 md:col-span-1 md:border-t-0 md:pt-0">
+            {/* A destra ciò che si tocca. Larghezza fissa su desktop: lasciata
+                elastica, i pulsanti si stiravano fino a metà pannello. Sotto md
+                torna a tutta larghezza, a portata di pollice. */}
+            <div className="flex flex-col items-center gap-2 border-t border-line pt-3 sm:gap-2.5 md:w-72 md:shrink-0 md:border-l md:border-t-0 md:pl-6 md:pt-0">
 
               {/* "Il tuo massimo" sta qui e non sotto il prezzo: serve mentre si
                   decide quanto offrire, non mentre si guarda l'offerta altrui. */}

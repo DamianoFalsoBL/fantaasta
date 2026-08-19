@@ -324,6 +324,16 @@ due finestre separate. Chiamiamoli **M1** e **M2**.
 - [ ] Da chi è già in testa, guarda i bottoni di rilancio.
   **Atteso:** disattivati, con scritto *Sei già in testa*.
 
+### D10b · Disposizione su schermo grande
+- [ ] Durante un'asta, da computer: **prezzo e tempo restano bassi e affiancati**,
+  con la fascia di chi è in testa **subito sotto**, non in fondo al pannello.
+  I comandi di rilancio stanno in una colonna a destra, allineata in alto.
+  **Atteso:** nessuna striscia vuota alta sotto i due numeri. Il difetto
+  precedente nasceva dal fatto che numeri e comandi erano celle della stessa
+  griglia: la cella dei comandi, alta il triplo, allungava tutta la riga.
+- [ ] Con un nome di squadra lungo la fascia non sfonda il riquadro e non
+  compare una barra di scorrimento orizzontale.
+
 ### D11 · Ritiro
 - [ ] Da un manager **non** in testa → *Smetti (mi ritiro)*.
   **Atteso:** la sua targhetta fra i partecipanti diventa barrata con ❌, e
