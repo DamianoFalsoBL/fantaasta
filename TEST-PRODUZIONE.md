@@ -708,8 +708,21 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
   colonna che resta ferma.
 
 ### I4 · Asta live sul telefono
-- [ ] Durante un'asta: timer e prezzo si leggono, i bottoni di rilancio si
-  toccano senza sbagliare mira, la barra dell'ordine scorre su una riga sola.
+- [ ] Durante un'asta: **prezzo e tempo stanno affiancati sulla stessa riga**, e
+  i pulsanti di rilancio si vedono **senza scorrere**. Prima erano tre blocchi
+  in colonna con "il tuo massimo" in mezzo, e per rilanciare bisognava scendere.
+- [ ] I bottoni si toccano senza sbagliare mira.
+- [ ] "Il tuo massimo" ora sta sopra i pulsanti: è lì che serve, mentre si
+  decide quanto offrire.
+
+### I4b · A chi tocca, sul telefono
+- [ ] Senza aste in corso, guarda l'ordine di chiamata.
+  **Atteso:** una riga a parole dice **«Tocca a <squadra>»**, e quando è il tuo
+  turno diventa **«Tocca a te»** su fondo verde. Prima lo si doveva dedurre dal
+  colore di una pillola in una fila che scorre.
+- [ ] Se non è il tuo turno, la stessa riga dice **quanti turni mancano** al tuo.
+- [ ] Quando il turno avanza, la pillola di chi tocca **si porta in vista da
+  sé**: non devi trascinare la barra per trovarla.
 
 ### I5 · Niente zoom involontario
 - [ ] Tocca il campo dell'offerta libera.

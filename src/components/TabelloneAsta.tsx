@@ -279,6 +279,15 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
     // sposta il massimo, perché cambiano slot liberi e giocatori in lista.
   }, [squadraId, squadraDelegaId, giocatoreInAsta, asta?.prezzo_corrente, supabase])
 
+  // Su telefono la barra dei turni scorre in orizzontale: con quattordici
+  // squadre quella di turno finisce facilmente fuori campo, e la domanda "a chi
+  // tocca?" resta senza risposta finché non si trascina. La si porta in vista
+  // da sé a ogni avanzamento.
+  const turnoRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    turnoRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }, [indiceChiamata, ordineChiamata])
+
   const [timeLeft, setTimeLeft] = useState(0)
 
   useEffect(() => {
@@ -422,6 +431,15 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
           )
           const concluse = ordineChiamata.length - daChiamare.length
 
+          // La domanda vera è "a chi tocca, e quanto manca a me": leggerla dal
+          // colore di una pillola in una fila che scorre non funziona, tanto
+          // meno su un telefono. Qui si risponde a parole.
+          const sqTurno = ordineChiamata[indiceChiamata - 1]
+          const nomeTurno = squadreMap[sqTurno] || 'Squadra'
+          const mioPosto = daChiamare.indexOf(squadraId ?? '')
+          const turnoCorrente = daChiamare.indexOf(sqTurno)
+          const turniMancanti = mioPosto >= 0 && turnoCorrente >= 0 ? mioPosto - turnoCorrente : -1
+
           return (
             <div className="fm-panel overflow-hidden">
               <div className="fm-panel-head">
@@ -429,6 +447,22 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                 {concluse > 0 && (
                   <span className="fm-label normal-case tracking-normal">
                     {concluse} {concluse === 1 ? 'squadra ha' : 'squadre hanno'} completato
+                  </span>
+                )}
+              </div>
+
+              {/* La riga che risponde alla domanda, prima delle pillole. */}
+              <div
+                className={`flex items-baseline justify-between gap-3 border-b px-3 py-2.5 ${
+                  isMioTurno ? 'border-neon/40 bg-neon/10' : 'border-line bg-panel-hi'
+                }`}
+              >
+                <span className={`fm-title text-base ${isMioTurno ? 'text-neon' : 'text-ink'}`}>
+                  {isMioTurno ? 'Tocca a te' : `Tocca a ${nomeTurno}`}
+                </span>
+                {!isMioTurno && turniMancanti > 0 && (
+                  <span className="fm-label shrink-0 normal-case tracking-normal">
+                    {turniMancanti === 1 ? 'sei il prossimo' : `mancano ${turniMancanti} turni`}
                   </span>
                 )}
               </div>
@@ -442,14 +476,16 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                   return (
                     <div
                       key={sqId}
+                      ref={isTurno ? turnoRef : undefined}
                       /* Niente scale: ingrandendo la pillola di turno finiva
-                         sopra a quella accanto. */
+                         sopra a quella accanto. L'anello invece non occupa
+                         spazio nel flusso, quindi non spinge le vicine. */
                       className={`fm-chip shrink-0 ${
                         isTurno
-                          ? 'fm-chip-attivo'
+                          ? 'fm-chip-attivo ring-2 ring-neon ring-offset-2 ring-offset-panel'
                           : isMe
                             ? 'fm-chip-mia'
-                            : ''
+                            : 'opacity-60'
                       }`}
                     >
                       <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
@@ -647,9 +683,14 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
           {/* I bordi laterali della colonna centrale, da impilata su mobile,
               diventavano due barre verticali senza senso: sotto md separa un
               bordo orizzontale. */}
-          <div className="flex flex-col items-stretch justify-between gap-3 md:flex-row md:gap-6">
+          {/* Griglia e non colonna impilata: sul telefono prezzo e tempo — i
+              due numeri che si guardano davvero — stanno affiancati sulla
+              stessa riga, e i comandi di rilancio salgono sopra la piega. Prima
+              erano tre blocchi in colonna con "il tuo massimo" in mezzo, e per
+              rilanciare bisognava scorrere. */}
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6">
 
-            <div className="w-full flex-1 text-center">
+            <div className="text-center">
               <p className="fm-label">Offerta attuale</p>
               <div className="mt-1 text-4xl font-bold tabular-nums text-ink sm:text-6xl">{asta.prezzo_corrente}</div>
               {asta.squadre ? (
@@ -659,25 +700,9 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
               ) : (
                 <div className="fm-chip mt-2">Base d&apos;asta</div>
               )}
-
-              {massimoOffribile !== null && (
-                <div className="mt-3 border-t border-line pt-2.5">
-                  <p className="fm-label">Il tuo massimo</p>
-                  <div
-                    className={`text-2xl font-bold tabular-nums ${
-                      massimoOffribile <= asta.prezzo_corrente ? 'text-rosso' : 'text-neon'
-                    }`}
-                  >
-                    {massimoOffribile} <span className="text-xs font-normal text-ink-dim">cr</span>
-                  </div>
-                  {massimoOffribile <= asta.prezzo_corrente && (
-                    <p className="mt-0.5 text-[11px] font-semibold text-rosso">Fuori portata</p>
-                  )}
-                </div>
-              )}
             </div>
 
-            <div className="w-full flex-1 border-y border-line py-3 text-center sm:py-4 md:min-h-[140px] md:border-x md:border-y-0 md:px-4 md:py-0">
+            <div className="border-l border-line pl-3 text-center md:min-h-[140px] md:border-x md:px-4">
               <p className="fm-label">Tempo rimasto</p>
               {isChiamata ? (
                  <div className="mt-3 text-base font-semibold leading-tight text-ink-dim sm:mt-5">
@@ -694,7 +719,28 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
               )}
             </div>
 
-            <div className="flex w-full flex-1 flex-col items-center gap-2 sm:gap-2.5">
+            {/* Occupa tutta la larghezza sotto md: i pulsanti sono la cosa che
+                si tocca, e vanno larghi e a portata di pollice. */}
+            <div className="col-span-2 flex flex-col items-center gap-2 border-t border-line pt-3 sm:gap-2.5 md:col-span-1 md:border-t-0 md:pt-0">
+
+              {/* "Il tuo massimo" sta qui e non sotto il prezzo: serve mentre si
+                  decide quanto offrire, non mentre si guarda l'offerta altrui. */}
+              {massimoOffribile !== null && (
+                <div className="flex w-full items-baseline justify-center gap-2">
+                  <span className="fm-label">Il tuo massimo</span>
+                  <span
+                    className={`text-lg font-bold tabular-nums ${
+                      massimoOffribile <= asta.prezzo_corrente ? 'text-rosso' : 'text-neon'
+                    }`}
+                  >
+                    {massimoOffribile}<span className="text-xs font-normal text-ink-dim"> cr</span>
+                  </span>
+                  {massimoOffribile <= asta.prezzo_corrente && (
+                    <span className="text-[11px] font-semibold text-rosso">fuori portata</span>
+                  )}
+                </div>
+              )}
+
               <p className="fm-label w-full text-center">Rilancia</p>
 
               {error && <div className="fm-alert fm-alert-danger w-full text-center text-xs font-semibold">{error}</div>}
