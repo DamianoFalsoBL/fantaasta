@@ -226,6 +226,19 @@ numeri del database.
   tendina *Ordina per* e funziona. Senza quella, sul telefono l'ordinamento non
   esisterebbe, perché le intestazioni sono nascoste.
 
+### C2b · Gli svincolati non contengono chi è già in coda per l'asta
+- [ ] Con almeno un giocatore conteso in attesa d'asta (`/aste` → *Da
+  assegnare*), cercalo in `/svincolati`.
+  **Atteso:** **non compare**. Prima compariva in tutt'e due i posti, perché un
+  conteso resta 'LIBERO' finché la sua asta non chiude: chi sfogliava gli
+  svincolati per preparare la tornata di buste lo credeva disponibile.
+- [ ] Il contatore in alto a destra conta solo i disponibili veri: deve
+  scendere esattamente del numero di giocatori elencati in *Da assegnare*.
+- [ ] **Il controllo di non aver sconfinato:** `/aste` deve mostrare ancora
+  quei giocatori sotto *Da assegnare*, con gli stessi contendenti, e
+  `/admin/asta` deve mostrarli ancora fra le prossime chiamate. Se uno di
+  questi due elenchi si accorcia, la modifica ha colpito il posto sbagliato.
+
 ### C3 · Aste a chiamata
 - [x] `/aste`: le quattro tessere in cima (i totali) mostrano numeri sensati.
 - [x] Spunta *solo contesi* → restano i giocatori richiesti da più squadre.
@@ -603,6 +616,19 @@ riassegnare.
 - [ ] Riapri la fase buste dopo uno spoglio.
   **Atteso:** si apre un **turno nuovo**; gli esiti del turno precedente
   restano consultabili e non vengono confusi con i nuovi.
+
+### F13b · Un giocatore in coda per l'asta non è selezionabile
+- [ ] Riapri la fase buste lasciando dei contesi ancora da assegnare. Cerca uno
+  di quei giocatori nell'elenco di `/buste`.
+  **Atteso:** non c'è. Altrimenti, da richiedente unico, se lo aggiudicherebbe
+  alla quotazione saltando l'asta che gli altri contendenti aspettavano.
+- [ ] **La porta di servizio**, che è la prova che conta. Dalla console del
+  browser, a fase buste aperta, chiama `submit_buste` includendo l'id di un
+  giocatore conteso:
+  `await supabase.rpc('submit_buste', { p_giocatori_ids: [ ...gli altri..., <id conteso> ] })`
+  **Atteso:** errore *«Uno o più giocatori selezionati non sono disponibili o
+  sono già in coda per l'asta.»*, e nessuna busta salvata. Se salva, l'elenco
+  nascosto è solo apparenza.
 
 ### F14 · Tetto ai portieri, nelle buste
 

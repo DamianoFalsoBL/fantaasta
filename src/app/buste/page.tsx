@@ -8,6 +8,7 @@ import Conferma from '@/components/Conferma'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
+import { idsInCodaAsta } from '@/utils/giocatori'
 
 type Squadra = {
   id: string
@@ -127,13 +128,22 @@ export default function BustePage() {
 
     if (aperta) {
       // Carica i liberi, escludendo chi è fuori lista
-      const { data: liberi } = await supabase
+      const { data: tuttiLiberi } = await supabase
         .from('giocatori')
         .select('*')
         .eq('stato', 'LIBERO')
         .eq('fuori_lista', false)
         .order('nome')
-      setGiocatoriLiberi((liberi as Giocatore[]) || [])
+
+      // Via anche chi è già in coda per l'asta. Qui non è una questione di
+      // ordine: un conteso resta 'LIBERO' finché la sua asta non chiude, e
+      // mettendoci sopra una busta in un turno successivo da richiedente unico
+      // se lo sarebbe aggiudicato alla quotazione, saltando l'asta che gli
+      // altri contendenti stavano aspettando. `submit_buste` ora lo rifiuta:
+      // questa riga serve a non far scoprire il rifiuto solo dopo aver premuto.
+      const inCoda = await idsInCodaAsta(supabase)
+      const liberi = ((tuttiLiberi as Giocatore[]) || []).filter((g) => !inCoda.has(g.id))
+      setGiocatoriLiberi(liberi)
 
       // Carica eventuali selezioni salvate in precedenza e non ancora elaborate
       const { data: busteInAttesa } = await supabase
