@@ -738,10 +738,38 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
   loro riquadro**, non trascinano tutto lo schermo.
 
 ### I3 · Tabelle
-- [ ] `/svincolati` e `/aste` (entrambe le schede): le righe si leggono come schede
-  impilate, ogni valore con la sua etichetta.
+- [ ] **Riscritto: la descrizione precedente non vale più.** `/svincolati` e
+  `/aste` (entrambe le schede) non mostrano più un'etichetta per ogni valore:
+  sotto il nome c'è **una riga sola** — ruoli · squadra · età · prezzo —
+  separata da punti mediani. L'unità sta dentro il valore: «27 anni», «10 cr».
+  **Atteso:** quella riga non va a capo se non serve. Se un valore finisce da
+  solo su una riga sua, una cella è rimasta di tipo blocco.
 - [ ] `/admin/riepilogo` e `/admin/setup`: scorrono in orizzontale con la prima
   colonna che resta ferma.
+
+### I3b · Quanto si vede in una schermata
+- [ ] `/svincolati` sul telefono: dalla cima del riquadro devono vedersi
+  **almeno sei giocatori** senza scorrere. Prima erano due.
+- [ ] `/aste` sul telefono: **almeno quattro**. Sono meno che negli svincolati
+  perché ogni scheda porta anche le pastiglie dei contendenti, che di proposito
+  non vengono troncate: sono l'informazione per cui quella pagina esiste.
+- [ ] Con quattro contendenti dai nomi lunghi le pastiglie **vanno a capo** e
+  non escono dal riquadro; la pagina non si sposta di lato.
+
+### I3c · Filtri a scomparsa
+- [ ] Sul telefono, sopra la lista si vede **solo il campo di ricerca** e un
+  pulsante **Filtri**. Prima erano cinque comandi impilati su `/svincolati`.
+- [ ] Tocca *Filtri*: si apre il pannello con gli altri filtri e, su
+  `/svincolati`, con la tendina *Ordina per*.
+- [ ] Scegli un filtro e richiudi il pannello.
+  **Atteso:** sul pulsante compare **quanti filtri sono attivi**. È ciò che
+  impedisce di guardare una lista quasi vuota senza capire perché.
+- [ ] *Azzera filtri*, dentro il pannello, riporta la lista intera. La ricerca
+  per nome non viene toccata: non è fra i filtri contati.
+- [ ] **Su schermo grande niente deve cambiare:** i filtri restano tutti aperti,
+  il pulsante *Filtri* non esiste, i quattro riquadri di riepilogo di `/aste`
+  tornano al loro posto, le tabelle restano tabelle con l'intestazione e i
+  valori non portano più «anni» e «cr», perché a dirlo c'è la colonna.
 
 ### I4 · Asta live sul telefono
 - [ ] Durante un'asta: **prezzo e tempo stanno affiancati sulla stessa riga**, e

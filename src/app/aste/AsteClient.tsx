@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import MantraBadge from '@/components/MantraBadge'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
+import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
 
 export type RigaAsta = {
@@ -65,6 +66,18 @@ export default function AsteClient({
     })
   }, [righe, nome, ruolo, squadraFanta, soloContesi, soloMie])
 
+  // Quanti filtri sono attivi oltre la ricerca: è il numero sul pulsante che
+  // apre il pannello sul telefono.
+  const filtriAttivi =
+    (ruolo ? 1 : 0) + (squadraFanta ? 1 : 0) + (soloContesi ? 1 : 0) + (soloMie ? 1 : 0)
+
+  const azzeraFiltri = () => {
+    setRuolo('')
+    setSquadraFanta('')
+    setSoloContesi(false)
+    setSoloMie(false)
+  }
+
   const contesi = righe.filter((r) => r.contendenti.length > 1).length
   const spesaPotenziale = filtrate.reduce((s, r) => s + r.quotazione, 0)
 
@@ -102,7 +115,21 @@ export default function AsteClient({
         <SchedaAssegnati righe={storico} errore={erroreStorico} spesaTotale={spesaTotale} />
       ) : (
       <>
-      <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+      {/* Sul telefono i quattro riquadri si prendevano un sesto dello schermo
+          prima di qualunque contenuto, e sopra ci stavano anche i filtri: il
+          primo giocatore finiva oltre metà pagina. Qui gli stessi numeri
+          stanno in una riga, e i riquadri restano dove c'è spazio. */}
+      <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-ink-mid md:hidden">
+        <span className="font-semibold tabular-nums text-ink">{righe.length}</span> in lista
+        <span className="text-ink-dim">·</span>
+        <span className="font-semibold tabular-nums text-neon">{contesi}</span> contesi
+        <span className="text-ink-dim">·</span>
+        <span className="font-semibold tabular-nums text-ink">{righe.length - contesi}</span> non contesi
+        <span className="text-ink-dim">·</span>
+        <span className="font-semibold tabular-nums text-ink">{spesaPotenziale} cr</span> di base
+      </div>
+
+      <div className="mb-4 hidden grid-cols-2 gap-2 md:grid md:grid-cols-4">
         <Metrica etichetta="Giocatori in lista" valore={righe.length} />
         <Metrica etichetta="Contesi" valore={contesi} accento />
         {/* Non "senza contendenti": ogni riga di liste_aste ha almeno una
@@ -112,18 +139,26 @@ export default function AsteClient({
         <Metrica etichetta="Valore base mostrato" valore={`${spesaPotenziale} cr`} />
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-md border border-line bg-panel-hi p-3 md:grid-cols-3">
-        <div>
-          <label htmlFor="a-nome" className="fm-label mb-1 block">Cerca per nome</label>
-          <input
-            id="a-nome"
-            type="text"
-            placeholder="Es. Salah…"
-            className="fm-input"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-          />
-        </div>
+      <PannelloFiltri
+        attivi={filtriAttivi}
+        onAzzera={azzeraFiltri}
+        ricerca={
+          <>
+            {/* Sul telefono l'etichetta resta solo per i lettori di schermo: il
+                segnaposto dice gia' cosa ci va, e ventiquattro pixel in cima
+                sono una riga di lista in fondo. */}
+            <label htmlFor="a-nome" className="fm-label mb-1 block max-md:sr-only">Cerca per nome</label>
+            <input
+              id="a-nome"
+              type="text"
+              placeholder="Es. Salah…"
+              className="fm-input"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+            />
+          </>
+        }
+      >
         <div>
           <label htmlFor="a-ruolo" className="fm-label mb-1 block">Ruolo</label>
           <select
@@ -157,10 +192,10 @@ export default function AsteClient({
             Solo quelli nella mia lista
           </label>
         </div>
-      </div>
+      </PannelloFiltri>
 
       <div className="fm-table-scroll rounded-md border border-line">
-        <table className="fm-table fm-table-cards">
+        <table className="fm-table fm-table-cards fm-table-compatta">
           <thead>
             <tr>
               <th>Nome</th>
@@ -191,20 +226,30 @@ export default function AsteClient({
                       {r.inMiaLista && <span className="fm-badge fm-badge-top">Tua</span>}
                     </span>
                   </td>
-                  <td data-label="Ruoli">
-                    <span className="flex items-center justify-end gap-2 md:justify-start">
+                  <td data-label="Ruoli" className="fm-meta">
+                    {/* `inline-flex` e non `flex`: dentro una cella `inline` un
+                        figlio di tipo blocco spezzerebbe la riga compatta. */}
+                    <span className="inline-flex items-center gap-2 align-middle">
                       <span className="text-ink-mid">{r.ruolo}</span>
                       {r.ruolo_mantra && r.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.ruolo_mantra} />}
                     </span>
                   </td>
-                  <td data-label="Età" className="tabular-nums text-ink-mid">{r.eta ? String(r.eta) : '—'}</td>
-                  <td data-label="Squadra" className="text-ink-mid">{r.squadra ?? '—'}</td>
-                  <td data-label="Prezzo" className="tabular-nums">
-                    <span className="fm-badge fm-badge-good">{r.quotazione}</span>
+                  <td data-label="Età" className="fm-meta tabular-nums text-ink-mid">
+                    {r.eta ? <>{r.eta}<span className="md:hidden"> anni</span></> : '—'}
                   </td>
-                  <td data-label="Conteso tra">
+                  <td data-label="Squadra" className="fm-meta text-ink-mid">{r.squadra ?? '—'}</td>
+                  <td data-label="Prezzo" className="fm-meta tabular-nums">
+                    <span className="fm-badge fm-badge-good align-middle">
+                      {r.quotazione}<span className="md:hidden">&nbsp;cr</span>
+                    </span>
+                  </td>
+                  {/* `fm-piena` e non `fm-meta`: i contendenti sono l'unica
+                      informazione che questa pagina porta e che l'app ufficiale
+                      non ha, quindi si prendono una riga tutta loro invece di
+                      essere troncati con un "+N". */}
+                  <td data-label="Conteso tra" className="fm-piena">
                     {r.contendenti.length > 1 ? (
-                      <span className="flex flex-wrap justify-end gap-1.5 md:justify-start">
+                      <span className="flex flex-wrap gap-1.5">
                         {r.contendenti.map((c) => (
                           <span key={c} className="fm-chip">{c}</span>
                         ))}
@@ -260,13 +305,19 @@ function SchedaAssegnati({
 
   return (
     <>
-      <div className="mb-4 grid grid-cols-2 gap-2">
+      <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-ink-mid md:hidden">
+        <span className="font-semibold tabular-nums text-ink">{righe.length}</span> assegnazioni
+        <span className="text-ink-dim">·</span>
+        <span className="font-semibold tabular-nums text-neon">{spesaTotale} cr</span> spesi in asta
+      </div>
+
+      <div className="mb-4 hidden grid-cols-2 gap-2 md:grid">
         <Metrica etichetta="Assegnazioni" valore={righe.length} />
         <Metrica etichetta="Speso in asta" valore={`${spesaTotale} cr`} accento />
       </div>
 
       <div className="fm-table-scroll rounded-md border border-line">
-        <table className="fm-table fm-table-cards">
+        <table className="fm-table fm-table-cards fm-table-compatta">
           <thead>
             <tr>
               <th scope="col">Calciatore</th>
@@ -285,20 +336,20 @@ function SchedaAssegnati({
                     {r.eta ? <span className="fm-label">{r.eta}</span> : null}
                   </span>
                 </td>
-                <td data-label="Ruoli">
-                  <span className="flex items-center justify-end gap-2 md:justify-start">
+                <td data-label="Ruoli" className="fm-meta">
+                  <span className="inline-flex items-center gap-2 align-middle">
                     <span className="text-ink-mid">{r.ruolo}</span>
                     {r.ruolo_mantra && r.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.ruolo_mantra} />}
                   </span>
                 </td>
-                <td data-label="Fantasquadra" className="font-semibold text-viola-hi">{r.fantasquadra}</td>
-                <td data-label="Prezzo" className="tabular-nums">
-                  <span className="fm-badge fm-badge-top">{r.prezzo}</span>
+                <td data-label="Fantasquadra" className="fm-meta font-semibold text-viola-hi">{r.fantasquadra}</td>
+                <td data-label="Prezzo" className="fm-meta tabular-nums">
+                  <span className="fm-badge fm-badge-top align-middle">{r.prezzo}<span className="md:hidden">&nbsp;cr</span></span>
                 </td>
                 {/* Niente `whitespace-nowrap`: la data in formato italiano è la
                     cella più larga, e lasciarla andare a capo è ciò che toglie
                     lo sforamento su schermo stretto. */}
-                <td data-label="Data" className="text-ink-dim">
+                <td data-label="Data" className="fm-meta text-ink-dim">
                   {new Date(r.quando).toLocaleString('it-IT')}
                 </td>
               </tr>

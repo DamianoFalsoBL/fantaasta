@@ -625,6 +625,63 @@
   }
   .fm-table-cards tbody td[colspan]::before { content: none; }
 
+  /* ---- Schede compatte ----
+     Variante di `.fm-table-cards`, non sostituzione: il formato etichettato
+     resta per le tabelle che hanno poche colonne e nomi non deducibili.
+
+     Il formato etichettato costa una riga per colonna, perché sparendo il
+     `thead` ogni valore deve riportarsi dietro il proprio nome: su /aste erano
+     sei righe per giocatore, e in una schermata di telefono ci stava un
+     giocatore e mezzo. Qui le celle marcate `.fm-meta` si mettono in fila su
+     una riga sola e rinunciano all'etichetta, che viene sostituita dall'unità
+     dentro il valore ("27 anni", "10 cr"). Non è solo estetica: senza le
+     etichette `::before` un lettore di schermo sentirebbe "27" e basta. */
+  .fm-table-compatta tbody td.fm-meta {
+    /* `inline` e non `inline-flex`: più celle devono formare una riga di testo
+       unica che va a capo da sé quando serve. */
+    display: inline;
+    padding: 0;
+    border-bottom: 0;
+    text-align: left;
+  }
+  .fm-table-compatta tbody td.fm-meta::before { content: none; }
+
+  /* Il punto separatore va fra una cella e l'altra, mai davanti alla prima:
+     da qui il selettore sul fratello, che è anche più specifico della regola
+     qui sopra e quindi la sovrascrive. */
+  .fm-table-compatta tbody td.fm-meta + td.fm-meta::before {
+    content: "·";
+    margin-inline: .4rem;
+    color: var(--color-ink-dim);
+  }
+
+  /* Una cella che si prende una riga sua, ma senza etichetta. */
+  .fm-table-compatta tbody td.fm-piena {
+    display: block;
+    padding-inline: 0;
+    padding-top: .5rem;
+    text-align: left;
+    border-bottom: 0;
+  }
+  .fm-table-compatta tbody td.fm-piena::before { content: none; }
+
+  /* Con le celle `inline` il rientro laterale non può più venire da loro:
+     passa alla riga. La prima cella però ha lo sfondo a tutta larghezza, che
+     così si staccherebbe dai bordi della scheda: il margine negativo pari al
+     rientro glielo restituisce. */
+  .fm-table-compatta tbody tr { padding: 0 .7rem .6rem; }
+  .fm-table-compatta tbody td:first-child { margin: 0 -.7rem .5rem; }
+
+  /* Lo stato vuoto usa colSpan e non deve ereditare il rientro della riga. */
+  .fm-table-compatta tbody td[colspan] { margin: 0 -.7rem; }
+
+  /* Le pastiglie dei contendenti sono l'informazione per cui /aste esiste, e
+     non vanno troncate: si stringono per farne stare tre per riga. */
+  .fm-table-compatta .fm-chip {
+    padding: .15rem .45rem;
+    font-size: .6875rem;
+  }
+
   /* ---- Target touch ---- */
   .fm-btn { min-height: 2.75rem; padding-inline: 1rem; }   /* 44px */
 

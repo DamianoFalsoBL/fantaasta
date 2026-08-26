@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react'
 import MantraBadge from '@/components/MantraBadge'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
+import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
 
 type Colonna = 'nome' | 'ruolo' | 'squadra' | 'eta' | 'quotazione'
@@ -96,21 +97,40 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
     })
   }, [giocatoriFiltrati, colonna, verso])
 
+  // Quanti filtri sono attivi oltre la ricerca: è il numero sul pulsante che
+  // apre il pannello. L'ordinamento non conta, perché non nasconde righe.
+  const filtriAttivi =
+    (searchSquadra ? 1 : 0) + (searchRuolo ? 1 : 0) + (searchEta ? 1 : 0)
+
+  const azzeraFiltri = () => {
+    setSearchSquadra('')
+    setSearchRuolo('')
+    setSearchEta('')
+  }
+
   return (
     <div className="p-3 sm:p-4">
-      {/* Filtri */}
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-md border border-line bg-panel-hi p-3 sm:grid-cols-2 md:grid-cols-4">
-        <div>
-          <label htmlFor="f-nome" className="fm-label mb-1 block">Cerca per nome</label>
-          <input
-            id="f-nome"
-            type="text"
-            placeholder="Es. Barella…"
-            className="fm-input"
-            value={searchNome}
-            onChange={(e) => setSearchNome(e.target.value)}
-          />
-        </div>
+      <PannelloFiltri
+        attivi={filtriAttivi}
+        onAzzera={azzeraFiltri}
+        griglia="sm:grid-cols-2 md:grid-cols-4"
+        ricerca={
+          <>
+            {/* Sul telefono l'etichetta resta solo per i lettori di schermo: il
+                segnaposto dice gia' cosa ci va, e ventiquattro pixel in cima
+                sono una riga di lista in fondo. */}
+            <label htmlFor="f-nome" className="fm-label mb-1 block max-md:sr-only">Cerca per nome</label>
+            <input
+              id="f-nome"
+              type="text"
+              placeholder="Es. Barella…"
+              className="fm-input"
+              value={searchNome}
+              onChange={(e) => setSearchNome(e.target.value)}
+            />
+          </>
+        }
+      >
         <div>
           <label htmlFor="f-squadra" className="fm-label mb-1 block">Squadra</label>
           <select
@@ -174,11 +194,11 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
             <option value="quotazione:asc">Quotazione crescente</option>
           </select>
         </div>
-      </div>
+      </PannelloFiltri>
 
       {/* Tabella Svincolati */}
       <div className="fm-table-scroll rounded-md border border-line">
-        <table className="fm-table fm-table-cards">
+        <table className="fm-table fm-table-cards fm-table-compatta">
           <thead>
             <tr>
               {INTESTAZIONI.map(({ colonna: c, etichetta }) => (
@@ -206,19 +226,30 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
                 </td>
               </tr>
             ) : (
+              // Sotto md le quattro celle marcate `fm-meta` si mettono in fila
+              // sotto il nome, senza etichette: due righe invece di cinque.
+              // L'unità dentro il valore — "27 anni", "9 cr" — sostituisce
+              // l'etichetta sparita, e resta nascosta su desktop dove a dirlo
+              // c'è già l'intestazione di colonna.
               giocatoriOrdinati.map((g) => (
                 <tr key={g.id}>
                   <td data-label="Nome" className="fm-nome">{g.nome}</td>
-                  <td data-label="Ruoli">
-                    <span className="flex items-center justify-end gap-2 md:justify-start">
+                  <td data-label="Ruoli" className="fm-meta">
+                    {/* `inline-flex` e non `flex`: dentro una cella `inline` un
+                        figlio di tipo blocco spezzerebbe la riga compatta. */}
+                    <span className="inline-flex items-center gap-2 align-middle">
                       <span className="text-ink-mid">{g.ruolo}</span>
                       {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
                     </span>
                   </td>
-                  <td data-label="Squadra" className="uppercase text-ink-mid">{g.squadra}</td>
-                  <td data-label="Età" className="tabular-nums text-ink-mid">{g.eta ? String(g.eta) : '—'}</td>
-                  <td data-label="Quotazione" className="tabular-nums">
-                    <span className="fm-badge fm-badge-good">{g.quotazione}</span>
+                  <td data-label="Squadra" className="fm-meta uppercase text-ink-mid">{g.squadra}</td>
+                  <td data-label="Età" className="fm-meta tabular-nums text-ink-mid">
+                    {g.eta ? <>{g.eta}<span className="md:hidden"> anni</span></> : '—'}
+                  </td>
+                  <td data-label="Quotazione" className="fm-meta tabular-nums">
+                    <span className="fm-badge fm-badge-good align-middle">
+                      {g.quotazione}<span className="md:hidden">&nbsp;cr</span>
+                    </span>
                   </td>
                 </tr>
               ))
