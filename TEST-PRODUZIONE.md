@@ -822,6 +822,11 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
   **Atteso:** rifiutato con un messaggio, non un errore del server.
 
 ### J2 · Import listone
+- [ ] **Prima di caricare, leggi la scheda.** Deve portare un avviso ambra che
+  dice che il caricamento **azzera tutte le rose** e le ricostruisce solo da
+  FantaSquadra e Costo del file, e che i crediti non vengono ricalcolati.
+  **Atteso:** l'avviso c'è, e i pulsanti *Importa* delle due schede affiancate
+  restano allineati — la scheda accanto non deve restare mezza vuota.
 - [ ] Carica il listone Mantra.
   **Atteso:** **1014 giocatori, 420 tesseramenti**. Attenzione: quei numeri
   valgono per il file usato allora. Letto l'8 agosto 2026, `DFL - Dolomiti

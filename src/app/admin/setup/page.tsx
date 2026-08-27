@@ -6,7 +6,13 @@ import { importBudget, importListone, importAste, ricalcolaSlot, type RisultatoI
 import Conferma from '@/components/Conferma'
 import { trasferimentiAttivi } from '@/utils/trasferimenti'
 
-function Uploader({ title, description, action }: { title: string, description: string, action: (formData: FormData) => Promise<RisultatoImport> }) {
+function Uploader({ title, description, avviso, action }: {
+  title: string,
+  description: string,
+  /** Cosa il caricamento DISTRUGGE, quando è irreversibile. Vedi sotto. */
+  avviso?: React.ReactNode,
+  action: (formData: FormData) => Promise<RisultatoImport>
+}) {
   const [status, setStatus] = useState<{type: 'idle' | 'loading' | 'success' | 'error', message: string, dettagli?: string[]}>({ type: 'idle', message: '' })
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,11 +36,23 @@ function Uploader({ title, description, action }: { title: string, description: 
   }
 
   return (
-    <div className="fm-panel p-4">
+    /* Colonna flessibile perché il modulo possa scendere in fondo (`mt-auto`
+       sul form). Le schede della griglia si allungano tutte all'altezza della
+       più alta: senza questo, quella con l'avviso lasciava l'altra con 166px di
+       vuoto e i due pulsanti "Importa" sfalsati di 149px. */
+    <div className="fm-panel flex flex-col p-4">
       <h3 className="fm-title text-base">{title}</h3>
       <p className="mb-3 mt-1 text-sm text-ink-mid">{description}</p>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      {/* La descrizione dice cosa il file PORTA; questo dice cosa il
+          caricamento TOGLIE. Erano due cose diverse e ne veniva scritta una
+          sola, quindi il caso peggiore — colonne mancanti nel file, rose
+          azzerate e non ricostruite — non era annunciato da nessuna parte. */}
+      {avviso && (
+        <div className="fm-alert fm-alert-warn mb-3 text-sm">{avviso}</div>
+      )}
+
+      <form onSubmit={handleSubmit} className="mt-auto space-y-3">
         {/* `.fm-file` ritematizza ::file-selector-button, che non eredita
             nulla dal genitore e resterebbe col tema chiaro del browser. */}
         <input
@@ -284,6 +302,17 @@ export default function AdminSetupPage() {
           <Uploader
             title="Listone Giocatori & Rose"
             description="Carica il listone Mantra (#, Nome, Sq., Under, R., R.MANTRA, QUOT.). Le colonne FantaSquadra e Costo, se presenti, creano anche i tesseramenti delle rose già assegnate."
+            avviso={
+              <>
+                <strong>⚠️ Azzera tutte le rose.</strong> Cancella i tesseramenti,
+                riporta ogni giocatore a svincolato, e poi le ricostruisce{' '}
+                <strong>solo</strong> da FantaSquadra e Costo di questo file. Quello
+                che è stato vinto all&apos;asta o alle buste dopo che il file è stato
+                esportato non c&apos;è dentro, e sparisce.
+                <br />
+                I crediti non vengono ricalcolati: restano quelli attuali.
+              </>
+            }
             action={importListone}
           />
           <Uploader
