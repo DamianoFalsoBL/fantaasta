@@ -645,11 +645,14 @@ riassegnare.
   restano consultabili e non vengono confusi con i nuovi.
 
 ### F13b · Un giocatore in coda per l'asta non è selezionabile
-- [ ] Riapri la fase buste lasciando dei contesi ancora da assegnare. Cerca uno
+- [x] Riapri la fase buste lasciando dei contesi ancora da assegnare. Cerca uno
   di quei giocatori nell'elenco di `/buste`.
   **Atteso:** non c'è. Altrimenti, da richiedente unico, se lo aggiudicherebbe
   alla quotazione saltando l'asta che gli altri contendenti aspettavano.
-- [ ] **La porta di servizio**, che è la prova che conta. Dalla console del
+  *Verificato il 27 agosto 2026 con la fase buste aperta al turno 2 e 21
+  giocatori in coda ancora liberi: l'elenco ne mostra 255 invece di 276.*
+- [ ] **Ancora da fare — e senza questa il resto è solo interfaccia nascosta.**
+  La porta di servizio. Dalla console del
   browser, a fase buste aperta, chiama `submit_buste` includendo l'id di un
   giocatore conteso:
   `await supabase.rpc('submit_buste', { p_giocatori_ids: [ ...gli altri..., <id conteso> ] })`
