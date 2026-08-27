@@ -263,19 +263,16 @@ export default function AdminRiepilogoPage() {
           </div>
           <div className="flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-ink-mid">
-              File di testo con tre colonne: <code className="rounded-sm bg-void px-1 text-ink">id calciatore</code>,{' '}
-              <code className="rounded-sm bg-void px-1 text-ink">nome fantasquadra</code>,{' '}
-              <code className="rounded-sm bg-void px-1 text-ink">costo</code>. L&apos;id è quello del listone.
+              Nel formato che <strong>fantacalcio.it</strong> accetta in import: colonne{' '}
+              <code className="rounded-sm bg-void px-1 text-ink">fantasquadra</code>,{' '}
+              <code className="rounded-sm bg-void px-1 text-ink">id calciatore</code>,{' '}
+              <code className="rounded-sm bg-void px-1 text-ink">costo</code>, con una riga{' '}
+              <code className="rounded-sm bg-void px-1 text-ink">$,$,$</code> a separare le rose.
+              L&apos;id è quello del listone.
             </p>
             <div className="flex shrink-0 items-center gap-3">
               <a href="/api/export/rose" className="fm-btn fm-btn-primary">
                 Scarica CSV
-              </a>
-              <a
-                href="/api/export/rose?intestazione=no"
-                className="text-sm font-medium text-ink-dim underline underline-offset-2 hover:text-ink"
-              >
-                senza intestazione
               </a>
             </div>
           </div>

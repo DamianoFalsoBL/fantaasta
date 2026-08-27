@@ -725,30 +725,43 @@ riassegnare.
 
 ## Blocco H — Export
 
-### H1 · Download con intestazione
+L'export ha **un solo formato**, quello che fantacalcio.it accetta in import.
+Ricavato confrontando un loro export vero con quello che generavamo prima e che
+loro rifiutavano.
+
+### H1 · Download
 - [ ] `/admin/riepilogo` → *Scarica CSV*.
   **Atteso:** scarica un file chiamato `rose-2026-08-04_20-09-43.csv`, con data
   **e ora italiana**. Due export nello stesso giorno devono avere nomi diversi.
 
-### H2 · Contenuto
-- [ ] Apri il file.
-  **Atteso:** prima riga `id,fantasquadra,costo`, poi una riga per giocatore
-  tesserato, ordinate per squadra. Il numero di righe corrisponde ai
-  tesseramenti (a rose complete: 420 più l'intestazione).
+### H2 · Struttura
+- [ ] Apri il file con un editor di testo, **non** con Excel.
+  **Atteso:** la prima riga è `$,$,$`; poi le rose, una squadra per blocco, con
+  una riga `$,$,$` **prima di ognuna** — tante quante le squadre, non una in
+  meno. Ogni riga di dati ha tre campi nell'ordine
+  `fantasquadra,id,costo`: il **nome per primo**, non l'id.
+- [ ] Nessuna riga di intestazione con i nomi delle colonne: al suo posto c'è
+  il primo `$,$,$`.
 
-### H3 · Senza intestazione
-- [ ] Usa il link *senza intestazione*.
-  **Atteso:** stesso file senza la prima riga.
+### H3 · La prova che conta
+- [ ] **Carica il file su fantacalcio.it.** È l'unica verifica che vale: il
+  formato è stato ricostruito dal loro export, non da una loro
+  documentazione, quindi finché non lo accettano davvero sappiamo solo che
+  *somiglia* al loro.
 
-### H4 · Accenti
-- [ ] Apri il CSV **con Excel**.
-  **Atteso:** i nomi con accenti e apostrofi si leggono correttamente. È ciò
-  che il file garantisce con una marcatura iniziale apposta: se vedi `Ã¨` al
-  posto di `è`, segnalalo.
+### H4 · Excel storpia gli accenti, ed è previsto
+- [ ] Apri il CSV con Excel.
+  **Atteso:** se una fantasquadra ha un accento, Excel lo mostra sbagliato
+  (`Ã¨` al posto di `è`). **Non è un difetto da segnalare**: il file non ha più
+  la marcatura iniziale che lo diceva a Excel, perché quella marcatura è un
+  byte invisibile davanti al primo `$,$,$` e fa fallire l'import senza dire
+  perché. Questo file serve a loro, non a Excel.
 
 ### H5 · Virgole nei nomi
-- [ ] Se una fantasquadra ha una virgola nel nome, controlla che in Excel resti
-  in una sola colonna.
+- [ ] Se una fantasquadra ha una virgola nel nome, controlla che il loro import
+  la accetti. Il nome viene messo fra virgolette secondo lo standard CSV, che è
+  la cosa corretta da scrivere, ma non sappiamo se il loro lettore le
+  interpreti o spezzi la riga in quattro campi.
 
 ---
 

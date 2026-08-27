@@ -3,12 +3,25 @@ import { createClient } from '@/utils/supabase/server'
 import { getProfiloCorrente, isAdminRole } from '@/utils/auth'
 
 /**
- * Export finale delle rose, da ricaricare sulla piattaforma di gioco.
+ * Export finale delle rose, nel formato che fantacalcio.it accetta in import.
  *
- * Serve un file di testo, non un foglio di calcolo: tre colonne soltanto,
- * `id calciatore, nome fantasquadra, costo`. L'id è quello del listone
- * (colonna `#`), cioè la stessa chiave usata in fase di import: chi rilegge
- * il file ritrova gli stessi giocatori senza dover riconciliare i nomi.
+ * Il formato NON è una scelta nostra: è stato ricavato confrontando un export
+ * vero della loro piattaforma (`la-lega-dei-furbi_rosters_*.csv`) con quello
+ * che generavamo prima, che loro rifiutavano. Tre differenze strutturali:
+ *
+ *   1. le colonne sono `fantasquadra, id, costo` — noi mettevamo l'id per
+ *      primo, quindi il loro lettore trovava un numero dove aspetta un nome;
+ *   2. non c'è riga di intestazione: al suo posto una riga `$,$,$` **prima di
+ *      ogni** squadra, che è come segnano l'inizio di una rosa;
+ *   3. niente BOM e fine riga LF, mentre noi scrivevamo BOM + CRLF.
+ *
+ * Il BOM serviva a far aprire il file a Excel senza storpiare gli accenti dei
+ * nomi delle fantasquadre. Toglierlo è un compromesso accettato: questo file
+ * ha un solo scopo, essere ricaricato da loro, e un BOM davanti alla prima
+ * riga `$,$,$` è esattamente il tipo di byte invisibile che fa fallire un
+ * lettore senza dire perché.
+ *
+ * L'id è quello del listone (colonna `#`), la stessa chiave usata in import.
  *
  * Non si usa `requireAdmin()` perché quell'helper fa `redirect()`, pensato per
  * le pagine: in un route handler produrrebbe un 307 verso una pagina HTML
@@ -43,7 +56,7 @@ function campoCsv(valore: string): string {
   return /[",\r\n]/.test(valore) ? `"${valore.replace(/"/g, '""')}"` : valore
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   const profilo = await getProfiloCorrente()
   if (!profilo) {
     return NextResponse.json({ error: 'Non autenticato.' }, { status: 401 })
@@ -66,30 +79,34 @@ export async function GET(request: Request) {
   type Riga = { giocatore_id: number; prezzo_pagato: number; squadre: { nome: string } | null }
   const righe = (data ?? []) as unknown as Riga[]
 
-  // Ordinamento per squadra e poi per id: il file resta leggibile a occhio,
-  // con le rose una sotto l'altra.
-  righe.sort((a, b) => {
-    const perSquadra = (a.squadre?.nome ?? '').localeCompare(b.squadre?.nome ?? '', 'it')
-    return perSquadra !== 0 ? perSquadra : a.giocatore_id - b.giocatore_id
-  })
-
-  const senzaIntestazione = new URL(request.url).searchParams.get('intestazione') === 'no'
-
-  const linee = righe.map((r) =>
-    [
-      String(r.giocatore_id),
-      campoCsv(r.squadre?.nome ?? ''),
-      String(r.prezzo_pagato),
-    ].join(',')
-  )
-
-  if (!senzaIntestazione) {
-    linee.unshift('id,fantasquadra,costo')
+  // Le rose una sotto l'altra, squadre in ordine alfabetico. Dentro ogni rosa
+  // l'id scende: è l'ordine del loro file, e allinearsi costa zero. Non credo
+  // che il loro lettore ci guardi, ma è una differenza in meno da sospettare
+  // se un giorno l'import tornasse a fallire.
+  const perSquadra = new Map<string, Riga[]>()
+  for (const r of righe) {
+    const nome = r.squadre?.nome ?? ''
+    if (!perSquadra.has(nome)) perSquadra.set(nome, [])
+    perSquadra.get(nome)!.push(r)
   }
 
-  // CRLF e BOM: senza BOM Excel apre il file in ANSI e storpia gli accenti
-  // nei nomi delle fantasquadre.
-  const csv = '﻿' + linee.join('\r\n') + '\r\n'
+  const linee: string[] = []
+  for (const nome of [...perSquadra.keys()].sort((a, b) => a.localeCompare(b, 'it'))) {
+    // Il separatore va PRIMA di ogni blocco, compreso il primo: nel loro file
+    // ci sono dieci `$,$,$` per dieci squadre, non nove.
+    linee.push('$,$,$')
+    const rose = perSquadra.get(nome)!.sort((a, b) => b.giocatore_id - a.giocatore_id)
+    for (const r of rose) {
+      // Il nome squadra è l'unico campo che potrebbe contenere una virgola.
+      // Le virgolette RFC 4180 sono la cosa corretta da scrivere, ma se un
+      // giorno una squadra si chiamasse "Rossi, Bianchi e Verdi" varrebbe la
+      // pena controllare che il loro lettore le interpreti invece di spezzare
+      // la riga in quattro campi.
+      linee.push([campoCsv(nome), String(r.giocatore_id), String(r.prezzo_pagato)].join(','))
+    }
+  }
+
+  const csv = linee.join('\n') + '\n'
 
   return new NextResponse(csv, {
     headers: {
