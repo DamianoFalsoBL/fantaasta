@@ -478,17 +478,24 @@ stessa transazione del rilancio avversario. Servono due manager, A e B.
 - [ ] A preme *Rimuovi* → al rilancio successivo di B non scatta più niente.
 
 **Nessuno rilancia contro sé stesso** (difetto trovato sul campo il 27 agosto)
-- [ ] A **chiama** un giocatore da 6: resta in testa alla base. Prima che
+- [x] A **chiama** un giocatore da 6: resta in testa alla base. Prima che
   l'admin avvii il timer, A imposta un tetto di 15. L'admin avvia il timer.
   **Atteso:** il prezzo resta **6** con A in testa. Prima compariva un'offerta
   AUTOMATICO da **7 a nome di A**, cioè A rilanciava su sé stesso e pagava un
   credito in più senza che nessuno avesse offerto nulla.
-- [ ] Ora B rilancia a 8. **Atteso:** solo adesso scatta l'automatico di A, a 9.
+  *Verificato il 27 agosto 2026 sull'asta di Santos A. (base 15): la prima
+  offerta è dell'avversario a 16, non più un AUTOMATICO del chiamante. Nelle
+  due aste precedenti — Busio e Mora — l'offerta fantasma c'era.*
+- [x] Ora B rilancia a 8. **Atteso:** solo adesso scatta l'automatico di A, a 9.
   Il tetto serve a rispondere agli avversari, non ad alzare la propria offerta.
-- [ ] Con A in testa e il tetto più alto in mano ad A, A piazza un rilancio **a
-  mano**. **Atteso:** il prezzo resta quello che ha appena scritto. Prima
-  l'automatico lo faceva salire ancora di un credito, e a ogni risoluzione
-  successiva ancora, fino al suo stesso tetto.
+  *Verificato sulla stessa asta: 16 dell'avversario, poi AUTOMATICO 17; 18
+  dell'avversario, poi AUTOMATICO 19.*
+- [ ] **Ancora da fare.** Con A in testa e il tetto più alto in mano ad A, A
+  piazza un rilancio **a mano**. **Atteso:** il prezzo resta quello che ha
+  appena scritto. Prima l'automatico lo faceva salire ancora di un credito, e a
+  ogni risoluzione successiva ancora, fino al suo stesso tetto.
+  *Il collaudo del 27 agosto non copre questo caso: in quell'asta chi aveva il
+  tetto non ha mai rilanciato a mano.*
 
 **La prova che conta**
 - [ ] A imposta il tetto e **chiude la scheda**. B rilancia. A deve risultare di
