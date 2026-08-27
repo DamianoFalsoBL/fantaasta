@@ -3,7 +3,8 @@ import { useState, useMemo } from 'react'
 import MantraBadge from '@/components/MantraBadge'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import PannelloFiltri from '@/components/PannelloFiltri'
-import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
+import { mantraPresenti } from '@/utils/ruoli'
+import { passaFiltri } from '@/utils/filtri'
 
 type Colonna = 'nome' | 'ruolo' | 'squadra' | 'eta' | 'quotazione'
 type Verso = 'asc' | 'desc'
@@ -52,16 +53,21 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
   const ruoliMantra = useMemo(() => mantraPresenti(giocatori), [giocatori])
 
   // Filtra i giocatori
+  //
+  // Nome e ruolo passano da `passaFiltri`, che era stato scritto proprio per
+  // unire le tre copie divergenti del filtro e qui era rimasto inutilizzato.
+  // La differenza si vedeva: la ricerca libera cercava solo nel nome, mentre in
+  // /buste cercava anche nella squadra reale. Stessa casella, due comportamenti
+  // a seconda della pagina — e chi scriveva "Milan" qui non trovava nulla.
+  //
+  // La tendina *Squadra* resta e non è in conflitto: filtra per corrispondenza
+  // esatta, la casella libera cerca un pezzo di testo. Valgono entrambe.
   const giocatoriFiltrati = useMemo(() => {
     return giocatori.filter(g => {
-      const matchNome = g.nome.toLowerCase().includes(searchNome.toLowerCase())
       const matchSquadra = searchSquadra === '' || g.squadra === searchSquadra
-      
-      const matchRuolo = ruoloCorrisponde(searchRuolo, g.ruolo, g.ruolo_mantra)
-      
       const matchEta = searchEta === '' || (g.eta && g.eta <= parseInt(searchEta))
 
-      return matchNome && matchSquadra && matchRuolo && matchEta
+      return passaFiltri(g, searchNome, searchRuolo) && matchSquadra && matchEta
     })
   }, [giocatori, searchNome, searchSquadra, searchRuolo, searchEta])
 
