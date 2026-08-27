@@ -188,6 +188,10 @@ progetto.
 Una colonna con l'icona **i** che apre una scheda con anagrafica e storico.
 Ricerca fatta il 27 agosto, decisione presa, costruzione rimandata.
 
+**Il dossier completo è in [docs/scheda-giocatore.md](docs/scheda-giocatore.md)**:
+com'è costruita la sincronizzazione, quali file toccare, le trappole e la
+verifica. Qui sotto solo quel tanto che serve a decidere se riprenderlo.
+
 **BigBallsData, l'API indicata all'inizio, non può fornire quei dati**: gli id
 sono UUID interni e la loro documentazione dice di non portare id da altri
 fornitori; per il calcio non esiste ricerca per nome; e non ci sono
@@ -200,15 +204,8 @@ tutti e 548 del listone.
 Prima cosa da fare quando si riprende: **provare con una chiave vera** su dieci
 giocatori nostri, perché il piano gratuito dà 100 richieste al giorno e limita
 le stagioni accessibili in un modo che la documentazione pubblica non dice.
-
-Due vincoli: la chiave sta **solo lato server**, e i dati vanno copiati in una
-tabella nostra invece di essere chiesti a ogni apertura della scheda, perché la
-quota è per chiave e non per utente. Misure utili sull'aggancio: dei 548
-giocatori, 466 sono cognomi secchi, 82 hanno l'iniziale del nome
-(«Miranda J.»), e 14 cognomi sono condivisi da due giocatori.
-
-Serve un account gratuito su API-Football e la chiave fra le variabili
-d'ambiente su Vercel: è un passaggio dell'utente.
+Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
+è un passaggio dell'utente.
 
 ---
 
