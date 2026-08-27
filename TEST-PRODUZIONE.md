@@ -744,10 +744,11 @@ loro rifiutavano.
   il primo `$,$,$`.
 
 ### H3 · La prova che conta
-- [ ] **Carica il file su fantacalcio.it.** È l'unica verifica che vale: il
+- [x] **Carica il file su fantacalcio.it.** È l'unica verifica che vale: il
   formato è stato ricostruito dal loro export, non da una loro
   documentazione, quindi finché non lo accettano davvero sappiamo solo che
   *somiglia* al loro.
+  *Importazione riuscita il 27 agosto 2026, con 300 tesseramenti su 10 squadre.*
 
 ### H4 · Excel storpia gli accenti, ed è previsto
 - [ ] Apri il CSV con Excel.
