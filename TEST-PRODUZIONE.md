@@ -477,6 +477,19 @@ stessa transazione del rilancio avversario. Servono due manager, A e B.
   **superato** con scritto che da lì in poi decide lui.
 - [ ] A preme *Rimuovi* → al rilancio successivo di B non scatta più niente.
 
+**Nessuno rilancia contro sé stesso** (difetto trovato sul campo il 27 agosto)
+- [ ] A **chiama** un giocatore da 6: resta in testa alla base. Prima che
+  l'admin avvii il timer, A imposta un tetto di 15. L'admin avvia il timer.
+  **Atteso:** il prezzo resta **6** con A in testa. Prima compariva un'offerta
+  AUTOMATICO da **7 a nome di A**, cioè A rilanciava su sé stesso e pagava un
+  credito in più senza che nessuno avesse offerto nulla.
+- [ ] Ora B rilancia a 8. **Atteso:** solo adesso scatta l'automatico di A, a 9.
+  Il tetto serve a rispondere agli avversari, non ad alzare la propria offerta.
+- [ ] Con A in testa e il tetto più alto in mano ad A, A piazza un rilancio **a
+  mano**. **Atteso:** il prezzo resta quello che ha appena scritto. Prima
+  l'automatico lo faceva salire ancora di un credito, e a ogni risoluzione
+  successiva ancora, fino al suo stesso tetto.
+
 **La prova che conta**
 - [ ] A imposta il tetto e **chiude la scheda**. B rilancia. A deve risultare di
   nuovo in testa. È ciò che distingue questa soluzione da una che gira nel
