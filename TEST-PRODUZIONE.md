@@ -240,7 +240,14 @@ numeri del database.
   questi due elenchi si accorcia, la modifica ha colpito il posto sbagliato.
 
 ### C3 · Aste a chiamata
-- [x] `/aste`: le quattro tessere in cima (i totali) mostrano numeri sensati.
+- [ ] **Cambiato: erano quattro tessere, ora due.** `/aste` mostra in cima solo
+  *Giocatori in lista* e *Contesi*. Sono spariti *Non contesi*, che in questa
+  lista è uno zero fisso — `admin_elabora_buste` ci manda solo chi ha più di
+  una richiesta — e *Valore base mostrato*, che nessuno usava per decidere.
+  Sul telefono la stessa cosa è una riga sola: «24 in lista · 24 contesi».
+- [ ] Se dall'import del file aste arriva un giocatore chiesto da una sola
+  squadra, la sua riga deve comunque dirlo con la pastiglia **Solo <squadra>**:
+  l'informazione non è andata persa, ha solo smesso di avere un riquadro.
 - [x] Spunta *solo contesi* → restano i giocatori richiesti da più squadre.
 - [x] Spunta *solo le mie* → restano quelli nella tua lista.
 - [x] Spunta entrambe → valgono entrambe.

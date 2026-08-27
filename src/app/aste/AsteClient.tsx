@@ -79,7 +79,13 @@ export default function AsteClient({
   }
 
   const contesi = righe.filter((r) => r.contendenti.length > 1).length
-  const spesaPotenziale = filtrate.reduce((s, r) => s + r.quotazione, 0)
+
+  // "Non contesi" e "Valore base mostrato" sono stati tolti: in questa lista
+  // finiscono solo i giocatori contesi — `admin_elabora_buste` manda in
+  // liste_aste unicamente chi ha più di una richiesta — quindi il primo era
+  // uno zero fisso e il secondo un totale che nessuno usava per decidere.
+  // Il caso del richiedente unico, se mai arriva dall'import del file aste,
+  // resta visibile lo stesso: la riga porta la pastiglia "Solo <squadra>".
 
   const spesaTotale = storico.reduce((s, r) => s + r.prezzo, 0)
 
@@ -123,20 +129,11 @@ export default function AsteClient({
         <span className="font-semibold tabular-nums text-ink">{righe.length}</span> in lista
         <span className="text-ink-dim">·</span>
         <span className="font-semibold tabular-nums text-neon">{contesi}</span> contesi
-        <span className="text-ink-dim">·</span>
-        <span className="font-semibold tabular-nums text-ink">{righe.length - contesi}</span> non contesi
-        <span className="text-ink-dim">·</span>
-        <span className="font-semibold tabular-nums text-ink">{spesaPotenziale} cr</span> di base
       </div>
 
-      <div className="mb-4 hidden grid-cols-2 gap-2 md:grid md:grid-cols-4">
+      <div className="mb-4 hidden grid-cols-2 gap-2 md:grid">
         <Metrica etichetta="Giocatori in lista" valore={righe.length} />
         <Metrica etichetta="Contesi" valore={contesi} accento />
-        {/* Non "senza contendenti": ogni riga di liste_aste ha almeno una
-            squadra, quindi il contendente c'è sempre. Questi sono i giocatori
-            richiesti da una sola squadra, cioè quelli che non finiranno in gara. */}
-        <Metrica etichetta="Non contesi" valore={righe.length - contesi} />
-        <Metrica etichetta="Valore base mostrato" valore={`${spesaPotenziale} cr`} />
       </div>
 
       <PannelloFiltri
