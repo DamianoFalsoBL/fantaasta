@@ -1,0 +1,241 @@
+# Cose da fare — FantaAsta
+
+Il posto unico delle attività aperte. Sta nel repository e non nella memoria di
+una conversazione, perché una conversazione finisce.
+
+**Regola:** si aggiorna a ogni lavoro. Quando una voce si chiude, si sposta in
+*Fatto di recente* con la data; quando ne nasce una, ci si scrive dentro il
+contesto per riprenderla **a freddo** — file, perché è un problema, e quale
+scorciatoia apparente sarebbe sbagliata.
+
+Il piano di collaudo è un documento diverso: [TEST-PRODUZIONE.md](TEST-PRODUZIONE.md)
+dice cosa va verificato, questo dice cosa va costruito.
+
+---
+
+## Segnalato dai manager dopo la prima asta vera (27 agosto 2026)
+
+L'asta è andata bene. Questi sono i suggerimenti raccolti a caldo, in ordine di
+quanto valgono rispetto a quanto costano.
+
+### 1. In `/buste`, lo stato «Buste salvate» / «Buste non salvate»
+
+La pagina non distingue fra ciò che vedi e ciò che il server ha davvero. Nel
+momento che conta — pochi minuti prima della chiusura — è l'unica domanda che
+un manager si fa, e oggi non c'è risposta sullo schermo.
+
+`src/app/buste/page.tsx` carica già la selezione salvata all'apertura
+(`busteInAttesa`, dentro `loadData`): basta confrontarla con `selezionati` per
+avere lo stato. Non serve interrogare il server a ogni modifica.
+
+**Trappola:** lo stato deve tornare a «non salvate» anche quando si *toglie* un
+giocatore, non solo quando se ne aggiunge uno. Un confronto sulla lunghezza
+della lista non basta.
+
+### 2. In `/buste`, una × per togliere un giocatore scelto
+
+L'elenco dei nomi scelti sopra crediti e slot c'è già. Oggi per toglierne uno
+bisogna ritrovarlo nella lista lunga: la × su ogni nome è il gesto naturale.
+
+### 3. In `/buste`, filtri e ordinamento come in `/svincolati`
+
+Metà c'è già: ricerca libera e ruolo, tramite `passaFiltri` di
+`src/utils/filtri.ts`. Mancano il filtro per squadra di Serie A, quello per età
+e l'ordinamento.
+
+Da riusare: `PannelloFiltri` (`src/components/PannelloFiltri.tsx`), nato per
+`/svincolati` e `/aste`. Questa sarebbe la terza pagina, il che conferma che
+era il posto giusto dove metterlo.
+
+### 4. Sommario Buste: chi è stato assegnato senza passare dall'asta
+
+Il gemello della scheda *Assegnati* di `/aste`. Oggi dopo lo spoglio ognuno
+vede solo i propri esiti.
+
+**Da decidere prima di scrivere codice:** le RLS su `buste` fanno vedere a
+ciascuno soltanto le proprie (policy *«Lettura limitata buste»*,
+`20260728190359_init_schema.sql`). Per mostrare gli esiti di tutti bisogna
+aprire la lettura alle buste **già spogliate**, tenendo segrete quelle in
+attesa. È un cambio di riservatezza, non un lavoro di interfaccia, e va deciso
+con l'utente. Il test F7 verifica proprio che le buste altrui non si vedano:
+andrà riscritto di conseguenza.
+
+**Scorciatoia sbagliata:** dedurre le assegnazioni da `tesseramenti`. Quella
+tabella non registra *da dove* arriva un giocatore, quindi mescolerebbe gli
+acquisti all'asta con quelli da busta — cioè proprio la distinzione che questa
+pagina esiste per mostrare.
+
+### 5. In `/asta`, avviso ben visibile quando l'asta è finita
+
+Segnalato dall'admin: durante la serata capitava di non accorgersi che un'asta
+era conclusa, per tempo scaduto o perché si erano ritirati tutti.
+
+Lo stato è **già calcolato** in `src/components/TabelloneAsta.tsx`: `timeLeft`
+arriva a 0 e `isSoloLeft` copre il caso dei ritiri. È un problema di
+presentazione, non di logica: oggi quella condizione non grida abbastanza.
+
+### 6. In `/aste`, non si riesce a vedere tutto in una schermata
+
+**In attesa dello screenshot** (promesso per il 28 agosto). Da non toccare
+prima: la pagina è stata rifatta il 27 agosto (v1.8.0 e v1.8.3) e non è chiaro
+se la segnalazione riguardi il telefono, il computer o le pastiglie dei
+contendenti che vanno a capo. Indovinare qui vuol dire rifare due volte.
+
+### 7. Facoltativo: logo della squadra di Serie A in `/svincolati`
+
+Il meno convincente del gruppo, e va detto perché.
+
+Non abbiamo gli asset: servirebbero venti file locali. Prenderli a caldo dal
+sito altrui è discutibile su banda e su diritti. E in `/svincolati` le righe
+sono state appena compattate (v1.8.0) proprio per farne stare di più in una
+schermata: un'immagine per riga rimangia parte di quel guadagno.
+
+Se si fa, **con file SVG nostri**, non con collegamenti a immagini altrui.
+
+---
+
+## Cambio password dei manager
+
+Chiesto il 27 agosto. Tre pezzi indipendenti, da fare in commit separati.
+
+### A. Il manager cambia la propria password
+
+`supabase.auth.updateUser({ password })` funziona con la sessione già attiva:
+niente chiave di servizio, niente modifiche al database. In fondo a
+*La mia Rosa*, che è la pagina che parla di te e non consuma una voce di menu.
+
+**Chiedere anche la password attuale**, verificandola con un
+`signInWithPassword` prima di aggiornare, benché Supabase non lo pretenda: qui
+le sessioni restano aperte sui telefoni per settimane.
+
+Niente requisiti di complessità: è una lega di dieci amici su un sito senza
+dati sensibili, e l'unico effetto sarebbe far scegliere a tutti la stessa
+password con un punto esclamativo in fondo. Il minimo di sei caratteri di
+Supabase basta, purché scritto nel modulo **prima** che qualcuno lo scopra con
+un errore.
+
+### B. L'import del budget smette di scavalcare le password scelte
+
+**Il pezzo che rende sicuro il pezzo A.** Oggi `src/app/admin/actions.ts:178`
+fa `updateUserById(esistente.id, { password })` per ogni utente già esistente:
+un manager cambia la password, il super admin reimporta il budget settimane
+dopo, e la password torna silenziosamente quella del foglio.
+
+Proposta: **cella password vuota su un utente che esiste già = non toccarla**.
+Oggi la cella vuota fa scartare l'intera riga
+(`actions.ts:144`), quindi non c'è modo di dire «lascia stare questo».
+
+**Non si può togliere quella riga e basta.** È l'unica via di recupero
+esistente: gli account usano email finte `@fantacalcio.local`, dominio
+riservato e non instradabile, quindi il «ti mando il link per reimpostarla»
+non è disattivato per scelta — **è impossibile**. Riempire la cella deve
+restare il modo di forzare una password nota.
+
+Serve anche un avviso sulla scheda di caricamento, come quello messo sul
+listone il 27 agosto.
+
+### C. Facoltativo: reset password dal super admin
+
+Un pulsante accanto a ogni squadra in *Budget e Fasi*, per quando qualcuno
+dimentica la password e non si ha voglia di reimportare tutto. Comodo, non
+indispensabile.
+
+---
+
+## Prestazioni e infrastruttura
+
+### 8. `fetchAsta()` ricarica tutta la lista chiamate ogni 15 secondi
+
+`src/components/TabelloneAsta.tsx` rifà cinque interrogazioni a ogni giro del
+salvagente e a ogni evento in tempo reale.
+
+Parcheggiata in attesa dei consumi, ma **attenzione a non trarre la conclusione
+sbagliata dai numeri di agosto**: il collaudo del 18 e l'asta del 27 non hanno
+messo sotto sforzo questa query, perché le liste erano corte — le rose erano
+state importate, non battute. Con le liste piene torna a pesare.
+
+**Trappola:** non disattivare il salvagente quando non c'è un'asta in corso. È
+esattamente il caso per cui esiste.
+
+### 9. Leggere i consumi di Supabase e Vercel dopo l'asta del 27 agosto
+
+Ora che un'asta vera c'è stata, il confronto ha senso. La fotografia di
+partenza dell'8 agosto: Supabase egress 71 MB, database 26,83 MB, realtime
+1.000 messaggi, picco connessioni 6, 46 MAU; Vercel Fast Data 44,51 MB su
+100 GB, Fast Origin 34,09 MB su 10 GB, Edge Requests 4.852 su 1M, Invocations
+5.973 su 1M.
+
+**Il numero che conta non è l'egress ma il picco di connessioni realtime.** Se
+arriva al numero dei presenti, il tempo reale ha funzionato per tutti; se resta
+a 5-6, una parte dei telefoni riceveva gli aggiornamenti solo grazie al
+salvagente ogni 15 secondi — cioè «sembrava funzionare».
+
+Il ciclo Supabase si è chiuso il 12 agosto: il confronto va fatto sul grafico
+giornaliero, non sul totale del mese.
+
+### 10. Duplicare il sito per una seconda lega
+
+Rimandato dall'utente. Nota: Supabase somma egress e messaggi realtime di
+**tutti** i progetti dell'organizzazione; solo lo spazio del database è per
+progetto.
+
+---
+
+## Rimandato con dossier a parte
+
+### 11. Scheda giocatore in `/svincolati`
+
+Una colonna con l'icona **i** che apre una scheda con anagrafica e storico.
+Ricerca fatta il 27 agosto, decisione presa, costruzione rimandata.
+
+**BigBallsData, l'API indicata all'inizio, non può fornire quei dati**: gli id
+sono UUID interni e la loro documentazione dice di non portare id da altri
+fornitori; per il calcio non esiste ricerca per nome; e non ci sono
+nazionalità, data di nascita né storico per stagione.
+
+**Fonte scelta: API-Football (api-sports.io)**, che ha tutti i campi e permette
+di elencare i giocatori squadra per squadra — una ventina di richieste per
+tutti e 548 del listone.
+
+Prima cosa da fare quando si riprende: **provare con una chiave vera** su dieci
+giocatori nostri, perché il piano gratuito dà 100 richieste al giorno e limita
+le stagioni accessibili in un modo che la documentazione pubblica non dice.
+
+Due vincoli: la chiave sta **solo lato server**, e i dati vanno copiati in una
+tabella nostra invece di essere chiesti a ogni apertura della scheda, perché la
+quota è per chiave e non per utente. Misure utili sull'aggancio: dei 548
+giocatori, 466 sono cognomi secchi, 82 hanno l'iniziale del nome
+(«Miranda J.»), e 14 cognomi sono condivisi da due giocatori.
+
+Serve un account gratuito su API-Football e la chiave fra le variabili
+d'ambiente su Vercel: è un passaggio dell'utente.
+
+---
+
+## Notato di sfuggita
+
+- **F13b non è ancora chiuso.** L'elenco di `/buste` nasconde i giocatori già
+  in coda per l'asta — verificato il 27 agosto — ma nessuno ha ancora chiamato
+  `submit_buste` dalla console per controllare che la funzione li **rifiuti**.
+  Finché non si fa, sappiamo che l'interfaccia nasconde, non che la porta sia
+  chiusa.
+- **D20, terza casella.** Chi ha il tetto più alto ed è già in testa non deve
+  farsi rilanciare da sé piazzando un rilancio a mano. Il ramo non è stato
+  esercitato nell'asta del 27.
+- Tre `any` nel lint di `src/app/svincolati/SvincolatiClient.tsx` (righe 30, 71,
+  140), preesistenti.
+
+---
+
+## Fatto di recente
+
+| Quando | Cosa |
+|---|---|
+| 27 ago 2026 | L'export delle rose esce nel formato di fantacalcio.it, e l'import è riuscito |
+| 27 ago 2026 | Il massimo automatico non rilancia più su chi è già in testa |
+| 27 ago 2026 | In *Sommario aste* restano due totali invece di quattro |
+| 27 ago 2026 | La scheda del listone avvisa che azzera le rose |
+| 27 ago 2026 | Negli svincolati la ricerca trova anche la squadra reale |
+| 27 ago 2026 | Liste compatte sul telefono: schede a tre righe, filtri a scomparsa |
+| 27 ago 2026 | Chi è in coda per l'asta non risulta più svincolato, con guardia in `submit_buste` |
+| 27 ago 2026 | Il pannello d'asta smette di stirarsi su schermo grande |

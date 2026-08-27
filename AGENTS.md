@@ -135,9 +135,21 @@ Procedi da solo sulle scelte ordinarie. Fermati e chiedi quando:
   quel caso non eseguire il piano per obbedienza: porta i numeri nuovi e
   rifai la scelta insieme.
 
+## La lista delle cose da fare
+
+Le attività aperte stanno in **`todolist.md`**, nella radice del progetto. Non
+in un registro esterno e non nella memoria di una conversazione, perché una
+conversazione finisce e quel che c'era dentro si perde.
+
+**Va aggiornata a ogni lavoro**: quando una voce si chiude si sposta in *Fatto
+di recente* con la data, quando ne nasce una ci si scrive dentro il contesto
+per riprenderla a freddo. Se una richiesta viene rimandata, finisce lì con il
+perché — soprattutto se la ricerca per deciderlo è costata tempo, che è
+esattamente quello che nessuno vuole rifare.
+
 ## Cose notate di sfuggita
 
 Se durante un lavoro noti un problema fuori tema, **non allargare il lavoro in
-corso**: annotalo nella lista delle attività, con dentro il contesto necessario
-a riprenderlo a freddo — file, righe, perché è un problema, e quale scorciatoia
+corso**: annotalo in `todolist.md`, con dentro il contesto necessario a
+riprenderlo a freddo — file, righe, perché è un problema, e quale scorciatoia
 apparente sarebbe sbagliata.
