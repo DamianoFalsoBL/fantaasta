@@ -8,6 +8,8 @@ import Conferma from '@/components/Conferma'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
+import PannelloFiltri from '@/components/PannelloFiltri'
+import { ordinaGiocatori, OPZIONI_ORDINE, type ColonnaOrdine, type Verso } from '@/utils/ordinamento'
 import { idsInCodaAsta } from '@/utils/giocatori'
 
 type Squadra = {
@@ -50,6 +52,12 @@ export default function BustePage() {
   // Per fase aperta
   const [ricerca, setRicerca] = useState('')
   const [filtroRuolo, setFiltroRuolo] = useState('')
+  // Gli stessi filtri di /svincolati: qui si compilano le buste guardando i
+  // reparti scoperti e il budget, e mancavano proprio squadra ed eta'.
+  const [filtroSquadra, setFiltroSquadra] = useState('')
+  const [filtroEta, setFiltroEta] = useState('')
+  const [colonna, setColonna] = useState<ColonnaOrdine>('nome')
+  const [verso, setVerso] = useState<Verso>('asc')
   const [giocatoriLiberi, setGiocatoriLiberi] = useState<Giocatore[]>([])
   const [selezionati, setSelezionati] = useState<Giocatore[]>([])
   // Gli id che il server ha registrato, non quelli che si vedono a schermo:
@@ -192,9 +200,30 @@ export default function BustePage() {
 
   const ruoliMantra = useMemo(() => mantraPresenti(giocatoriLiberi), [giocatoriLiberi])
 
-  const liberiFiltrati = useMemo(
-    () => giocatoriLiberi.filter((g) => passaFiltri(g, ricerca, filtroRuolo)),
-    [giocatoriLiberi, ricerca, filtroRuolo])
+  // Le squadre di Serie A presenti fra i liberi: l'elenco si accorcia da solo
+  // man mano che i giocatori vengono assegnati.
+  const squadreUniche = useMemo(
+    () => [...new Set(giocatoriLiberi.map((g) => g.squadra).filter(Boolean))].sort() as string[],
+    [giocatoriLiberi])
+
+  const liberiFiltrati = useMemo(() => {
+    const filtrati = giocatoriLiberi.filter((g) => {
+      const matchSquadra = filtroSquadra === '' || g.squadra === filtroSquadra
+      const matchEta = filtroEta === '' || (g.eta !== null && g.eta <= parseInt(filtroEta))
+      return passaFiltri(g, ricerca, filtroRuolo) && matchSquadra && matchEta
+    })
+    return ordinaGiocatori(filtrati, colonna, verso)
+  }, [giocatoriLiberi, ricerca, filtroRuolo, filtroSquadra, filtroEta, colonna, verso])
+
+  // L'ordinamento non conta fra i filtri attivi: non nasconde nessuna riga.
+  const filtriAttivi =
+    (filtroRuolo ? 1 : 0) + (filtroSquadra ? 1 : 0) + (filtroEta ? 1 : 0)
+
+  const azzeraFiltri = () => {
+    setFiltroRuolo('')
+    setFiltroSquadra('')
+    setFiltroEta('')
+  }
 
   const toggleSelezionato = (giocatore: Giocatore) => {
     if (selezionati.find(s => s.id === giocatore.id)) {
@@ -343,30 +372,87 @@ export default function BustePage() {
 
           {/* Colonna Ricerca */}
           <div className="fm-panel min-w-0 p-3 sm:p-4 lg:col-span-2">
-            <div className="mb-3 flex flex-col gap-2 sm:flex-row">
-              <input
-                type="text"
-                placeholder="Cerca calciatore svincolato…"
-                /* `focus:ring-0` azzerava l'anello di focus proprio sui due
-                   comandi principali della pagina. */
-                className="fm-input flex-1"
-                value={ricerca}
-                onChange={e => setRicerca(e.target.value)}
-                aria-label="Cerca calciatore svincolato"
-              />
-              {/* Prima era un elenco fatto a mano di P/D/C/A, e i ruoli Mantra
-                  non si potevano filtrare: qui si compilano le buste guardando
-                  i reparti scoperti, ed era proprio la pagina in cui servivano
-                  di più. */}
-              <select
-                className="fm-select sm:w-52"
-                value={filtroRuolo}
-                onChange={e => setFiltroRuolo(e.target.value)}
-                aria-label="Filtra per ruolo"
-              >
-                <OpzioniRuolo presenti={ruoliMantra} />
-              </select>
-            </div>
+            {/* Due colonne e non quattro: questo pannello vive dentro i due
+                terzi di sinistra della pagina, e a quattro colonne le tendine
+                si stringerebbero fino a tagliare i nomi delle squadre. */}
+            <PannelloFiltri
+              attivi={filtriAttivi}
+              onAzzera={azzeraFiltri}
+              griglia="sm:grid-cols-2"
+              ricerca={
+                <input
+                  type="text"
+                  placeholder="Cerca calciatore o squadra…"
+                  /* `focus:ring-0` azzerava l'anello di focus proprio sul
+                     comando principale della pagina. */
+                  className="fm-input"
+                  value={ricerca}
+                  onChange={e => setRicerca(e.target.value)}
+                  aria-label="Cerca calciatore o squadra"
+                />
+              }
+            >
+              <div>
+                {/* Prima era un elenco fatto a mano di P/D/C/A, e i ruoli Mantra
+                    non si potevano filtrare: qui si compilano le buste guardando
+                    i reparti scoperti, ed era proprio la pagina in cui servivano
+                    di più. */}
+                <label htmlFor="b-ruolo" className="fm-label mb-1 block">Ruolo</label>
+                <select
+                  id="b-ruolo"
+                  className="fm-select"
+                  value={filtroRuolo}
+                  onChange={e => setFiltroRuolo(e.target.value)}
+                >
+                  <OpzioniRuolo presenti={ruoliMantra} />
+                </select>
+              </div>
+              <div>
+                <label htmlFor="b-squadra" className="fm-label mb-1 block">Squadra</label>
+                <select
+                  id="b-squadra"
+                  className="fm-select"
+                  value={filtroSquadra}
+                  onChange={e => setFiltroSquadra(e.target.value)}
+                >
+                  <option value="">Tutte le squadre</option>
+                  {squadreUniche.map((sq) => (
+                    <option key={sq} value={sq}>{sq}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="b-eta" className="fm-label mb-1 block">Età (under max)</label>
+                <input
+                  id="b-eta"
+                  type="number"
+                  placeholder="Es. 21"
+                  className="fm-input"
+                  value={filtroEta}
+                  onChange={e => setFiltroEta(e.target.value)}
+                />
+              </div>
+              <div>
+                {/* Qui la tendina serve su ogni schermo, non solo sul telefono:
+                    l'elenco è fatto di schede e non ha intestazioni di colonna
+                    da cliccare come in /svincolati. */}
+                <label htmlFor="b-ordine" className="fm-label mb-1 block">Ordina per</label>
+                <select
+                  id="b-ordine"
+                  className="fm-select"
+                  value={`${colonna}:${verso}`}
+                  onChange={(e) => {
+                    const [c, v] = e.target.value.split(':')
+                    setColonna(c as ColonnaOrdine)
+                    setVerso(v as Verso)
+                  }}
+                >
+                  {OPZIONI_ORDINE.map((o) => (
+                    <option key={o.valore} value={o.valore}>{o.etichetta}</option>
+                  ))}
+                </select>
+              </div>
+            </PannelloFiltri>
 
             <div className="mb-2">
               {/* Prima la lista era tagliata a 100 elementi senza dirlo: ordinata

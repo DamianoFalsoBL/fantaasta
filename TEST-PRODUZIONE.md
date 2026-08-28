@@ -593,8 +593,33 @@ riassegnare.
 - [ ] Da manager, cerca e seleziona giocatori.
   **Atteso:** contatore dei selezionati e costo totale si aggiornano a ogni
   scelta.
-- [ ] Deseleziona → i numeri tornano indietro.
-- [ ] Usa la ricerca e il filtro per ruolo dentro la pagina.
+- [ ] Deseleziona toccando la riga → i numeri tornano indietro.
+- [ ] **La × accanto a un nome scelto**, nel riquadro *I tuoi selezionati*, lo
+  toglie senza doverlo ritrovare nella lista lunga.
+
+### F3b · Sapere se la lista è al sicuro
+- [ ] Apri la pagina con una lista già salvata.
+  **Atteso:** la pastiglia accanto al conteggio dice **«✓ Buste salvate»** in
+  verde. A lista mai compilata dice *«Nessuna busta salvata»*.
+- [ ] Togli un giocatore e mettine un altro, così da tornare allo **stesso
+  numero** di prima.
+  **Atteso:** la pastiglia resta **ambra**, *«Buste non salvate»*, e sotto il
+  pulsante compare *«La lista è a posto ma non è ancora salvata»*. È il caso
+  che conta: contare i nomi non basta, la lista è diversa.
+- [ ] Ricarica **senza salvare** → torna la lista del server e la pastiglia
+  torna verde. Serve anche a rimediare se il collaudo è finito storto.
+
+### F3c · Filtri e ordinamento
+- [ ] Sopra la lista c'è **solo la casella di ricerca** e il pulsante *Filtri*
+  (su schermo grande il pannello è già aperto).
+- [ ] Cerca il nome di una squadra di Serie A: la ricerca guarda anche quella,
+  non solo il nome del calciatore.
+- [ ] Dentro il pannello: **Ruolo**, **Squadra**, **Età (under max)** e
+  **Ordina per**. Le prime tre contano nel numero sul pulsante, l'ordinamento
+  no — non nasconde nessuna riga.
+- [ ] *Azzera filtri* riporta l'elenco intero senza toccare la ricerca.
+- [ ] Prova un paio di ordinamenti: chi non ha l'età deve restare **in fondo**
+  in entrambi i versi, non in cima.
 
 ### F4 · Numero sbagliato di slot
 - [ ] Seleziona **meno** giocatori degli slot liberi e invia.

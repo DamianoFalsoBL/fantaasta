@@ -5,9 +5,9 @@ import OpzioniRuolo from '@/components/OpzioniRuolo'
 import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
+import { ordinaGiocatori, OPZIONI_ORDINE, type ColonnaOrdine, type Verso } from '@/utils/ordinamento'
 
-type Colonna = 'nome' | 'ruolo' | 'squadra' | 'eta' | 'quotazione'
-type Verso = 'asc' | 'desc'
+type Colonna = ColonnaOrdine
 
 // Le colonne di testo partono da A-Z, quelle numeriche dal valore più alto:
 // è l'ordine che si cerca davvero aprendo una classifica. La freccia mostra
@@ -23,10 +23,6 @@ const INTESTAZIONI: { colonna: Colonna; etichetta: string }[] = [
   { colonna: 'eta', etichetta: 'Età' },
   { colonna: 'quotazione', etichetta: 'Quotazione' },
 ]
-
-// I reparti si ordinano dalla porta all'attacco, non alfabeticamente: A, C, D, P
-// non vuol dire niente per chi guarda una rosa.
-const PESO_RUOLO: Record<string, number> = { P: 1, D: 2, C: 3, A: 4 }
 
 export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
   const [searchNome, setSearchNome] = useState('')
@@ -71,37 +67,9 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
     })
   }, [giocatori, searchNome, searchSquadra, searchRuolo, searchEta])
 
-  const giocatoriOrdinati = useMemo(() => {
-    const segno = verso === 'asc' ? 1 : -1
-
-    const chiave = (g: any): string | number | null => {
-      if (colonna === 'nome') return g.nome ?? ''
-      if (colonna === 'squadra') return g.squadra ?? ''
-      if (colonna === 'ruolo') return PESO_RUOLO[g.ruolo] ?? 99
-      if (colonna === 'eta') return g.eta ?? null
-      return g.quotazione ?? null
-    }
-
-    return [...giocatoriFiltrati].sort((a, b) => {
-      const ka = chiave(a)
-      const kb = chiave(b)
-
-      // I valori mancanti restano in fondo in entrambi i versi: un'età ignota
-      // non è né la più bassa né la più alta, e in cima darebbe fastidio due
-      // volte su tre.
-      if (ka === null && kb === null) return a.nome.localeCompare(b.nome, 'it')
-      if (ka === null) return 1
-      if (kb === null) return -1
-
-      const confronto = typeof ka === 'string'
-        ? ka.localeCompare(kb as string, 'it')
-        : (ka as number) - (kb as number)
-
-      // A parità, il nome: senza, righe identiche si riordinano a ogni
-      // ridisegno e l'elenco sembra instabile.
-      return confronto === 0 ? a.nome.localeCompare(b.nome, 'it') : confronto * segno
-    })
-  }, [giocatoriFiltrati, colonna, verso])
+  const giocatoriOrdinati = useMemo(
+    () => ordinaGiocatori(giocatoriFiltrati, colonna, verso),
+    [giocatoriFiltrati, colonna, verso])
 
   // Quanti filtri sono attivi oltre la ricerca: è il numero sul pulsante che
   // apre il pannello. L'ordinamento non conta, perché non nasconde righe.
@@ -189,15 +157,9 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
               setVerso(v as Verso)
             }}
           >
-            <option value="nome:asc">Nome A-Z</option>
-            <option value="nome:desc">Nome Z-A</option>
-            <option value="squadra:asc">Squadra A-Z</option>
-            <option value="squadra:desc">Squadra Z-A</option>
-            <option value="ruolo:asc">Reparto, dalla porta all&apos;attacco</option>
-            <option value="eta:asc">Età, dal più giovane</option>
-            <option value="eta:desc">Età, dal più vecchio</option>
-            <option value="quotazione:desc">Quotazione decrescente</option>
-            <option value="quotazione:asc">Quotazione crescente</option>
+            {OPZIONI_ORDINE.map((o) => (
+              <option key={o.valore} value={o.valore}>{o.etichetta}</option>
+            ))}
           </select>
         </div>
       </PannelloFiltri>
