@@ -1,6 +1,7 @@
 'use server'
 
 import * as xlsx from 'xlsx'
+import { randomInt } from 'node:crypto'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { getProfiloCorrente, isAdminRole, isSuperAdminRole } from '@/utils/auth'
 import type { Json } from '@/utils/supabase/database.types'
@@ -556,4 +557,89 @@ export async function ricalcolaSlot(): Promise<RisultatoImport> {
   }
 
   return { success: `Slot ricalcolati per ${aggiornate} squadre.` }
+}
+
+// -----------------------------------------------------------------------------
+// Reset della password di una squadra
+// -----------------------------------------------------------------------------
+
+export type EsitoReset =
+  | { error: string }
+  | { squadra: string; email: string; password: string }
+
+/**
+ * Alfabeto senza i caratteri che si confondono a voce o a schermo: niente
+ * `l`/`1`, niente `o`/`0`. La password viene dettata al telefono o letta da
+ * uno screenshot, e un `l` scambiato per `1` sembra un guasto del sito.
+ *
+ * Solo minuscole: le maiuscole raddoppierebbero le domande («la effe è
+ * grande?») per due bit di entropia in più, che qui non servono a niente.
+ */
+const ALFABETO = 'abcdefghijkmnpqrstuvwxyz23456789'
+
+function generaPassword(): string {
+  const gruppo = () =>
+    Array.from({ length: 4 }, () => ALFABETO[randomInt(ALFABETO.length)]).join('')
+  return `${gruppo()}-${gruppo()}`
+}
+
+/**
+ * Assegna una password nuova all'account collegato a una squadra.
+ *
+ * Esiste perché le email `@fantacalcio.local` non ricevono nulla: il «link per
+ * reimpostare la password» qui non è disattivato per scelta, è impossibile.
+ * Senza questo pulsante l'unico recupero era ricaricare il foglio del budget
+ * per intero, cioè un import completo per una password sola.
+ *
+ * **La password la genera il server e la mostra una volta.** Non viene salvata
+ * da nessuna parte e non si può rileggere: se il super admin chiude la
+ * finestra senza copiarla, si rifà il reset. È di proposito — l'alternativa
+ * sarebbe tenersela scritta da qualche parte in chiaro.
+ */
+export async function resetPasswordSquadra(squadraId: string): Promise<EsitoReset> {
+  const negato = await assertSuperAdmin()
+  if (negato) return { error: negato }
+
+  const admin = createAdminClient()
+
+  const { data: squadra, error: sqErr } = await admin
+    .from('squadre')
+    .select('nome')
+    .eq('id', squadraId)
+    .maybeSingle()
+
+  if (sqErr) return { error: `Impossibile leggere la squadra: ${sqErr.message}` }
+  if (!squadra) return { error: 'Squadra non trovata.' }
+
+  const { data: profili, error: profErr } = await admin
+    .from('profili')
+    .select('id')
+    .eq('squadra_id', squadraId)
+
+  if (profErr) return { error: `Impossibile leggere i profili: ${profErr.message}` }
+  if (!profili || profili.length === 0) {
+    return {
+      error: `Nessun account è collegato a ${squadra.nome}. Il collegamento lo scrive l'import del budget.`,
+    }
+  }
+  // Più profili sulla stessa squadra non dovrebbero esistere, ma lo schema li
+  // ammette. Meglio fermarsi che indovinare a chi cambiare la password.
+  if (profili.length > 1) {
+    return {
+      error: `A ${squadra.nome} risultano collegati ${profili.length} account: vanno sistemati prima, il reset non sa a quale applicarsi.`,
+    }
+  }
+
+  const { data: utente, error: getErr } = await admin.auth.admin.getUserById(profili[0].id)
+  if (getErr || !utente?.user) {
+    return { error: `Account non trovato: ${getErr?.message ?? 'utente inesistente'}.` }
+  }
+
+  const password = generaPassword()
+  const { error: updErr } = await admin.auth.admin.updateUserById(profili[0].id, { password })
+  if (updErr) return { error: `Password non cambiata: ${updErr.message}` }
+
+  // L'email si restituisce insieme alla password: è quella con cui si entra, e
+  // chi ha dimenticato la password spesso ha dimenticato anche quella.
+  return { squadra: squadra.nome, email: utente.user.email ?? '(senza email)', password }
 }

@@ -163,6 +163,32 @@ Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
   bisogna chiedere all'amministratore. È vero: gli account non hanno un
   indirizzo email a cui scrivere.
 
+### A11c · Il super admin genera una password nuova
+
+- [ ] Da super admin, in *Budget e Fasi*, colonna **Accesso**, premi *Nuova
+      password* su una squadra.
+      **Atteso:** una finestra rossa avvisa che quella attuale smette di
+      funzionare subito e che la nuova si vede una volta sola.
+- [ ] Conferma.
+      **Atteso:** compare **utente e password**, la password in verde e grande.
+      Il pulsante *Copia utente e password* mette negli appunti tutte e tre le
+      righe (squadra, utente, password): incollale da qualche parte per
+      controllarlo. Se il browser nega gli appunti, sotto al pulsante compare
+      *«Il browser non ha concesso gli appunti»* — quel caso è stato provato,
+      il pulsante non fallisce in silenzio.
+- [ ] Chiudi la finestra e cerca di rivedere la password.
+      **Atteso:** non c'è modo. Non è un difetto: non viene salvata da nessuna
+      parte, né a database né altrove. Per riaverne una si rifà il reset.
+- [ ] Entra come quel manager con la password nuova → funziona. Con quella di
+      prima → non funziona.
+- [ ] La password non contiene mai `l`, `1`, `o`, `0`.
+      **Atteso:** vero per costruzione — sono i caratteri che si scambiano
+      dettandola al telefono.
+- [ ] **Controprova del gate:** da *admin* semplice (non super admin) la pagina
+      *Budget e Fasi* non è raggiungibile. Se qualcuno arrivasse comunque a
+      chiamare l'azione, deve rispondere *«Accesso negato: azione riservata al
+      Super Admin»*.
+
 ### A12 · Uscita
 - [x] Premi *Esci*.
   **Atteso:** torni alla home. Premi il tasto "indietro" del browser: **non**

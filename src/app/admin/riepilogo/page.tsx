@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import Conferma from '@/components/Conferma'
+import { resetPasswordSquadra } from '../actions'
 
 function BudgetAdjuster({ onApply }: { onApply: (delta: number) => void }) {
   const [amount, setAmount] = useState<number>(5)
@@ -38,6 +39,55 @@ function BudgetAdjuster({ onApply }: { onApply: (delta: number) => void }) {
   )
 }
 
+/**
+ * Le credenziali appena generate, con il pulsante per copiarle.
+ *
+ * E' un componente e non un pezzo di JSX dentro il messaggio della finestra
+ * perche' il pulsante ha uno stato suo (il "Copiato" che compare per un
+ * attimo), e i messaggi di `Conferma` sono nodi statici.
+ */
+function CredenzialiGenerate({ squadra, email, password }: { squadra: string; email: string; password: string }) {
+  const [statoCopia, setStatoCopia] = useState<'pronto' | 'copiato' | 'negato'>('pronto')
+
+  const copia = async () => {
+    try {
+      await navigator.clipboard.writeText(`Accesso ${squadra}
+Utente: ${email}
+Password: ${password}`)
+      setStatoCopia('copiato')
+      setTimeout(() => setStatoCopia('pronto'), 2000)
+    } catch {
+      // Il browser puo' negare gli appunti — succede fuori da HTTPS e in certi
+      // contesti incorniciati. Va detto: un pulsante che non fa niente e non
+      // si lamenta fa incollare il vuoto convinti di avere la password.
+      setStatoCopia('negato')
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <p>
+        Password nuova per <strong className="text-ink">{squadra}</strong>. Copiala adesso:{' '}
+        <strong className="text-ink">non si potrà più rileggere</strong>.
+      </p>
+      <div className="space-y-1 rounded-md border border-line bg-void p-3">
+        <div className="fm-label">Utente</div>
+        <div className="break-all font-mono text-sm text-ink">{email}</div>
+        <div className="fm-label pt-2">Password</div>
+        <div className="font-mono text-xl font-bold tracking-wider text-neon">{password}</div>
+      </div>
+      <button onClick={copia} className="fm-btn fm-btn-ghost fm-btn-sm">
+        {statoCopia === 'copiato' ? 'Copiato' : 'Copia utente e password'}
+      </button>
+      {statoCopia === 'negato' && (
+        <p className="text-xs text-rosso">
+          Il browser non ha concesso gli appunti: seleziona e copia il testo qui sopra a mano.
+        </p>
+      )}
+    </div>
+  )
+}
+
 // Al posto di `confirm()`: si registra qui l'azione in attesa di conferma.
 type AzioneInAttesa = {
   titolo: string
@@ -60,6 +110,9 @@ export default function AdminRiepilogoPage() {
   const [azione, setAzione] = useState<AzioneInAttesa | null>(null)
   // Al posto di `alert()`: un avviso in pagina, che il tema può raggiungere.
   const [esito, setEsito] = useState<{ tipo: 'ok' | 'errore'; testo: string } | null>(null)
+  // La password appena generata. Vive solo qui, finche' la finestra resta
+  // aperta: non viene salvata da nessuna parte e non si puo' rileggere.
+  const [credenziali, setCredenziali] = useState<{ squadra: string; email: string; password: string } | null>(null)
 
   const fetchData = async () => {
     setLoading(true)
@@ -132,6 +185,27 @@ export default function AdminRiepilogoPage() {
         const { error } = await supabase.rpc('admin_annulla_acquisto', { p_asta_id: astaId })
         if (error) setEsito({ tipo: 'errore', testo: `Errore annullamento acquisto: ${error.message}` })
         else { setEsito({ tipo: 'ok', testo: `Acquisto di ${giocatoreNome} annullato.` }); await fetchData() }
+      },
+    })
+  }
+
+  const resetPassword = (squadraId: string, squadraNome: string) => {
+    setAzione({
+      titolo: 'Nuova password',
+      pericolo: true,
+      messaggio: (
+        <>
+          Stai per generare una password nuova per <strong className="text-ink">{squadraNome}</strong>. Quella
+          attuale smette di funzionare subito, anche se il manager se l&apos;era cambiata da sé. La password
+          nuova viene mostrata <strong className="text-ink">una volta sola</strong>: se chiudi la finestra senza
+          copiarla, si rifà il reset.
+        </>
+      ),
+      testoConferma: 'Genera',
+      esegui: async () => {
+        const esitoReset = await resetPasswordSquadra(squadraId)
+        if ('error' in esitoReset) setEsito({ tipo: 'errore', testo: esitoReset.error })
+        else setCredenziali(esitoReset)
       },
     })
   }
@@ -229,11 +303,12 @@ export default function AdminRiepilogoPage() {
                   <th className="fm-num">Budget residuo</th>
                   <th className="text-center">Aggiungi / togli crediti</th>
                   <th className="fm-num">Slot</th>
+                  <th className="text-center">Accesso</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={5} className="p-8 text-center text-ink-dim">Caricamento in corso…</td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-ink-dim">Caricamento in corso…</td></tr>
                 ) : squadre.map(s => (
                   <tr key={s.id}>
                     <td className="fm-nome">{s.nome}</td>
@@ -248,6 +323,14 @@ export default function AdminRiepilogoPage() {
                       <span className={`fm-badge ${(s.slot_occupati ?? 0) < slotTotali ? 'fm-badge-mid' : 'fm-badge-top'}`}>
                         {s.slot_occupati ?? 0} / {slotTotali}
                       </span>
+                    </td>
+                    <td className="text-center">
+                      <button
+                        onClick={() => resetPassword(s.id, s.nome)}
+                        className="fm-btn fm-btn-ghost fm-btn-sm"
+                      >
+                        Nuova password
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -319,6 +402,16 @@ export default function AdminRiepilogoPage() {
           </div>
         </div>
       </div>
+
+      <Conferma
+        aperta={credenziali !== null}
+        titolo="Password generata"
+        soloConferma
+        messaggio={credenziali ? <CredenzialiGenerate {...credenziali} /> : ''}
+        testoConferma="Ho copiato, chiudi"
+        onAnnulla={() => setCredenziali(null)}
+        onConferma={() => setCredenziali(null)}
+      />
 
       <Conferma
         aperta={azione !== null}

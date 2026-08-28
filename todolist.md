@@ -31,20 +31,6 @@ Se si fa, **con file SVG nostri**, non con collegamenti a immagini altrui.
 
 ---
 
-## Cambio password dei manager
-
-Fatti il 28 agosto i due pezzi che contavano: il manager se la cambia da *La
-mia Rosa*, e l'import del budget non gliela riscrive più se la cella è vuota.
-Resta solo la comodità.
-
-### Facoltativo: reset password dal super admin
-
-Un pulsante accanto a ogni squadra in *Budget e Fasi*, per quando qualcuno
-dimentica la password e non si ha voglia di reimportare tutto. Comodo, non
-indispensabile.
-
----
-
 ## Prestazioni e infrastruttura
 
 ### `fetchAsta()` ricarica tutta la lista chiamate ogni 15 secondi
@@ -137,6 +123,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | Il super admin genera una password nuova a una squadra da *Budget e Fasi* |
 | 28 ago 2026 | L'import del budget non riscrive più le password scelte, se la cella è vuota |
 | 28 ago 2026 | Il manager si cambia la password da *La mia Rosa* |
 | 28 ago 2026 | Il tabellone d'asta sta in una schermata di telefono: da 917 a 611px |
