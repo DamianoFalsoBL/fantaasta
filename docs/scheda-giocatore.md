@@ -7,7 +7,7 @@
 > nel repository il 28 agosto perché quel file è **una sola casella che si
 > sovrascrive** a ogni nuova progettazione: i tre piani precedenti della stessa
 > sessione erano già stati cancellati così. Qui è versionato, e
-> [todolist.md](../todolist.md) ci rimanda alla voce 11.
+> [todolist.md](../todolist.md) ci rimanda dalla voce *Scheda giocatore*.
 
 ## Cosa era stato chiesto
 

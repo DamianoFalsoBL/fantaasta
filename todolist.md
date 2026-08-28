@@ -18,26 +18,12 @@ dice cosa va verificato, questo dice cosa va costruito.
 L'asta è andata bene. Questi sono i suggerimenti raccolti a caldo, in ordine di
 quanto valgono rispetto a quanto costano.
 
-### 1. In `/buste`, lo stato «Buste salvate» / «Buste non salvate»
-
-La pagina non distingue fra ciò che vedi e ciò che il server ha davvero. Nel
-momento che conta — pochi minuti prima della chiusura — è l'unica domanda che
-un manager si fa, e oggi non c'è risposta sullo schermo.
-
-`src/app/buste/page.tsx` carica già la selezione salvata all'apertura
-(`busteInAttesa`, dentro `loadData`): basta confrontarla con `selezionati` per
-avere lo stato. Non serve interrogare il server a ogni modifica.
-
-**Trappola:** lo stato deve tornare a «non salvate» anche quando si *toglie* un
-giocatore, non solo quando se ne aggiunge uno. Un confronto sulla lunghezza
-della lista non basta.
-
-### 2. In `/buste`, una × per togliere un giocatore scelto
+### In `/buste`, una × per togliere un giocatore scelto
 
 L'elenco dei nomi scelti sopra crediti e slot c'è già. Oggi per toglierne uno
 bisogna ritrovarlo nella lista lunga: la × su ogni nome è il gesto naturale.
 
-### 3. In `/buste`, filtri e ordinamento come in `/svincolati`
+### In `/buste`, filtri e ordinamento come in `/svincolati`
 
 Metà c'è già: ricerca libera e ruolo, tramite `passaFiltri` di
 `src/utils/filtri.ts`. Mancano il filtro per squadra di Serie A, quello per età
@@ -47,7 +33,7 @@ Da riusare: `PannelloFiltri` (`src/components/PannelloFiltri.tsx`), nato per
 `/svincolati` e `/aste`. Questa sarebbe la terza pagina, il che conferma che
 era il posto giusto dove metterlo.
 
-### 4. Sommario Buste: chi è stato assegnato senza passare dall'asta
+### Sommario Buste: chi è stato assegnato senza passare dall'asta
 
 Il gemello della scheda *Assegnati* di `/aste`. Oggi dopo lo spoglio ognuno
 vede solo i propri esiti.
@@ -65,7 +51,7 @@ tabella non registra *da dove* arriva un giocatore, quindi mescolerebbe gli
 acquisti all'asta con quelli da busta — cioè proprio la distinzione che questa
 pagina esiste per mostrare.
 
-### 5. In `/asta`, avviso ben visibile quando l'asta è finita
+### In `/asta`, avviso ben visibile quando l'asta è finita
 
 Segnalato dall'admin: durante la serata capitava di non accorgersi che un'asta
 era conclusa, per tempo scaduto o perché si erano ritirati tutti.
@@ -74,14 +60,14 @@ Lo stato è **già calcolato** in `src/components/TabelloneAsta.tsx`: `timeLeft`
 arriva a 0 e `isSoloLeft` copre il caso dei ritiri. È un problema di
 presentazione, non di logica: oggi quella condizione non grida abbastanza.
 
-### 6. In `/aste`, non si riesce a vedere tutto in una schermata
+### In `/aste`, non si riesce a vedere tutto in una schermata
 
 **In attesa dello screenshot** (promesso per il 28 agosto). Da non toccare
 prima: la pagina è stata rifatta il 27 agosto (v1.8.0 e v1.8.3) e non è chiaro
 se la segnalazione riguardi il telefono, il computer o le pastiglie dei
 contendenti che vanno a capo. Indovinare qui vuol dire rifare due volte.
 
-### 7. Facoltativo: logo della squadra di Serie A in `/svincolati`
+### Facoltativo: logo della squadra di Serie A in `/svincolati`
 
 Il meno convincente del gruppo, e va detto perché.
 
@@ -144,7 +130,7 @@ indispensabile.
 
 ## Prestazioni e infrastruttura
 
-### 8. `fetchAsta()` ricarica tutta la lista chiamate ogni 15 secondi
+### `fetchAsta()` ricarica tutta la lista chiamate ogni 15 secondi
 
 `src/components/TabelloneAsta.tsx` rifà cinque interrogazioni a ogni giro del
 salvagente e a ogni evento in tempo reale.
@@ -157,7 +143,7 @@ state importate, non battute. Con le liste piene torna a pesare.
 **Trappola:** non disattivare il salvagente quando non c'è un'asta in corso. È
 esattamente il caso per cui esiste.
 
-### 9. Leggere i consumi di Supabase e Vercel dopo l'asta del 27 agosto
+### Leggere i consumi di Supabase e Vercel dopo l'asta del 27 agosto
 
 Ora che un'asta vera c'è stata, il confronto ha senso. La fotografia di
 partenza dell'8 agosto: Supabase egress 71 MB, database 26,83 MB, realtime
@@ -173,7 +159,7 @@ salvagente ogni 15 secondi — cioè «sembrava funzionare».
 Il ciclo Supabase si è chiuso il 12 agosto: il confronto va fatto sul grafico
 giornaliero, non sul totale del mese.
 
-### 10. Duplicare il sito per una seconda lega
+### Duplicare il sito per una seconda lega
 
 Rimandato dall'utente. Nota: Supabase somma egress e messaggi realtime di
 **tutti** i progetti dell'organizzazione; solo lo spazio del database è per
@@ -183,7 +169,7 @@ progetto.
 
 ## Rimandato con dossier a parte
 
-### 11. Scheda giocatore in `/svincolati`
+### Scheda giocatore in `/svincolati`
 
 Una colonna con l'icona **i** che apre una scheda con anagrafica e storico.
 Ricerca fatta il 27 agosto, decisione presa, costruzione rimandata.
@@ -221,6 +207,12 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
   esercitato nell'asta del 27.
 - Tre `any` nel lint di `src/app/svincolati/SvincolatiClient.tsx` (righe 30, 71,
   140), preesistenti.
+- `src/app/buste/page.tsx`: `loadData` è usata dentro l'`useEffect` di riga 67
+  ma dichiarata dopo, e il lint lo segnala come **errore** (non warning).
+  Preesistente, e il build passa lo stesso perché `next build` non esegue
+  eslint. Si risolve spostando `loadData` sopra l'effect o avvolgendola in
+  `useCallback`; la seconda strada obbliga a sistemare anche le dipendenze,
+  quindi non è la modifica di una riga che sembra.
 
 ---
 
@@ -228,6 +220,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | In `/buste` una pastiglia dice se quello che vedi è già salvato sul server |
 | 27 ago 2026 | L'export delle rose esce nel formato di fantacalcio.it, e l'import è riuscito |
 | 27 ago 2026 | Il massimo automatico non rilancia più su chi è già in testa |
 | 27 ago 2026 | In *Sommario aste* restano due totali invece di quattro |

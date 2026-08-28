@@ -52,6 +52,9 @@ export default function BustePage() {
   const [filtroRuolo, setFiltroRuolo] = useState('')
   const [giocatoriLiberi, setGiocatoriLiberi] = useState<Giocatore[]>([])
   const [selezionati, setSelezionati] = useState<Giocatore[]>([])
+  // Gli id che il server ha registrato, non quelli che si vedono a schermo:
+  // servono a distinguere le due cose. `null` finché non si è letto.
+  const [idsSalvati, setIdsSalvati] = useState<Set<number> | null>(null)
 
   // Per fase chiusa
   const [risultati, setRisultati] = useState<BustaConGiocatore[]>([])
@@ -152,9 +155,13 @@ export default function BustePage() {
         .eq('squadra_id', sq.id)
         .eq('esito', 'ATTESA')
 
-      if (busteInAttesa && busteInAttesa.length > 0 && liberi) {
-        const ids = busteInAttesa.map(b => b.giocatore_id)
-        setSelezionati((liberi as Giocatore[]).filter(g => ids.includes(g.id)))
+      // Si tiene da parte ciò che il server ha davvero registrato: è l'unico
+      // modo di dire se quello che si vede a schermo è già al sicuro.
+      const idsAttesa = new Set<number>((busteInAttesa ?? []).map((b) => b.giocatore_id))
+      setIdsSalvati(idsAttesa)
+
+      if (idsAttesa.size > 0) {
+        setSelezionati(liberi.filter((g) => idsAttesa.has(g.id)))
       }
 
     } else {
@@ -245,6 +252,24 @@ export default function BustePage() {
     selezionati.length === slotLiberi &&
     costoTotale <= squadra.crediti_residui &&
     portieriResidui >= 0
+
+  // Confronto fra INSIEMI, non fra lunghezze: togliere un giocatore e
+  // aggiungerne un altro lascia il conto identico e la lista diversa, che è
+  // proprio il caso in cui dire "salvate" sarebbe una bugia.
+  const salvata =
+    idsSalvati !== null &&
+    idsSalvati.size === selezionati.length &&
+    selezionati.every((g) => idsSalvati.has(g.id))
+
+  // Tre stati e non due: a lista mai compilata "salvate" sarebbe vero per
+  // vacuità — due insiemi vuoti sono uguali — e leggerlo su una pagina appena
+  // aperta darebbe l'idea di essere a posto senza aver fatto niente.
+  const statoBuste: 'mai' | 'salvate' | 'modificate' =
+    idsSalvati !== null && idsSalvati.size === 0 && selezionati.length === 0
+      ? 'mai'
+      : salvata
+        ? 'salvate'
+        : 'modificate'
 
   return (
     <div className="mx-auto w-full max-w-7xl p-3 sm:p-6 md:p-8">
@@ -417,9 +442,29 @@ export default function BustePage() {
             </div>
 
             <div className="fm-panel overflow-hidden">
+              {/* Lo stato sta qui, sopra il pulsante e accanto al conteggio:
+                  è il punto in cui si guarda prima di chiudere la pagina, ed
+                  è lì che serve sapere se quello che si vede è già al sicuro. */}
               <div className="fm-panel-head">
                 <span>I tuoi selezionati</span>
-                <span className="fm-label">{selezionati.length}/{slotLiberi}</span>
+                <span className="flex items-center gap-2">
+                  <span className="fm-label">{selezionati.length}/{slotLiberi}</span>
+                  <span
+                    className={`fm-chip shrink-0 normal-case ${
+                      statoBuste === 'salvate'
+                        ? 'fm-chip-neon'
+                        : statoBuste === 'modificate'
+                          ? 'fm-chip-ambra'
+                          : ''
+                    }`}
+                  >
+                    {statoBuste === 'salvate'
+                      ? '✓ Buste salvate'
+                      : statoBuste === 'modificate'
+                        ? 'Buste non salvate'
+                        : 'Nessuna busta salvata'}
+                  </span>
+                </span>
               </div>
 
               <div className="fm-panel-body">
@@ -465,13 +510,20 @@ export default function BustePage() {
                 >
                   Salva la lista
                 </button>
-                {!isValida && (
+                {!isValida ? (
                   <p className="mt-2.5 text-center text-xs font-semibold text-rosso">
                     {portieriResidui < 0
                       ? `Puoi prendere al massimo ${portieriDisponibili} portier${portieriDisponibili === 1 ? 'e' : 'i'}.`
                       : 'Devi riempire esattamente tutti gli slot e non superare il budget.'}
                   </p>
-                )}
+                ) : statoBuste === 'modificate' ? (
+                  /* La pastiglia in cima al riquadro dice lo stato, ma chi ha
+                     appena finito di scegliere guarda il pulsante: qui serve
+                     l'invito ad agire, non la constatazione. */
+                  <p className="mt-2.5 text-center text-xs font-semibold text-ambra">
+                    La lista è a posto ma non è ancora salvata.
+                  </p>
+                ) : null}
               </div>
             </div>
           </div>
