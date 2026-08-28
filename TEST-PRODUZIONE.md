@@ -662,12 +662,15 @@ esiti diventano pubblici.
 
 - [ ] **A fase aperta**, da un secondo manager: non vede in alcun modo le
   selezioni altrui ancora in attesa. È qui che l'asta al buio va protetta.
-- [ ] Prova anche dalla console, che è la verifica vera perché scavalca
+- [x] Prova anche dalla console, che è la verifica vera perché scavalca
   l'interfaccia:
   `await supabase.from('buste').select('*').eq('esito','ATTESA')`
   **Atteso:** tornano **solo** le proprie righe. Se ne tornano di altre
   squadre, la policy `lettura_buste` è sbagliata e la fase buste non è più
   segreta.
+  *Verificato il 28 agosto 2026 nel caso più severo, con la chiave anonima —
+  che non possiede alcuna busta: su 47 righe totali ne vede 46, e le zero in
+  ATTESA. La riga in attesa esisteva davvero al momento della prova.*
 - [ ] Stessa chiamata senza filtro sull'esito: le righe **già spogliate**
   (VINTO, CONTESO, PERSO) di tutte le squadre ora si vedono, ed è voluto.
 
