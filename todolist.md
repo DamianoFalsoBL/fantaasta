@@ -108,6 +108,11 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 - **D20, terza casella.** Chi ha il tetto più alto ed è già in testa non deve
   farsi rilanciare da sé piazzando un rilancio a mano. Il ramo non è stato
   esercitato nell'asta del 27.
+- **Il messaggio di errore dell'accesso è in inglese.** `LoginForm` mostra
+  `error.message` così com'è: *«Invalid login credentials»*. Non distingue fra
+  utente inesistente e password sbagliata — di proposito, lato Supabase — ma in
+  italiano si capirebbe di più. Attenzione a non inventare una distinzione che
+  il server non fa.
 - Tre `any` nel lint di `src/app/svincolati/SvincolatiClient.tsx` (righe 30, 71,
   140), preesistenti.
 - `src/app/buste/page.tsx`: `loadData` è usata dentro l'`useEffect` di riga 67
@@ -123,6 +128,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | Accesso e cambio password sfrondano gli spazi ai bordi |
 | 28 ago 2026 | Il super admin genera una password nuova a una squadra da *Budget e Fasi* |
 | 28 ago 2026 | L'import del budget non riscrive più le password scelte, se la cella è vuota |
 | 28 ago 2026 | Il manager si cambia la password da *La mia Rosa* |

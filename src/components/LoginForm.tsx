@@ -18,13 +18,21 @@ export default function LoginForm() {
     setError(null)
 
     // Formatta l'username nell'email fittizia usata in fase di importazione se non c'è la @
-    const formattedEmail = usernameOrEmail.includes('@') 
-      ? usernameOrEmail 
-      : `${usernameOrEmail.replace(/\s+/g, '').toLowerCase()}@fantacalcio.local`
+    // Il ramo con la @ ora abbassa e sfronda come l'altro: un'email incollata
+    // con la maiuscola iniziale o con uno spazio in coda veniva rifiutata, e
+    // il messaggio diceva soltanto "credenziali non valide".
+    const utentePulito = usernameOrEmail.trim()
+    const formattedEmail = utentePulito.includes('@')
+      ? utentePulito.toLowerCase()
+      : `${utentePulito.replace(/\s+/g, '').toLowerCase()}@fantacalcio.local`
 
     const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: formattedEmail,
-      password,
+      // Gli spazi ai bordi non fanno parte di nessuna password nostra: quelle
+      // dell'import passano da `testo()`, che le sfronda, e quelle generate
+      // dal reset non ne contengono. Toglierli qui evita che una tastiera del
+      // telefono, o un incolla, faccia fallire un accesso corretto.
+      password: password.trim(),
     })
 
     if (error) {

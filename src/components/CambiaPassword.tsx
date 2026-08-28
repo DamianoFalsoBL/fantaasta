@@ -33,15 +33,31 @@ export default function CambiaPassword() {
     e.preventDefault()
     setEsito(null)
 
-    if (nuova.length < LUNGHEZZA_MINIMA) {
+    // Gli spazi ai bordi si tolgono prima di qualunque controllo.
+    //
+    // Provato contro Supabase: una password che finisce con uno spazio viene
+    // accettata senza obiezioni, e poi la stessa password digitata senza
+    // spazio NON entra piu'. Sul telefono lo spazio arriva da solo — dopo un
+    // suggerimento della tastiera, o incollando — e resta invisibile in un
+    // campo con i pallini. Chi ci finisce dentro non ha modo di accorgersene.
+    //
+    // Si taglia anche l'attuale, e si puo' farlo senza rischi: le password che
+    // arrivano dall'import passano da `testo()`, che gia' toglie gli spazi, e
+    // quelle generate dal reset sono [a-z2-9]{4}-[a-z2-9]{4}. L'unica fonte
+    // possibile di una password con lo spazio era questo modulo.
+    const attualePulita = attuale.trim()
+    const nuovaPulita = nuova.trim()
+    const confermaPulita = conferma.trim()
+
+    if (nuovaPulita.length < LUNGHEZZA_MINIMA) {
       setEsito({ tono: 'errore', testo: `La nuova password deve avere almeno ${LUNGHEZZA_MINIMA} caratteri.` })
       return
     }
-    if (nuova !== conferma) {
+    if (nuovaPulita !== confermaPulita) {
       setEsito({ tono: 'errore', testo: 'Le due nuove password non coincidono.' })
       return
     }
-    if (nuova === attuale) {
+    if (nuovaPulita === attualePulita) {
       setEsito({ tono: 'errore', testo: 'La nuova password è uguale a quella attuale.' })
       return
     }
@@ -60,14 +76,14 @@ export default function CambiaPassword() {
     // sostituisce la sessione con una nuova dello stesso utente: innocuo, ed è
     // l'unico modo di controllare la password senza mandarla a un endpoint
     // nostro.
-    const { error: erroreAccesso } = await supabase.auth.signInWithPassword({ email, password: attuale })
+    const { error: erroreAccesso } = await supabase.auth.signInWithPassword({ email, password: attualePulita })
     if (erroreAccesso) {
       setEsito({ tono: 'errore', testo: 'La password attuale non è corretta.' })
       setInCorso(false)
       return
     }
 
-    const { error } = await supabase.auth.updateUser({ password: nuova })
+    const { error } = await supabase.auth.updateUser({ password: nuovaPulita })
     if (error) {
       setEsito({ tono: 'errore', testo: `Non è stato possibile cambiarla: ${error.message}` })
     } else {
