@@ -928,8 +928,14 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
           {/* Etichetta e pastiglie sulla stessa riga, e il ritiro dentro il
               flusso invece che su una riga sua: separati erano 133px, insieme
               87. Il pulsante resta `fm-btn`, quindi sotto md conserva i 44px
-              di altezza — si comprime lo spazio attorno, non il bersaglio. */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-2 border-t border-line pt-3 sm:mt-6 sm:pt-5">
+              di altezza — si comprime lo spazio attorno, non il bersaglio.
+
+              Da md in su le pastiglie vanno a sinistra e il ritiro all'altro
+              capo della riga: al centro, subito dopo i nomi, sembrava la
+              pastiglia di una terza squadra invece di un comando. Sul telefono
+              lo spazio non basta per allontanarli e resta tutto centrato, dove
+              la confusione non si pone: le pastiglie stanno su una riga loro. */}
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2 border-t border-line pt-3 sm:mt-6 sm:pt-5 md:justify-start">
             <h3 className="fm-label">👥 In gara</h3>
             <div className="flex flex-wrap justify-center gap-2">
               {partecipanti.map((p) => {
@@ -954,7 +960,7 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
             </div>
             
             {!isChiamata && isParticipant && !hasAbbandonato && asta.squadra_in_testa !== squadraId && (
-              <button onClick={() => abbandona()} disabled={loading} className="fm-btn fm-btn-danger fm-btn-sm">
+              <button onClick={() => abbandona()} disabled={loading} className="fm-btn fm-btn-danger fm-btn-sm md:ml-auto">
                 🛑 Mi ritiro
               </button>
             )}

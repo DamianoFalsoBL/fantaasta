@@ -123,6 +123,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 29 ago 2026 | Su schermo grande *Mi ritiro* non sta più in mezzo ai nomi in gara |
 | 29 ago 2026 | Gli errori di autenticazione parlano italiano |
 | 28 ago 2026 | Accesso e cambio password sfrondano gli spazi ai bordi |
 | 28 ago 2026 | Il super admin genera una password nuova a una squadra da *Budget e Fasi* |
