@@ -18,13 +18,6 @@ dice cosa va verificato, questo dice cosa va costruito.
 L'asta è andata bene. Questi sono i suggerimenti raccolti a caldo, in ordine di
 quanto valgono rispetto a quanto costano.
 
-### In `/aste`, non si riesce a vedere tutto in una schermata
-
-**In attesa dello screenshot** (promesso per il 28 agosto). Da non toccare
-prima: la pagina è stata rifatta il 27 agosto (v1.8.0 e v1.8.3) e non è chiaro
-se la segnalazione riguardi il telefono, il computer o le pastiglie dei
-contendenti che vanno a capo. Indovinare qui vuol dire rifare due volte.
-
 ### Facoltativo: logo della squadra di Serie A in `/svincolati`
 
 Il meno convincente del gruppo, e va detto perché.
@@ -178,6 +171,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | Il tabellone d'asta sta in una schermata di telefono: da 917 a 611px |
 | 28 ago 2026 | Tolta la seconda pagina di accesso: `/login` rimanda alla home |
 | 28 ago 2026 | Sommario buste in fondo a `/buste`, con gli esiti già spogliati di tutte le squadre |
 | 28 ago 2026 | In `/asta` una fascia dice che l'asta è finita, e i rilanci si spengono |

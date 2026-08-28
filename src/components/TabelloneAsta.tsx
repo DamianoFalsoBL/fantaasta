@@ -703,9 +703,12 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
         )}
         {/* Spaziatura ridotta sotto sm: su uno schermo da 5" ogni riga tolta
             qui è una riga guadagnata in fondo, dove stanno i partecipanti. */}
-        <div className="relative border-b border-line-hi bg-panel-hi px-3 py-3 text-center sm:px-4 sm:py-4">
-          <h2 className="fm-title text-2xl sm:text-3xl">{asta.giocatori.nome}</h2>
-          <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-sm text-ink-mid">
+        {/* Sotto sm nome e dati stanno sulla STESSA riga: separati costavano
+            83px, insieme 45. Da sm in su tornano incolonnati, dove lo spazio
+            non manca. */}
+        <div className="relative flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1 border-b border-line-hi bg-panel-hi px-3 py-2 text-center sm:block sm:px-4 sm:py-4">
+          <h2 className="fm-title text-xl sm:text-3xl">{asta.giocatori.nome}</h2>
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-sm text-ink-mid sm:mt-1.5">
             <span>{asta.giocatori.ruolo}</span>
             <span className="text-ink-dim">&bull;</span>
             <span>{asta.giocatori.squadra}</span>
@@ -808,25 +811,25 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                 torna a tutta larghezza, a portata di pollice. */}
             <div className="flex flex-col items-center gap-2 border-t border-line pt-3 sm:gap-2.5 md:w-72 md:shrink-0 md:border-l md:border-t-0 md:pl-6 md:pt-0">
 
-              {/* "Il tuo massimo" sta qui e non sotto il prezzo: serve mentre si
-                  decide quanto offrire, non mentre si guarda l'offerta altrui. */}
-              {massimoOffribile !== null && (
-                <div className="flex w-full items-baseline justify-center gap-2">
-                  <span className="fm-label">Il tuo massimo</span>
-                  <span
-                    className={`text-lg font-bold tabular-nums ${
-                      massimoOffribile <= asta.prezzo_corrente ? 'text-rosso' : 'text-neon'
-                    }`}
-                  >
-                    {massimoOffribile}<span className="text-xs font-normal text-ink-dim"> cr</span>
+              {/* "Rilancia" e "il tuo massimo" sulla stessa riga: erano due
+                  righe intere per pochi caratteri ciascuna. Il massimo sta qui
+                  e non sotto il prezzo perché serve mentre si decide quanto
+                  offrire, non mentre si guarda l'offerta altrui. */}
+              <div className="flex w-full items-baseline justify-between gap-2">
+                <span className="fm-label">Rilancia</span>
+                {massimoOffribile !== null && (
+                  <span className="flex items-baseline gap-1.5">
+                    <span className="fm-label">il tuo massimo</span>
+                    <span
+                      className={`text-base font-bold tabular-nums ${
+                        massimoOffribile <= asta.prezzo_corrente ? 'text-rosso' : 'text-neon'
+                      }`}
+                    >
+                      {massimoOffribile}<span className="text-xs font-normal text-ink-dim"> cr</span>
+                    </span>
                   </span>
-                  {massimoOffribile <= asta.prezzo_corrente && (
-                    <span className="text-[11px] font-semibold text-rosso">fuori portata</span>
-                  )}
-                </div>
-              )}
-
-              <p className="fm-label w-full text-center">Rilancia</p>
+                )}
+              </div>
 
               {error && <div className="fm-alert fm-alert-danger w-full text-center text-xs font-semibold">{error}</div>}
 
@@ -861,10 +864,42 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                   la stessa transazione del rilancio avversario: funziona anche
                   a pagina chiusa. */}
               {squadraId && (
-                <div className="mt-2 w-full border-t border-line pt-3">
-                  <p className="fm-label mb-1.5 text-center">Massimo automatico</p>
-
-                  {massimoAuto !== null ? (
+                <div className="mt-2 w-full border-t border-line pt-2 sm:pt-3">
+                  {/* Quando un tetto c'è, si vede sempre: è uno stato da tenere
+                      d'occhio, e nasconderlo sarebbe il difetto che abbiamo
+                      appena corretto altrove.
+                      Quando NON c'è, il modulo sta dietro un tocco: impostarlo
+                      è un gesto deliberato, non qualcosa che si guarda ogni
+                      secondo, e quelle due righe valevano 55px su uno schermo
+                      che ne aveva 73 di troppo. */}
+                  {massimoAuto === null ? (
+                    <details className="w-full">
+                      <summary className="fm-label cursor-pointer list-none text-center">
+                        Massimo automatico ▾
+                      </summary>
+                      <form
+                        onSubmit={(e) => { e.preventDefault(); void impostaMassimo() }}
+                        className="mt-2 flex w-full gap-2"
+                      >
+                        <input
+                          type="number"
+                          min={offertaMinima}
+                          value={campoMassimo}
+                          onChange={(e) => setCampoMassimo(e.target.value)}
+                          placeholder="Fino a…"
+                          disabled={massimoBloccato}
+                          className="fm-input flex-1"
+                          aria-label="Importo massimo automatico"
+                          required
+                        />
+                        <button type="submit" disabled={massimoBloccato} className="fm-btn fm-btn-viola shrink-0">
+                          Imposta
+                        </button>
+                      </form>
+                    </details>
+                  ) : (
+                    <>
+                    <p className="fm-label mb-1.5 text-center">Massimo automatico</p>
                     <div className="flex flex-col items-center gap-2">
                       <span className={`fm-chip ${tettoSuperato ? 'fm-chip-rosso' : 'fm-chip-neon'}`}>
                         {massimoAuto} cr · {tettoSuperato ? 'superato' : 'attivo'}
@@ -882,26 +917,7 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                         Rimuovi
                       </button>
                     </div>
-                  ) : (
-                    <form
-                      onSubmit={(e) => { e.preventDefault(); void impostaMassimo() }}
-                      className="flex w-full gap-2"
-                    >
-                      <input
-                        type="number"
-                        min={offertaMinima}
-                        value={campoMassimo}
-                        onChange={(e) => setCampoMassimo(e.target.value)}
-                        placeholder="Fino a…"
-                        disabled={massimoBloccato}
-                        className="fm-input flex-1"
-                        aria-label="Importo massimo automatico"
-                        required
-                      />
-                      <button type="submit" disabled={massimoBloccato} className="fm-btn fm-btn-viola shrink-0">
-                        Imposta
-                      </button>
-                    </form>
+                    </>
                   )}
                 </div>
               )}
@@ -909,8 +925,12 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
 
           </div>
 
-          <div className="mt-4 border-t border-line pt-4 sm:mt-6 sm:pt-5">
-            <h3 className="fm-label mb-3 text-center">👥 Partecipanti in gara</h3>
+          {/* Etichetta e pastiglie sulla stessa riga, e il ritiro dentro il
+              flusso invece che su una riga sua: separati erano 133px, insieme
+              87. Il pulsante resta `fm-btn`, quindi sotto md conserva i 44px
+              di altezza — si comprime lo spazio attorno, non il bersaglio. */}
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2 border-t border-line pt-3 sm:mt-6 sm:pt-5">
+            <h3 className="fm-label">👥 In gara</h3>
             <div className="flex flex-wrap justify-center gap-2">
               {partecipanti.map((p) => {
                 const haAbbandonato = elencoAbbandoni(asta.abbandoni).includes(p.squadra_id)
@@ -934,11 +954,9 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
             </div>
             
             {!isChiamata && isParticipant && !hasAbbandonato && asta.squadra_in_testa !== squadraId && (
-              <div className="mt-5 flex justify-center">
-                <button onClick={() => abbandona()} disabled={loading} className="fm-btn fm-btn-danger">
-                  🛑 Smetti (mi ritiro)
-                </button>
-              </div>
+              <button onClick={() => abbandona()} disabled={loading} className="fm-btn fm-btn-danger fm-btn-sm">
+                🛑 Mi ritiro
+              </button>
             )}
           </div>
         </div>

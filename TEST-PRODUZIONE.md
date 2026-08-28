@@ -895,6 +895,18 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
   valori non portano più «anni» e «cr», perché a dirlo c'è la colonna.
 
 ### I4 · Asta live sul telefono
+- [ ] **Tutto in una schermata.** Durante un'asta, dalla barra in alto fino al
+  pulsante *Mi ritiro*, si deve vedere ogni cosa **senza scorrere**. Misurato a
+  390×844: il contenuto finisce a 611px, quindi ci sta anche con la barra di
+  Chrome aperta. Prima erano 917px e bisognava andare su e giù col dito.
+- [ ] Il pulsante *Mi ritiro* è piccolo ma **resta alto 44px**: si comprime lo
+  spazio attorno, non il bersaglio da toccare.
+- [ ] *Massimo automatico* è chiuso dietro un tocco **finché non ne hai uno**.
+  Impostane uno: da quel momento deve restare **sempre visibile**, con la cifra
+  e lo stato — è uno stato da tenere d'occhio, non un modulo.
+- [ ] Da tablet o computer nulla si comprime: nome e dati del giocatore tornano
+  su due righe, il titolo *Asta Live* ricompare, i partecipanti hanno la loro
+  riga.
 - [ ] Durante un'asta: **prezzo e tempo stanno affiancati sulla stessa riga**, e
   i pulsanti di rilancio si vedono **senza scorrere**. Prima erano tre blocchi
   in colonna con "il tuo massimo" in mezzo, e per rilanciare bisognava scendere.
