@@ -603,11 +603,32 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   const senzaOfferte = !asta.squadra_in_testa
   const offertaMinima = senzaOfferte ? asta.base_asta : asta.prezzo_corrente + 1
 
+  // L'asta è di fatto finita e aspetta solo la chiusura dell'admin. Due strade:
+  // il tempo è scaduto, oppure si sono ritirati tutti tranne uno.
+  //
+  // Il confronto è con l'orologio vero e non solo con `timeLeft`: quel
+  // contatore parte da 0 e viene riempito da un effect, quindi al primo
+  // disegno direbbe "finita" anche su un'asta appena avviata.
+  const scaduta =
+    !isChiamata &&
+    scadenza !== null &&
+    timeLeft === 0 &&
+    new Date(scadenza).getTime() <= Date.now()
+  const astaFinita = !isChiamata && (scaduta || isSoloLeft)
+
   // Un unico posto in cui si decide se si può rilanciare, e soprattutto
   // PERCHÉ no: prima i comandi si disabilitavano in silenzio, e chi guardava
   // non aveva modo di capire cosa mancasse.
+  //
+  // A tempo scaduto il server rifiuta comunque, con «L'asta è scaduta!»
+  // (piazza_offerta_asta): senza questo ramo i pulsanti restavano accesi e si
+  // scopriva il rifiuto solo dopo aver premuto.
   const nonPuoiRilanciare =
-    rosaPiena ? 'La tua rosa è al completo: non puoi aggiudicarti altri giocatori.'
+    astaFinita
+      ? isSoloLeft
+        ? 'Si sono ritirati tutti gli altri: l\'asta aspetta la chiusura dell\'admin.'
+        : 'Tempo scaduto: l\'asta aspetta la chiusura dell\'admin.'
+    : rosaPiena ? 'La tua rosa è al completo: non puoi aggiudicarti altri giocatori.'
     : ruoloPieno ? 'Hai già il numero massimo di portieri.'
     : !isParticipant ? 'Non sei fra i contendenti per questo giocatore.'
     : hasAbbandonato ? 'Ti sei ritirato da quest\'asta.'
@@ -618,11 +639,13 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
     : null
 
   const rilancioBloccato =
-    loading || isWinning || isChiamata || hasAbbandonato || !isParticipant || rosaPiena || ruoloPieno
+    loading || astaFinita || isWinning || isChiamata || hasAbbandonato || !isParticipant || rosaPiena || ruoloPieno
 
   // Il tetto si può dichiarare anche ad asta solo prenotata: scatterà quando
   // l'admin avvia il timer. `isChiamata` blocca i rilanci, non questo.
-  const massimoBloccato = loading || hasAbbandonato || !isParticipant || rosaPiena || ruoloPieno
+  // Ad asta finita invece non serve più a niente: `risolvi_massimi` esce
+  // subito quando la scadenza è passata.
+  const massimoBloccato = loading || astaFinita || hasAbbandonato || !isParticipant || rosaPiena || ruoloPieno
   // Superato: il prezzo ha raggiunto il tetto e non siamo più in testa. È lo
   // stato che va gridato, non sussurrato: chi si crede protetto e non lo è più
   // deve accorgersene subito.
@@ -631,9 +654,15 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   return (
     <div className="flex flex-col gap-6">
       {isAdmin && (
-         <div className="fm-panel flex flex-wrap items-center justify-between gap-3 border-rosso/50 p-3">
-           <div className="fm-title flex items-center gap-2 text-base text-rosso">
-             <span>🔴</span> Super-regia
+         /* Ad asta finita il pannello si accende: l'admin ha segnalato che
+            durante la serata gli sfuggiva la fine di un'asta, e il pulsante da
+            premere è già qui. Meglio far risaltare questo che aggiungerne un
+            secondo identico più sotto. */
+         <div className={`fm-panel flex flex-wrap items-center justify-between gap-3 p-3 ${
+           astaFinita ? 'animate-lampo border-ambra bg-ambra/10 text-ambra' : 'border-rosso/50'
+         }`}>
+           <div className={`fm-title flex items-center gap-2 text-base ${astaFinita ? 'text-ambra' : 'text-rosso'}`}>
+             {astaFinita ? <><span>⏹️</span> Asta finita · da assegnare</> : <><span>🔴</span> Super-regia</>}
            </div>
            <div className="flex gap-2">
              {isChiamata && (
@@ -651,6 +680,27 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
       )}
 
       <div className="fm-panel mx-auto w-full max-w-4xl overflow-hidden">
+        {/* La fine dell'asta detta a parole, per tutti. Prima l'unico segnale
+            era il contatore fermo su 0, che è esattamente ciò che non si nota
+            mentre si guarda altro. Il lampo riparte a ogni cambio di motivo,
+            così il passaggio da "in corso" a "finita" si vede anche di
+            sfuggita. */}
+        {astaFinita && (
+          <div
+            key={isSoloLeft ? 'ritirati' : 'tempo'}
+            className="animate-lampo flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-b border-ambra/50 bg-ambra/15 px-3 py-2.5 text-center text-sm font-semibold text-ambra"
+          >
+            <span className="text-base">⏹️</span>
+            <span>
+              Asta finita: {isSoloLeft ? 'si sono ritirati tutti gli altri' : 'il tempo è scaduto'}.
+            </span>
+            <span className="font-normal text-ink-mid">
+              {asta.squadre
+                ? <>Se la aggiudica <strong className="font-semibold text-ink">{asta.squadre.nome}</strong> a {asta.prezzo_corrente} cr, quando l&apos;admin chiude.</>
+                : <>Nessuna offerta: il giocatore resta libero.</>}
+            </span>
+          </div>
+        )}
         {/* Spaziatura ridotta sotto sm: su uno schermo da 5" ogni riga tolta
             qui è una riga guadagnata in fondo, dove stanno i partecipanti. */}
         <div className="relative border-b border-line-hi bg-panel-hi px-3 py-3 text-center sm:px-4 sm:py-4">

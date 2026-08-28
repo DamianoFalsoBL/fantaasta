@@ -366,6 +366,27 @@ due finestre separate. Chiamiamoli **M1** e **M2**.
 - [ ] Con una squadra a 30/30, prova a rilanciare.
   **Atteso:** comandi disattivati con *La tua rosa è al completo*.
 
+### D12b · Si capisce che l'asta è finita
+- [ ] Lascia scadere il tempo su un'asta in corso.
+  **Atteso:** compare una **fascia ambra** sopra il nome del giocatore —
+  *«Asta finita: il tempo è scaduto»* — con chi se la aggiudica e a quanto. La
+  fascia **lampeggia** quando appare. Prima l'unico segnale era il contatore
+  fermo su 0, che è ciò che non si nota mentre si guarda altro.
+- [ ] Da admin, nello stesso momento: il pannello **Super-regia** diventa ambra
+  e si intitola *«Asta finita · da assegnare»*. Il pulsante da premere è quello
+  che c'era già: non ne compare un secondo identico.
+- [ ] Da manager, sempre a tempo scaduto: i pulsanti di rilancio sono **spenti**
+  e sotto c'è scritto *«Tempo scaduto: l'asta aspetta la chiusura dell'admin»*.
+  Prima restavano accesi e il rifiuto — *«L'asta è scaduta!»*, che arriva dal
+  server — si scopriva solo dopo aver premuto.
+- [ ] Fai ritirare tutti tranne uno **prima** che il tempo scada.
+  **Atteso:** la stessa fascia, con il motivo giusto: *«si sono ritirati tutti
+  gli altri»*.
+- [ ] **Il caso che smaschera un difetto sottile:** avvia un'asta nuova e
+  guarda il primo istante. La fascia **non deve comparire e sparire**: il
+  contatore parte da zero prima di essere riempito, e chi si basasse solo su
+  quello annuncerebbe la fine di un'asta appena cominciata.
+
 ### D13 · Chiusura e assegnazione
 - [ ] Admin → *Chiudi asta e assegna*.
   **Atteso, tutto insieme:** il giocatore entra nella rosa del vincitore, i

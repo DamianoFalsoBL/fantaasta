@@ -36,15 +36,6 @@ tabella non registra *da dove* arriva un giocatore, quindi mescolerebbe gli
 acquisti all'asta con quelli da busta — cioè proprio la distinzione che questa
 pagina esiste per mostrare.
 
-### In `/asta`, avviso ben visibile quando l'asta è finita
-
-Segnalato dall'admin: durante la serata capitava di non accorgersi che un'asta
-era conclusa, per tempo scaduto o perché si erano ritirati tutti.
-
-Lo stato è **già calcolato** in `src/components/TabelloneAsta.tsx`: `timeLeft`
-arriva a 0 e `isSoloLeft` copre il caso dei ritiri. È un problema di
-presentazione, non di logica: oggi quella condizione non grida abbastanza.
-
 ### In `/aste`, non si riesce a vedere tutto in una schermata
 
 **In attesa dello screenshot** (promesso per il 28 agosto). Da non toccare
@@ -205,6 +196,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | In `/asta` una fascia dice che l'asta è finita, e i rilanci si spengono |
 | 28 ago 2026 | `/buste` ha filtri per squadra ed età e l'ordinamento, e condivide il comparatore con `/svincolati` |
 | 28 ago 2026 | In `/buste` una × su ogni nome scelto lo toglie dalla lista |
 | 28 ago 2026 | In `/buste` una pastiglia dice se quello che vedi è già salvato sul server |
