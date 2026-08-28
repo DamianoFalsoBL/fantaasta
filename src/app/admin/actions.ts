@@ -127,6 +127,16 @@ export async function importBudget(formData: FormData): Promise<RisultatoImport>
   const dettagli: string[] = []
   const slugUsati = new Set<string>()
   let importate = 0
+  let passwordLasciate = 0
+
+  // Gli account esistenti si leggono UNA volta sola. Prima l'elenco veniva
+  // richiesto dentro il ciclo, a ogni createUser fallito: con quattordici
+  // squadre erano quattordici elenchi completi.
+  const { data: elencoUtenti } = await admin.auth.admin.listUsers({ perPage: 1000 })
+  const utentiPerEmail = new Map<string, string>()
+  for (const u of elencoUtenti?.users ?? []) {
+    if (u.email) utentiPerEmail.set(u.email.toLowerCase(), u.id)
+  }
 
   for (const [indice, rawRow] of righe.entries()) {
     const riga = normalizzaChiavi(rawRow)
@@ -141,16 +151,25 @@ export async function importBudget(formData: FormData): Promise<RisultatoImport>
       dettagli.push(`Riga ${numeroRiga}: manca "nome utente" o "nome squadra".`)
       continue
     }
-    if (!password) {
-      // Nessuna password di ripiego: prima c'era 'password123' hardcoded,
-      // identica per tutti gli account creati.
-      dettagli.push(`Riga ${numeroRiga} (${nomeSquadra}): password mancante.`)
-      continue
-    }
 
     const email = username.includes('@')
       ? username.toLowerCase()
       : `${username.replace(/\s+/g, '').toLowerCase()}@fantacalcio.local`
+
+    const idEsistente = utentiPerEmail.get(email)
+
+    // Cella password vuota: su un account che esiste già significa «lascia
+    // stare la sua password». Da quando i manager possono cambiarsela
+    // (CambiaPassword), un reimport di routine gliela riscriveva con quella
+    // del foglio, e loro restavano fuori senza capire perché.
+    //
+    // Su un account NUOVO invece non si può creare niente senza password, e la
+    // riga si salta dicendolo. Nessuna password di ripiego: prima c'era
+    // 'password123' scritta nel codice, identica per tutti.
+    if (!password && !idEsistente) {
+      dettagli.push(`Riga ${numeroRiga} (${nomeSquadra}): password mancante, e l'account non esiste ancora.`)
+      continue
+    }
 
     // Slug univoco anche con nomi squadra simili.
     let slug = slugify(nomeSquadra)
@@ -160,26 +179,32 @@ export async function importBudget(formData: FormData): Promise<RisultatoImport>
     }
     slugUsati.add(slug)
 
-    // 1. Account di autenticazione (o recupero di quello esistente).
+    // 1. Account di autenticazione: si crea se non c'è, altrimenti si riusa.
     let userId: string | null = null
-    const { data: creato, error: authError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    })
 
-    if (creato?.user) {
-      userId = creato.user.id
-    } else {
-      const { data: esistenti } = await admin.auth.admin.listUsers()
-      const esistente = esistenti?.users.find((u) => u.email?.toLowerCase() === email)
-      if (esistente) {
-        userId = esistente.id
-        await admin.auth.admin.updateUserById(esistente.id, { password })
+    if (idEsistente) {
+      userId = idEsistente
+      if (password) {
+        // La cella piena resta il modo di forzare una password nota: è
+        // l'unica via di recupero che esiste, perché le email
+        // @fantacalcio.local non ricevono nulla e il «link per reimpostarla»
+        // qui non è disattivato per scelta — è impossibile.
+        await admin.auth.admin.updateUserById(idEsistente, { password })
       } else {
+        passwordLasciate++
+      }
+    } else {
+      const { data: creato, error: authError } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      })
+      if (!creato?.user) {
         dettagli.push(`Riga ${numeroRiga} (${nomeSquadra}): ${authError?.message ?? 'utente non creato'}.`)
         continue
       }
+      userId = creato.user.id
+      utentiPerEmail.set(email, userId)
     }
 
     // 2. Squadra. L'id è autonomo: il collegamento con l'utente passa da
@@ -222,6 +247,16 @@ export async function importBudget(formData: FormData): Promise<RisultatoImport>
       error: `Nessuna squadra importata su ${righe.length} righe.`,
       dettagli,
     }
+  }
+
+  // Le password lasciate stare si dicono: è il caso in cui l'import ha fatto
+  // di proposito meno di quanto ci si aspetterebbe, e un silenzio qui
+  // sembrerebbe una dimenticanza.
+  if (passwordLasciate > 0) {
+    dettagli.push(
+      `${passwordLasciate} password non toccate: la cella era vuota e l'account esisteva già. ` +
+      `Per forzarne una, scrivila nel foglio e ricarica.`
+    )
   }
 
   return {

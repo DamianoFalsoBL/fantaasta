@@ -294,10 +294,22 @@ export default function AdminSetupPage() {
         <p className="mb-3 text-sm text-ink-mid">Carica i file nell&apos;ordine indicato: prima utenti e budget, poi il listone.</p>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <Uploader 
-            title="Utenti & Budget" 
-            description="Carica il file budget.xlsx (Colonne: nome utente, password, nome squadra, budget) per generare account Auth e Squadre." 
-            action={importBudget} 
+          <Uploader
+            title="Utenti & Budget"
+            description="Carica il file budget.xlsx (Colonne: nome utente, password, nome squadra, budget) per generare account Auth e Squadre."
+            avviso={
+              <>
+                <strong>La colonna password riscrive quella scelta dal manager.</strong>{' '}
+                Da quando ognuno può cambiarsela da <em>La mia Rosa</em>, un reimport
+                con la cella piena la riporta a quella del foglio.
+                <br />
+                <strong>Lascia la cella vuota</strong> per non toccarla. Riempirla resta
+                il modo di reimpostare la password di chi l&apos;ha dimenticata: qui non
+                esiste un «password dimenticata», perché gli account non hanno un
+                indirizzo email vero.
+              </>
+            }
+            action={importBudget}
           />
           <Uploader
             title="Listone Giocatori & Rose"

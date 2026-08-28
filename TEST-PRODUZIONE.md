@@ -964,6 +964,19 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 > **Solo a fine stagione, o su una lega che si è disposti a ricostruire da
 > zero.** Non eseguire mai questo blocco se la lega sta usando il sito.
 
+### J0b · L'import non scavalca le password scelte
+- [ ] Fai cambiare a un manager la propria password da *La mia Rosa*.
+- [ ] Ricarica il file budget **con la sua cella password vuota**.
+  **Atteso:** l'import riesce, e in fondo agli avvisi c'è scritto quante
+  password non sono state toccate. Il manager entra ancora con quella che si è
+  scelto.
+- [ ] Ora ricarica lo stesso file **con la cella piena**.
+  **Atteso:** la password torna quella del foglio. È l'unica via di recupero
+  che esiste, e deve continuare a funzionare.
+- [ ] Riga con cella vuota e utente **che non esiste ancora**.
+  **Atteso:** la riga viene saltata dicendo che la password manca e l'account
+  non c'è: senza password un account nuovo non si può creare.
+
 ### J1 · Import utenti e budget
 - [ ] `/admin/setup` → *Utenti & Budget* → carica `budget.xlsx`.
   **Atteso:** account e squadre creati, con l'elenco di eventuali righe scartate.

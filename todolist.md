@@ -33,29 +33,11 @@ Se si fa, **con file SVG nostri**, non con collegamenti a immagini altrui.
 
 ## Cambio password dei manager
 
-Chiesto il 27 agosto. Tre pezzi indipendenti, da fare in commit separati.
+Fatti il 28 agosto i due pezzi che contavano: il manager se la cambia da *La
+mia Rosa*, e l'import del budget non gliela riscrive più se la cella è vuota.
+Resta solo la comodità.
 
-### B. L'import del budget smette di scavalcare le password scelte
-
-**Il pezzo che rende sicuro il pezzo A.** Oggi `src/app/admin/actions.ts:178`
-fa `updateUserById(esistente.id, { password })` per ogni utente già esistente:
-un manager cambia la password, il super admin reimporta il budget settimane
-dopo, e la password torna silenziosamente quella del foglio.
-
-Proposta: **cella password vuota su un utente che esiste già = non toccarla**.
-Oggi la cella vuota fa scartare l'intera riga
-(`actions.ts:144`), quindi non c'è modo di dire «lascia stare questo».
-
-**Non si può togliere quella riga e basta.** È l'unica via di recupero
-esistente: gli account usano email finte `@fantacalcio.local`, dominio
-riservato e non instradabile, quindi il «ti mando il link per reimpostarla»
-non è disattivato per scelta — **è impossibile**. Riempire la cella deve
-restare il modo di forzare una password nota.
-
-Serve anche un avviso sulla scheda di caricamento, come quello messo sul
-listone il 27 agosto.
-
-### C. Facoltativo: reset password dal super admin
+### Facoltativo: reset password dal super admin
 
 Un pulsante accanto a ogni squadra in *Budget e Fasi*, per quando qualcuno
 dimentica la password e non si ha voglia di reimportare tutto. Comodo, non
@@ -155,6 +137,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | L'import del budget non riscrive più le password scelte, se la cella è vuota |
 | 28 ago 2026 | Il manager si cambia la password da *La mia Rosa* |
 | 28 ago 2026 | Il tabellone d'asta sta in una schermata di telefono: da 917 a 611px |
 | 28 ago 2026 | Tolta la seconda pagina di accesso: `/login` rimanda alla home |
