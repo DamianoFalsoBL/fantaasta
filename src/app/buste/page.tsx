@@ -111,7 +111,10 @@ export default function BustePage() {
     setLoading(true)
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
-      router.push('/login')
+      // La home, non `/login`: è lì che vive l'unico modulo di accesso, quello
+      // che accetta il solo nome utente. Tutte le pagine server fanno lo
+      // stesso tramite `requireUtente()`.
+      router.push('/')
       return
     }
 

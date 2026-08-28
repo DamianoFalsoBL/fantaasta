@@ -1,70 +1,23 @@
-import { login } from './actions'
+import { redirect } from 'next/navigation'
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ message?: string }>
-}) {
-  const { message } = await searchParams
-
-  return (
-    <div className="flex flex-1 items-center justify-center bg-background px-4 py-10">
-      {/* Le varianti `dark:` che c'erano qui sono state rimosse: il tema è
-          unico e scuro, e con `dark:` legato a prefers-color-scheme un utente
-          con sistema chiaro avrebbe visto metà pagina in tema chiaro. */}
-      <div className="fm-panel w-full max-w-md space-y-8 p-8 shadow-xl">
-
-        <div className="text-center">
-          <h2 className="fm-title text-3xl">
-            Asta <span className="text-neon">Live</span>
-          </h2>
-          <p className="mt-2 text-sm text-ink-mid">
-            Accedi per gestire la tua rosa o avviare l&apos;asta
-          </p>
-        </div>
-
-        <form className="mt-8 space-y-6" action={login}>
-          <div className="space-y-4">
-            <div>
-              <label className="fm-label mb-1.5 block" htmlFor="email">
-                Indirizzo Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="fm-input"
-                placeholder="manager@fantacalcio.it"
-              />
-            </div>
-            <div>
-              <label className="fm-label mb-1.5 block" htmlFor="password">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="fm-input"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-
-          {message && <div className="fm-alert fm-alert-danger">{message}</div>}
-
-          <button type="submit" className="fm-btn fm-btn-primary w-full">
-            Accedi
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-xs text-ink-dim">
-          I nuovi account possono essere creati solo dall&apos;amministratore di lega.
-        </p>
-
-      </div>
-    </div>
-  )
+/**
+ * `/login` non è più una pagina: rimanda alla home, che è l'unico accesso.
+ *
+ * Ce n'erano due, e la seconda era rotta per come si accede davvero qui. Il
+ * campo era `type="email"`, quindi il browser rifiutava «Gianni» chiedendo una
+ * chiocciola; e anche superandolo, la server action passava il valore
+ * direttamente a `signInWithPassword` senza la conversione in
+ * `gianni@fantacalcio.local` che fa `LoginForm`. Il segnaposto suggeriva
+ * perfino `@fantacalcio.it`, un dominio che qui non esiste: chi lo avesse
+ * seguito alla lettera avrebbe sbagliato lo stesso.
+ *
+ * Non si è corretta la seconda pagina ma tolta: due moduli di accesso da
+ * tenere allineati sono lo stesso schema che in questo progetto ha già
+ * prodotto filtri e ordinamenti divergenti fra pagine.
+ *
+ * La rotta resta, come rimando, perché era raggiungibile: dai segnalibri di
+ * chi c'è già finito, e da `/buste` quando la sessione scadeva.
+ */
+export default function LoginPage() {
+  redirect('/')
 }

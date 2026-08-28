@@ -178,6 +178,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | Tolta la seconda pagina di accesso: `/login` rimanda alla home |
 | 28 ago 2026 | Sommario buste in fondo a `/buste`, con gli esiti già spogliati di tutte le squadre |
 | 28 ago 2026 | In `/asta` una fascia dice che l'asta è finita, e i rilanci si spengono |
 | 28 ago 2026 | `/buste` ha filtri per squadra ed età e l'ordinamento, e condivide il comparatore con `/svincolati` |

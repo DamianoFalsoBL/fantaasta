@@ -176,10 +176,20 @@ Non scrive nulla.
 - [x] Se una squadra ha extra budget negativo, controlla che il numero si legga
   col segno meno e non venga tagliato.
 
-### B3 · Rotta morta
-- [x] Apri `/login`.
-  **Atteso:** una pagina coerente col tema scuro. Non è la pagina di accesso
-  vera (quella è la home) ma non deve essere rotta né mezza bianca.
+### B3 · `/login` rimanda alla home (riscritto il 28 agosto)
+La casella era spuntata e la descrizione sbagliava: chiamava `/login` una
+«rotta morta» innocua. Era invece una **seconda** pagina di accesso, e quella
+che non funzionava — un manager ci è finito e non è riuscito a entrare.
+
+- [ ] Apri `/login` da sloggato.
+  **Atteso:** finisci sulla **home**, con il campo *Username o Email*. Non deve
+  esistere nessun altro modulo di accesso.
+- [ ] Scrivi il solo nome utente, per esempio `Gianni`, senza chiocciola.
+  **Atteso:** il browser **non** protesta. Prima il campo era dichiarato
+  `type="email"` e la validazione nativa pretendeva una `@`, mentre il codice è
+  fatto apposta per completare il nome in `gianni@fantacalcio.local`.
+- [ ] Da `/buste`, con la sessione scaduta.
+  **Atteso:** vieni riportato alla home, non alla vecchia pagina.
 
 ### B4 · Pagina inesistente
 - [x] Apri `/qualcosa-che-non-esiste`.
