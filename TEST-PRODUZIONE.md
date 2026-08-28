@@ -147,6 +147,22 @@ Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
   **Atteso:** resti dentro. È il test che vale solo in produzione: su HTTPS i
   cookie hanno regole diverse che su `localhost`.
 
+### A11b · Il manager si cambia la password
+- [ ] Da manager, in fondo a *La mia Rosa*, apri *Cambia la tua password*.
+- [ ] Sbaglia di proposito la **password attuale**.
+  **Atteso:** *«La password attuale non è corretta»*, e niente viene cambiato.
+  Serve a impedire che chi trova un telefono con la sessione aperta cambi la
+  password a qualcun altro.
+- [ ] Scrivi due nuove password **diverse** fra loro → viene detto che non
+  coincidono.
+- [ ] Scrivi una nuova password di **meno di 6 caratteri** → viene rifiutata,
+  e il limite era scritto nel modulo prima di provarci.
+- [ ] Cambia la password davvero, poi **esci e rientra** con quella nuova.
+  **Atteso:** entri. E con la vecchia **non** entri più.
+- [ ] Il testo in fondo dice che non esiste un «password dimenticata» e che
+  bisogna chiedere all'amministratore. È vero: gli account non hanno un
+  indirizzo email a cui scrivere.
+
 ### A12 · Uscita
 - [x] Premi *Esci*.
   **Atteso:** torni alla home. Premi il tasto "indietro" del browser: **non**

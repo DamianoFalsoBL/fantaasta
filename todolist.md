@@ -35,22 +35,6 @@ Se si fa, **con file SVG nostri**, non con collegamenti a immagini altrui.
 
 Chiesto il 27 agosto. Tre pezzi indipendenti, da fare in commit separati.
 
-### A. Il manager cambia la propria password
-
-`supabase.auth.updateUser({ password })` funziona con la sessione già attiva:
-niente chiave di servizio, niente modifiche al database. In fondo a
-*La mia Rosa*, che è la pagina che parla di te e non consuma una voce di menu.
-
-**Chiedere anche la password attuale**, verificandola con un
-`signInWithPassword` prima di aggiornare, benché Supabase non lo pretenda: qui
-le sessioni restano aperte sui telefoni per settimane.
-
-Niente requisiti di complessità: è una lega di dieci amici su un sito senza
-dati sensibili, e l'unico effetto sarebbe far scegliere a tutti la stessa
-password con un punto esclamativo in fondo. Il minimo di sei caratteri di
-Supabase basta, purché scritto nel modulo **prima** che qualcuno lo scopra con
-un errore.
-
 ### B. L'import del budget smette di scavalcare le password scelte
 
 **Il pezzo che rende sicuro il pezzo A.** Oggi `src/app/admin/actions.ts:178`
@@ -171,6 +155,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | Il manager si cambia la password da *La mia Rosa* |
 | 28 ago 2026 | Il tabellone d'asta sta in una schermata di telefono: da 917 a 611px |
 | 28 ago 2026 | Tolta la seconda pagina di accesso: `/login` rimanda alla home |
 | 28 ago 2026 | Sommario buste in fondo a `/buste`, con gli esiti già spogliati di tutte le squadre |

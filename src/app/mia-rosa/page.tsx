@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import MantraBadge from '@/components/MantraBadge'
 import Conferma from '@/components/Conferma'
+import CambiaPassword from '@/components/CambiaPassword'
 import { badgeRuolo, ORDINE_RUOLI, trasferimentiAttivi, type GiocatoreMercato } from '@/utils/trasferimenti'
 
 type RigaRosa = GiocatoreMercato & {
@@ -221,6 +222,10 @@ export default function MiaRosaPage() {
             In entrambi i casi è solo indicativo e non vincola quanto gli altri possono offrirti.
           </p>
         )}
+
+        {/* Sta qui e non in una voce di menu propria: è la pagina che parla di
+            te, e il menu era stato sfoltito apposta. */}
+        <CambiaPassword />
       </div>
 
       <Conferma
