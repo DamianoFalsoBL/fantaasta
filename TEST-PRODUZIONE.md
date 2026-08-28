@@ -656,10 +656,30 @@ riassegnare.
 - [ ] Numero esatto, entro budget → invia.
   **Atteso:** conferma di salvataggio.
 
-### F7 · Riservatezza
-- [ ] Da un secondo manager, guarda `/buste`.
-  **Atteso:** vede **solo** le proprie selezioni. Mai quelle altrui: è un'asta
-  al buio.
+### F7 · Riservatezza (riscritto il 28 agosto: la regola è cambiata)
+La segretezza serve mentre la fase è aperta. A spoglio avvenuto decade, e gli
+esiti diventano pubblici.
+
+- [ ] **A fase aperta**, da un secondo manager: non vede in alcun modo le
+  selezioni altrui ancora in attesa. È qui che l'asta al buio va protetta.
+- [ ] Prova anche dalla console, che è la verifica vera perché scavalca
+  l'interfaccia:
+  `await supabase.from('buste').select('*').eq('esito','ATTESA')`
+  **Atteso:** tornano **solo** le proprie righe. Se ne tornano di altre
+  squadre, la policy `lettura_buste` è sbagliata e la fase buste non è più
+  segreta.
+- [ ] Stessa chiamata senza filtro sull'esito: le righe **già spogliate**
+  (VINTO, CONTESO, PERSO) di tutte le squadre ora si vedono, ed è voluto.
+
+### F7b · Sommario buste
+- [ ] In fondo a `/buste`, in **entrambe** le fasi, c'è il pannello *Sommario
+  buste* con chi è stato assegnato senza passare dall'asta, di tutte le
+  squadre, raggruppato per turno dal più recente.
+- [ ] Il conteggio in alto a destra corrisponde al numero di righe elencate.
+- [ ] Confronta un paio di nomi con `/rose`: la fantasquadra e il prezzo devono
+  coincidere.
+- [ ] Prima di qualunque spoglio il pannello **non deve comparire affatto**,
+  invece di mostrarsi vuoto.
 
 ### F8 · Chiusura
 - [ ] Admin → *Chiudi fase buste*.

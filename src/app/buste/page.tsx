@@ -36,6 +36,9 @@ type BustaConGiocatore = {
   giocatori: Giocatore | null
 }
 
+/** Una busta vinta da chiunque: serve il nome della squadra, non solo il mio. */
+type BustaVinta = BustaConGiocatore & { squadre: { nome: string } | null }
+
 export default function BustePage() {
   const supabase = createClient()
   const router = useRouter()
@@ -66,6 +69,9 @@ export default function BustePage() {
 
   // Per fase chiusa
   const [risultati, setRisultati] = useState<BustaConGiocatore[]>([])
+  // Chi si e' preso un giocatore senza passare dall'asta, di TUTTE le squadre.
+  // Visibile a fase aperta e chiusa: e' storia di turni gia' spogliati.
+  const [sommario, setSommario] = useState<BustaVinta[]>([])
 
   const [loading, setLoading] = useState(true)
   // Al posto di `alert()`: erano le ultime finestre di sistema rimaste
@@ -182,6 +188,17 @@ export default function BustePage() {
       setRisultati((storico as unknown as BustaConGiocatore[]) || [])
     }
 
+    // Il sommario si carica in entrambe le fasi: sono esiti di turni già
+    // spogliati, quindi non svelano niente di quello in corso. La policy
+    // `lettura_buste` li rende leggibili a tutti; le buste ancora in ATTESA
+    // restano visibili solo a chi le ha scritte.
+    const { data: vinte } = await supabase
+      .from('buste')
+      .select('*, giocatori(*), squadre(nome)')
+      .eq('esito', 'VINTO')
+      .order('turno', { ascending: false })
+    setSommario((vinte as unknown as BustaVinta[]) || [])
+
     setLoading(false)
   }
 
@@ -197,6 +214,22 @@ export default function BustePage() {
     }
     return [...gruppi.entries()].sort((a, b) => b[0] - a[0])
   }, [risultati])
+
+  // Il sommario, raggruppato per turno come i propri esiti: sono le stesse
+  // tornate, guardate da fuori invece che dalla propria squadra.
+  const sommarioPerTurno = useMemo(() => {
+    const gruppi = new Map<number, BustaVinta[]>()
+    for (const b of sommario) {
+      const t = b.turno ?? 1
+      if (!gruppi.has(t)) gruppi.set(t, [])
+      gruppi.get(t)!.push(b)
+    }
+    for (const righe of gruppi.values()) {
+      righe.sort((a, b) => (a.squadre?.nome ?? '').localeCompare(b.squadre?.nome ?? '', 'it')
+        || (a.giocatori?.nome ?? '').localeCompare(b.giocatori?.nome ?? '', 'it'))
+    }
+    return [...gruppi.entries()].sort((a, b) => b[0] - a[0])
+  }, [sommario])
 
   const ruoliMantra = useMemo(() => mantraPresenti(giocatoriLiberi), [giocatoriLiberi])
 
@@ -640,6 +673,59 @@ export default function BustePage() {
             </div>
           </div>
 
+        </div>
+      )}
+
+      {/* Sommario buste: chi si è preso un giocatore SENZA passare dall'asta,
+          di tutte le squadre. Prima dopo lo spoglio ognuno vedeva solo i propri
+          esiti, e dove fosse finito un giocatore non si leggeva da nessuna
+          parte.
+
+          Sta in fondo e vale in entrambe le fasi: sono turni già spogliati,
+          quindi non svela niente di quello in corso. */}
+      {sommarioPerTurno.length > 0 && (
+        <div className="fm-panel mt-5 overflow-hidden">
+          <div className="fm-panel-head">
+            <div>
+              <span>Sommario buste</span>
+              <p className="mt-0.5 text-xs font-normal normal-case tracking-normal text-ink-dim">
+                Chi è stato assegnato senza passare dall&apos;asta, di tutte le squadre.
+              </p>
+            </div>
+            <span className="fm-chip shrink-0">{sommario.length}</span>
+          </div>
+
+          <div className="fm-panel-body space-y-5">
+            {sommarioPerTurno.map(([turno, righe]) => (
+              <div key={turno}>
+                <div className="mb-2 flex items-center gap-3">
+                  <span className="fm-chip fm-chip-attivo">Turno {turno}</span>
+                  <div className="flex-1 border-t border-line" />
+                  <span className="fm-label shrink-0">{righe.length}</span>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {righe.map((b) => (
+                    <div key={b.id} className="flex items-center justify-between gap-2 rounded-md border border-line bg-panel-hi p-2.5">
+                      <div className="min-w-0">
+                        {/* Optional chaining ovunque: una busta orfana non deve
+                            far cadere la pagina, come già successo altrove. */}
+                        <div className="fm-nome truncate text-base">{b.giocatori?.nome ?? 'Giocatore rimosso'}</div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm">
+                          <span className="font-semibold text-viola-hi">{b.squadre?.nome ?? '—'}</span>
+                          <span className="text-ink-dim">·</span>
+                          <span className="text-ink-mid">{b.giocatori?.ruolo} · {b.giocatori?.squadra}</span>
+                          {b.giocatori?.ruolo_mantra && b.giocatori.ruolo_mantra.length > 0 && (
+                            <MantraBadge ruoli={b.giocatori.ruolo_mantra} />
+                          )}
+                        </div>
+                      </div>
+                      <span className="fm-badge fm-badge-good shrink-0">{b.giocatori?.quotazione} cr</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

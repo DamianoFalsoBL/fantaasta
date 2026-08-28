@@ -18,24 +18,6 @@ dice cosa va verificato, questo dice cosa va costruito.
 L'asta è andata bene. Questi sono i suggerimenti raccolti a caldo, in ordine di
 quanto valgono rispetto a quanto costano.
 
-### Sommario Buste: chi è stato assegnato senza passare dall'asta
-
-Il gemello della scheda *Assegnati* di `/aste`. Oggi dopo lo spoglio ognuno
-vede solo i propri esiti.
-
-**Da decidere prima di scrivere codice:** le RLS su `buste` fanno vedere a
-ciascuno soltanto le proprie (policy *«Lettura limitata buste»*,
-`20260728190359_init_schema.sql`). Per mostrare gli esiti di tutti bisogna
-aprire la lettura alle buste **già spogliate**, tenendo segrete quelle in
-attesa. È un cambio di riservatezza, non un lavoro di interfaccia, e va deciso
-con l'utente. Il test F7 verifica proprio che le buste altrui non si vedano:
-andrà riscritto di conseguenza.
-
-**Scorciatoia sbagliata:** dedurre le assegnazioni da `tesseramenti`. Quella
-tabella non registra *da dove* arriva un giocatore, quindi mescolerebbe gli
-acquisti all'asta con quelli da busta — cioè proprio la distinzione che questa
-pagina esiste per mostrare.
-
 ### In `/aste`, non si riesce a vedere tutto in una schermata
 
 **In attesa dello screenshot** (promesso per il 28 agosto). Da non toccare
@@ -196,6 +178,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | Sommario buste in fondo a `/buste`, con gli esiti già spogliati di tutte le squadre |
 | 28 ago 2026 | In `/asta` una fascia dice che l'asta è finita, e i rilanci si spengono |
 | 28 ago 2026 | `/buste` ha filtri per squadra ed età e l'ordinamento, e condivide il comparatore con `/svincolati` |
 | 28 ago 2026 | In `/buste` una × su ogni nome scelto lo toglie dalla lista |
