@@ -18,11 +18,6 @@ dice cosa va verificato, questo dice cosa va costruito.
 L'asta è andata bene. Questi sono i suggerimenti raccolti a caldo, in ordine di
 quanto valgono rispetto a quanto costano.
 
-### In `/buste`, una × per togliere un giocatore scelto
-
-L'elenco dei nomi scelti sopra crediti e slot c'è già. Oggi per toglierne uno
-bisogna ritrovarlo nella lista lunga: la × su ogni nome è il gesto naturale.
-
 ### In `/buste`, filtri e ordinamento come in `/svincolati`
 
 Metà c'è già: ricerca libera e ruolo, tramite `passaFiltri` di
@@ -220,6 +215,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 28 ago 2026 | In `/buste` una × su ogni nome scelto lo toglie dalla lista |
 | 28 ago 2026 | In `/buste` una pastiglia dice se quello che vedi è già salvato sul server |
 | 27 ago 2026 | L'export delle rose esce nel formato di fantacalcio.it, e l'import è riuscito |
 | 27 ago 2026 | Il massimo automatico non rilancia più su chi è già in testa |

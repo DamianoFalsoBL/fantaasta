@@ -469,10 +469,36 @@ export default function BustePage() {
 
               <div className="fm-panel-body">
                 <div className="mb-4 max-h-[30svh] divide-y divide-line overflow-y-auto lg:max-h-none lg:overflow-visible">
+                  {/* La × toglie il giocatore da qui. Prima l'unico modo era
+                      ritrovarlo nella lista lunga a fianco e ritoccarlo: con
+                      trenta slot da riempire, cambiare idea su un nome
+                      costava una ricerca. */}
                   {selezionati.map(g => (
                     <div key={g.id} className="flex items-center justify-between gap-2 py-1.5">
                       <span className="fm-nome truncate">{g.nome}</span>
-                      <span className="fm-badge fm-badge-good shrink-0">{g.quotazione}</span>
+                      <span className="flex shrink-0 items-center gap-1.5">
+                        <span className="fm-badge fm-badge-good">{g.quotazione}</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleSelezionato(g)}
+                          /* Non `.fm-btn`: sotto md quella classe impone 44px
+                             di altezza, e con trenta nomi allungherebbe il
+                             riquadro di mezzo schermo. 32px restano ben sopra
+                             i 24 richiesti dalle linee guida.
+                             `-my-1` fa rientrare il bottone nella spaziatura
+                             che la riga ha già: misurato, senza margine
+                             negativo la riga passa da 35 a 45px, con il
+                             margine si ferma a 37 — stesso bersaglio da
+                             toccare, 240px risparmiati su una lista piena. */
+                          className="flex h-8 w-8 -my-1 items-center justify-center rounded-md text-lg leading-none text-ink-dim transition hover:bg-rosso/15 hover:text-rosso focus-visible:bg-rosso/15 focus-visible:text-rosso"
+                          /* Il nome nell'etichetta perché a schermo la × da
+                             sola non dice quale riga toglie. */
+                          aria-label={`Togli ${g.nome} dalla lista`}
+                          title={`Togli ${g.nome}`}
+                        >
+                          ×
+                        </button>
+                      </span>
                     </div>
                   ))}
                   {selezionati.length === 0 && (
