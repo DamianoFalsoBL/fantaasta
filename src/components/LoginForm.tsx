@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
+import { messaggioErroreAuth } from '@/utils/erroriAuth'
 
 export default function LoginForm() {
   const [usernameOrEmail, setUsernameOrEmail] = useState('')
@@ -36,7 +37,7 @@ export default function LoginForm() {
     })
 
     if (error) {
-      setError(error.message)
+      setError(messaggioErroreAuth(error))
       setLoading(false)
     } else {
       const { data: profilo } = await supabase.from('profili').select('ruolo').eq('id', authData.user.id).single()

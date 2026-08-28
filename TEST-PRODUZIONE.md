@@ -102,14 +102,24 @@ Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
 
   **Atteso:** `401` con `{"error":"Non autenticato."}`. Nessun file scaricato.
 
-### A4 · Login sbagliato
-- [x] Username giusto, password sbagliata.
-  **Atteso:** messaggio d'errore rosso dentro il riquadro *Accedi*, si resta
-  sulla pagina.
-- [x] Username inesistente.
-  **Atteso:** stesso comportamento, nessuna pagina bianca.
+### A4 · Login sbagliato (spuntato tolto il 29 agosto: il messaggio è cambiato)
+
+Le prime due caselle erano superate, ma il messaggio d'errore ora è tradotto in
+italiano: va riguardato, non dato per buono.
+
+- [ ] Username giusto, password sbagliata.
+  **Atteso:** riquadro rosso dentro *Accedi* con scritto **«Utente o password
+  non corretti.»**, e si resta sulla pagina.
+- [ ] Username inesistente.
+  **Atteso:** **lo stesso identico messaggio.** Non è una svista: Supabase
+  risponde `invalid_credentials` in tutti e due i casi, per non far scoprire
+  quali account esistono. Se un giorno i due messaggi differiscono, è un
+  difetto, non un miglioramento.
 - [x] Campi vuoti → *Entra nell'asta*.
   **Atteso:** il browser blocca l'invio (i campi sono obbligatori).
+- [ ] Prova con il telefono in modalità aereo.
+  **Atteso:** *«Server non raggiungibile: controlla la connessione e riprova.»*
+  — non un errore di password, che manderebbe a cercare dalla parte sbagliata.
 
 ### A5 · Login manager
 - [x] Entra come manager.

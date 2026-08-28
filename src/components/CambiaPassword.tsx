@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { messaggioErroreAuth } from '@/utils/erroriAuth'
 
 /** Il minimo che impone Supabase. Scritto qui e mostrato nel modulo, così non
  *  lo si scopre da un errore dopo aver premuto. */
@@ -85,7 +86,7 @@ export default function CambiaPassword() {
 
     const { error } = await supabase.auth.updateUser({ password: nuovaPulita })
     if (error) {
-      setEsito({ tono: 'errore', testo: `Non è stato possibile cambiarla: ${error.message}` })
+      setEsito({ tono: 'errore', testo: `Non è stato possibile cambiarla: ${messaggioErroreAuth(error)}` })
     } else {
       setEsito({ tono: 'ok', testo: 'Password cambiata. La prossima volta entra con quella nuova.' })
       setAttuale('')
