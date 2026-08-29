@@ -478,10 +478,13 @@ numeri del database.
       **Perché esatti e non "al massimo":** la busta riempie sempre tutti gli
       slot liberi, quindi a fine turno la rosa è completa. Se i portieri chiesti
       non sono quelli mancanti, non c'è più modo di rimediare.
-- [ ] **Controprova dal server:** chiama `submit_buste` dalla console con una
-      lista giusta di numero ma senza il portiere che manca.
-      **Atteso:** *«Devi scegliere esattamente N portieri»*. Il controllo nella
-      pagina rende l'errore evidente prima, ma è la funzione a garantirlo.
+- [x] **Controprova dal server** — fatta il 29 agosto contro il database vero,
+      con una squadra usa e getta e una sessione autenticata. Liste da 30
+      giocatori su un tetto di 3 portieri: con 0 rifiutata, con 2 rifiutata, con
+      4 rifiutata, con 3 accettata e trenta righe scritte. Il messaggio è
+      *«Devi scegliere esattamente 3 portieri: ne hai scelti N»*. Il controllo
+      nella pagina rende l'errore evidente prima, ma è la funzione a
+      garantirlo.
 - [ ] La bozza è **di quel browser**: aperta dal telefono non c'è. È il
       compromesso scelto, non un difetto.
 - [ ] La scheda di `/svincolati` resta di **76px** sul telefono, e le colonne

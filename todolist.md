@@ -219,11 +219,16 @@ tornata.
   campionato, scaricato insieme agli altri venti. Lasciato lì perché non dà
   fastidio e potrebbe servire da segnaposto, ma se si vuole fare pulizia si può
   togliere.
-- **F13b non è ancora chiuso.** L'elenco di `/buste` nasconde i giocatori già
-  in coda per l'asta — verificato il 27 agosto — ma nessuno ha ancora chiamato
-  `submit_buste` dalla console per controllare che la funzione li **rifiuti**.
-  Finché non si fa, sappiamo che l'interfaccia nasconde, non che la porta sia
-  chiusa.
+- **F13b non è ancora chiuso, e il 29 agosto non era provabile.** L'elenco di
+  `/buste` nasconde i giocatori già in coda per l'asta — verificato il 27
+  agosto — ma nessuno ha ancora chiamato `submit_buste` per controllare che la
+  funzione li **rifiuti**. Il tentativo del 29 si è fermato subito: `liste_aste`
+  era **vuota**, perché le aste erano chiuse e si era in fase buste.
+  **Si prova solo quando c'è una coda**, cioè subito dopo uno spoglio che
+  produce contesi. Lo script è di dieci righe: prendere un giocatore da
+  `liste_aste`, infilarlo in una lista per il resto valida e verificare che
+  venga rifiutato — e poi rifare la stessa lista senza di lui, per sapere che a
+  farla rifiutare è stato lui e non altro.
 - **D20, terza casella.** Chi ha il tetto più alto ed è già in testa non deve
   farsi rilanciare da sé piazzando un rilancio a mano. Il ramo non è stato
   esercitato nell'asta del 27.
