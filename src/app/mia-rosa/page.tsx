@@ -8,6 +8,7 @@ import MantraBadge from '@/components/MantraBadge'
 import Conferma from '@/components/Conferma'
 import CambiaPassword from '@/components/CambiaPassword'
 import { ORDINE_RUOLI, trasferimentiAttivi, type GiocatoreMercato } from '@/utils/trasferimenti'
+import { indiceMantra } from '@/utils/ruoli'
 
 type RigaRosa = GiocatoreMercato & {
   prezzo_pagato: number
@@ -65,8 +66,12 @@ export default function MiaRosaPage() {
         return { ...g, prezzo_pagato: r.prezzo_pagato, in_vendita: r.in_vendita, prezzo_richiesto: r.prezzo_richiesto }
       })
       .filter((r): r is RigaRosa => r !== null)
+      // Stesso ordine di /rose: reparto classico, poi la leggenda Mantra
+      // dentro il reparto, poi il nome.
       .sort((a, b) =>
-        (ORDINE_RUOLI[a.ruolo] ?? 99) - (ORDINE_RUOLI[b.ruolo] ?? 99) || a.nome.localeCompare(b.nome))
+        (ORDINE_RUOLI[a.ruolo] ?? 99) - (ORDINE_RUOLI[b.ruolo] ?? 99)
+        || indiceMantra(a.ruolo_mantra) - indiceMantra(b.ruolo_mantra)
+        || a.nome.localeCompare(b.nome, 'it'))
 
     setRosa(lista)
     setPrezzi(Object.fromEntries(lista.map((g) => [g.id, g.prezzo_richiesto?.toString() ?? ''])))

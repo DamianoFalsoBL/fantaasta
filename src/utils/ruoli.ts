@@ -25,8 +25,35 @@ export const RUOLI_CLASSICI: OpzioneRuolo[] = [
   { valore: 'cl:A', etichetta: 'Attaccanti (A)' },
 ]
 
-/** Ruoli Mantra nell'ordine di campo, non in quello alfabetico. */
-export const RUOLI_MANTRA = ['Por', 'Dc', 'B', 'Dd', 'Ds', 'E', 'M', 'C', 'T', 'W', 'A', 'Pc']
+/**
+ * Ruoli Mantra nell'ordine della leggenda ufficiale Mantra, dalla porta
+ * all'attacco: portiere, linea difensiva, centrocampo, trequarti, attacco.
+ *
+ * L'ordine non e' inventato ne' alfabetico, ed e' cambiato il 29 agosto per
+ * combaciare con la leggenda: prima diceva Dc, B, Dd, Ds e T prima di W.
+ * Serve in due posti — le voci del filtro e l'ordine delle rose — e devono
+ * essere lo stesso, altrimenti la tendina dice una cosa e la lista un'altra.
+ */
+export const RUOLI_MANTRA = ['Por', 'Ds', 'Dc', 'Dd', 'B', 'E', 'M', 'C', 'W', 'T', 'A', 'Pc']
+
+/**
+ * La posizione di un giocatore nell'ordine della leggenda.
+ *
+ * Con piu' ruoli si prende **il piu' arretrato**, cioe' l'indice piu' basso:
+ * chi puo' fare Ds sta con i terzini sinistri anche se sa fare pure l'esterno.
+ * Non si guarda il primo elemento dell'array, perche' il listone non li scrive
+ * in quest'ordine — verificato: 36 giocatori su 549 li hanno in ordine diverso,
+ * per esempio "B / Ds / E".
+ *
+ * Chi non ha ruoli Mantra finisce in fondo invece che in testa.
+ */
+export function indiceMantra(ruoli: string[] | null | undefined): number {
+  if (!ruoli || ruoli.length === 0) return 99
+  return ruoli.reduce((minimo, r) => {
+    const i = RUOLI_MANTRA.findIndex((m) => m.toUpperCase() === r.toUpperCase())
+    return i >= 0 && i < minimo ? i : minimo
+  }, 99)
+}
 
 /**
  * Le voci Mantra da mostrare, limitate a quelle davvero presenti nei dati.

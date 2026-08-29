@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import MantraBadge from '@/components/MantraBadge'
+import { indiceMantra } from '@/utils/ruoli'
 import { isAdminRole, requireUtente } from '@/utils/auth'
 
 export default async function RosePage() {
@@ -55,6 +56,20 @@ export default async function RosePage() {
   }
 
   // Ordine dei ruoli
+  /**
+   * Il reparto classico resta la chiave principale, e i ruoli Mantra ordinano
+   * dentro di esso.
+   *
+   * Non si ordina per solo ruolo Mantra perche' gli slot di una rosa si contano
+   * per reparto: misurati sul listone, 18 giocatori su 549 hanno il reparto in
+   * disaccordo con la linea del loro ruolo Mantra piu' arretrato — Dimarco e'
+   * un difensore che gioca E, Neres un attaccante che gioca W. Ordinando per
+   * solo Mantra finirebbero in mezzo ai centrocampisti, dove chi conta i
+   * difensori non li cerca.
+   *
+   * Sui restanti 531 le due strade danno lo stesso risultato, perche' la
+   * leggenda Mantra e' gia' ordinata per linee.
+   */
   const ruoloOrder = { 'P': 1, 'D': 2, 'C': 3, 'A': 4 }
 
   return (
@@ -83,7 +98,10 @@ export default async function RosePage() {
                 ...t.giocatori,
                 prezzo_pagato: t.prezzo_pagato
               }))
-              .sort((a: any, b: any) => (ruoloOrder[a.ruolo as keyof typeof ruoloOrder] || 99) - (ruoloOrder[b.ruolo as keyof typeof ruoloOrder] || 99))
+              .sort((a: any, b: any) =>
+                (ruoloOrder[a.ruolo as keyof typeof ruoloOrder] || 99) - (ruoloOrder[b.ruolo as keyof typeof ruoloOrder] || 99)
+                || indiceMantra(a.ruolo_mantra) - indiceMantra(b.ruolo_mantra)
+                || a.nome.localeCompare(b.nome, 'it'))
 
             return (
               <div key={squadra.id} className="fm-panel overflow-hidden">

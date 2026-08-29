@@ -289,6 +289,17 @@ numeri del database.
       **Atteso:** ripeteva quello che i ruoli Mantra dicono già — Por implica P,
       Dc implica D. L'ordine delle righe è ancora per reparto, portieri in
       testa.
+- [ ] Le righe seguono **l'ordine della leggenda Mantra** dentro ogni reparto:
+      portieri, poi Ds, Dc, Dd, B, poi E, M, C, poi W, T, poi A, Pc.
+      **Atteso:** con più ruoli conta il più arretrato — chi è «B / Ds / E» sta
+      con i terzini sinistri, non in fondo ai difensori.
+- [ ] Il reparto classico resta la divisione principale.
+      **Atteso:** voluto. Dimarco è un difensore che gioca E e Neres un
+      attaccante che gioca W: ordinando per solo Mantra finirebbero in mezzo ai
+      centrocampisti, dove chi conta i difensori non li cerca. Sono 18
+      giocatori su 549; sugli altri 531 le due strade danno lo stesso ordine.
+- [ ] La tendina **Ruolo** in `/svincolati` e `/aste` elenca i ruoli Mantra
+      nello stesso ordine: Por, Ds, Dc, Dd, B, E, M, C, W, T, A, Pc.
 - [ ] I ruoli Mantra sono **incolonnati**: scorrendo la rosa stanno uno sotto
       l'altro anche quando un giocatore ne ha uno e quello dopo tre. In `/rose`
       vale anche fra una squadra e l'altra, perché le tre schede affiancate
