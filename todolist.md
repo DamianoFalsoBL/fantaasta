@@ -97,31 +97,32 @@ progetto.
 
 ## Rimandato con dossier a parte
 
-### Scheda giocatore in `/svincolati` — ferma in attesa della chiave
+### Scheda giocatore in `/svincolati` — accantonata: si paga
 
-Piano deciso il 29 agosto e **sonda già scritta**; nient'altro costruito.
+**Chiusa il 29 agosto, e non per mancanza di tempo.** Anche le chiamate di
+API-Football si pagano: il «piano gratuito» descritto nel confronto non
+corrisponde a quello che si trova aprendo un account. Nessuna delle tre fonti
+esaminate regge quindi il requisito di partenza — dati completi **e** costo
+zero.
 
-Il primo passo è una misura, non del codice: `scripts/sonda-api-football.mts`
-spende tre richieste e dice se il piano gratuito copre la **stagione in corso**.
-Se non la copre la scheda mostrerebbe la carriera di due anni fa, e si riapre la
-scelta della fonte invece di costruire su un dato vecchio.
+Non è una voce da riaprire con un tentativo: **serve una fonte nuova**, e prima
+di rimettersi a progettare va verificato che sia davvero gratuita aprendo un
+account, non leggendo una pagina di prezzi.
 
-```
-node --experimental-strip-types scripts/sonda-api-football.mts
-```
+Cosa resta a terra, se un giorno si riprende:
 
-**Serve solo che tu apra un account gratuito** su
-<https://dashboard.api-football.com/register> (non chiede la carta) e metta la
-chiave in `.env.local` come `API_FOOTBALL_KEY`. È già documentata in
-`.env.example`. Non va su Vercel: la sincronizzazione è uno script locale,
-perché con 10 richieste al minuto un giro completo dura 4-6 minuti e una
-funzione su Vercel verrebbe interrotta molto prima.
+- il piano completo — tabella, sincronizzazione, abbinamento, interfaccia e le
+  trappole — è in [docs/scheda-giocatore.md](docs/scheda-giocatore.md);
+- `scripts/sonda-api-football.mts` è scritta e funziona: tre richieste che
+  dicono se una fonte copre la stagione in corso e quanto costa un giro
+  completo. Adattarla a un'altra API è un lavoro di mezz'ora, e resta il modo
+  giusto di cominciare: **prima la misura, poi il codice**;
+- `API_FOOTBALL_KEY` è documentata in `.env.example` e non è mai stata
+  valorizzata da nessuna parte. Non c'è niente da revocare.
 
-**Il piano completo è in [docs/scheda-giocatore.md](docs/scheda-giocatore.md)**:
-tabella, sincronizzazione, abbinamento per cognome dentro la rosa del club,
-interfaccia, e le trappole — soprattutto quella dei 14 cognomi condivisi, dove
-un abbinamento sbagliato mostra la carriera di un altro giocatore e sembra un
-dato invece che un guasto.
+**Perché BigBallsData non torna utile:** non ha nazionalità, data di nascita,
+nome e cognome né storico per stagione. Il problema non era la quota, erano i
+dati.
 
 ---
 

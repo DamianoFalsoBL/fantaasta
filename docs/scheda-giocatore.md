@@ -1,13 +1,20 @@
 # Scheda giocatore in /svincolati
 
-> **Stato al 29 agosto 2026: in attesa della chiave API.** Il piano è deciso e
-> la sonda è scritta (`scripts/sonda-api-football.mts`), ma niente altro è stato
-> costruito: il primo passo è una misura che senza chiave non si può fare.
+> **Stato al 29 agosto 2026: accantonata, perché si paga.** Anche le chiamate
+> di API-Football sono a pagamento: il «piano gratuito» descritto nel confronto
+> non corrisponde a quello che si trova aprendo un account. Nessuna delle tre
+> fonti esaminate soddisfa quindi il requisito di partenza — dati completi
+> **e** costo zero.
+>
+> Quello che segue resta valido come progetto: se un giorno si trova una fonte
+> davvero gratuita, cambia da dove arrivano i dati, non come si costruisce.
+> `scripts/sonda-api-football.mts` è scritta e funziona, e adattarla a un'altra
+> API è mezz'ora: resta il modo giusto di cominciare, **prima la misura e poi il
+> codice**.
 >
 > Questo documento sta nel repository e non nel file di piano perché quello è
 > **una sola casella che si sovrascrive** a ogni nuova progettazione: i piani
 > precedenti della stessa sessione erano già stati cancellati così.
-> [todolist.md](../todolist.md) ci rimanda dalla voce *Scheda giocatore*.
 
 ## Cosa è stato chiesto
 
