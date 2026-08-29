@@ -97,29 +97,31 @@ progetto.
 
 ## Rimandato con dossier a parte
 
-### Scheda giocatore in `/svincolati`
+### Scheda giocatore in `/svincolati` — ferma in attesa della chiave
 
-Una colonna con l'icona **i** che apre una scheda con anagrafica e storico.
-Ricerca fatta il 27 agosto, decisione presa, costruzione rimandata.
+Piano deciso il 29 agosto e **sonda già scritta**; nient'altro costruito.
 
-**Il dossier completo è in [docs/scheda-giocatore.md](docs/scheda-giocatore.md)**:
-com'è costruita la sincronizzazione, quali file toccare, le trappole e la
-verifica. Qui sotto solo quel tanto che serve a decidere se riprenderlo.
+Il primo passo è una misura, non del codice: `scripts/sonda-api-football.mts`
+spende tre richieste e dice se il piano gratuito copre la **stagione in corso**.
+Se non la copre la scheda mostrerebbe la carriera di due anni fa, e si riapre la
+scelta della fonte invece di costruire su un dato vecchio.
 
-**BigBallsData, l'API indicata all'inizio, non può fornire quei dati**: gli id
-sono UUID interni e la loro documentazione dice di non portare id da altri
-fornitori; per il calcio non esiste ricerca per nome; e non ci sono
-nazionalità, data di nascita né storico per stagione.
+```
+node --experimental-strip-types scripts/sonda-api-football.mts
+```
 
-**Fonte scelta: API-Football (api-sports.io)**, che ha tutti i campi e permette
-di elencare i giocatori squadra per squadra — una ventina di richieste per
-tutti e 548 del listone.
+**Serve solo che tu apra un account gratuito** su
+<https://dashboard.api-football.com/register> (non chiede la carta) e metta la
+chiave in `.env.local` come `API_FOOTBALL_KEY`. È già documentata in
+`.env.example`. Non va su Vercel: la sincronizzazione è uno script locale,
+perché con 10 richieste al minuto un giro completo dura 4-6 minuti e una
+funzione su Vercel verrebbe interrotta molto prima.
 
-Prima cosa da fare quando si riprende: **provare con una chiave vera** su dieci
-giocatori nostri, perché il piano gratuito dà 100 richieste al giorno e limita
-le stagioni accessibili in un modo che la documentazione pubblica non dice.
-Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
-è un passaggio dell'utente.
+**Il piano completo è in [docs/scheda-giocatore.md](docs/scheda-giocatore.md)**:
+tabella, sincronizzazione, abbinamento per cognome dentro la rosa del club,
+interfaccia, e le trappole — soprattutto quella dei 14 cognomi condivisi, dove
+un abbinamento sbagliato mostra la carriera di un altro giocatore e sembra un
+dato invece che un guasto.
 
 ---
 

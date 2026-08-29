@@ -1,109 +1,181 @@
-# DA FARE IN FUTURO — Scheda giocatore in /svincolati
+# Scheda giocatore in /svincolati
 
-> **Stato: rimandato.** Niente è stato implementato. Ricerca fatta il 27 agosto
-> 2026, decisione sulla fonte dati presa, resta da costruire.
+> **Stato al 29 agosto 2026: in attesa della chiave API.** Il piano è deciso e
+> la sonda è scritta (`scripts/sonda-api-football.mts`), ma niente altro è stato
+> costruito: il primo passo è una misura che senza chiave non si può fare.
 >
-> Questo documento nasce dal file di piano usato quel giorno. È stato portato
-> nel repository il 28 agosto perché quel file è **una sola casella che si
-> sovrascrive** a ogni nuova progettazione: i tre piani precedenti della stessa
-> sessione erano già stati cancellati così. Qui è versionato, e
+> Questo documento sta nel repository e non nel file di piano perché quello è
+> **una sola casella che si sovrascrive** a ogni nuova progettazione: i piani
+> precedenti della stessa sessione erano già stati cancellati così.
 > [todolist.md](../todolist.md) ci rimanda dalla voce *Scheda giocatore*.
 
-## Cosa era stato chiesto
+## Cosa è stato chiesto
 
 In `/svincolati`, una colonna in fondo dopo *Quotazione*, con un'icona **i** che
 apre una scheda con molte informazioni sul giocatore di quella riga: nome e
 cognome, età, ruolo, nazionalità, storico anno per anno di presenze e gol.
 Sul telefono, soluzione a scelta di chi implementa.
 
-## Il vincolo che ha cambiato la scelta
+## La fonte: API-Football, confermata due volte
 
-L'API indicata inizialmente — **BigBallsData** (`https://api.bigballsdata.com/v1/`)
-— **non può fornire quei dati**. Verificato su più pagine della loro
-documentazione, non dedotto:
+**BigBallsData, l'API indicata all'inizio, non può fornire quei dati.**
+Verificato il 27 agosto su più pagine della loro documentazione, non dedotto:
+gli id giocatore sono UUID interni e la documentazione dice esplicitamente di
+non portare un id da un altro fornitore; per il calcio non esiste ricerca per
+nome, quindi gli id si leggono solo dalle formazioni delle partite (~380
+richieste per una mappa che copre solo chi è sceso in campo); e mancano
+nazionalità, data di nascita, nome e cognome e lo storico per stagione. Il loro
+limite gratuito sarebbe stato abbondante — 1.000 richieste al giorno — ma i dati
+non ci sono.
 
-- gli id giocatore sono **UUID interni**; la documentazione dice esplicitamente
-  di non portare un id da un altro fornitore, e passare il nostro numero di
-  listone (es. `7294`) restituisce `400 bad_request`;
-- per il calcio **non esiste ricerca per nome**: gli id si leggono solo dalle
-  formazioni delle partite (`/v1/stored/matches/:id/lineups`), cioè ~380
-  richieste per costruire una mappa che copre solo chi è sceso in campo;
-- gli endpoint Serie A sono sei — partite, classifiche, storico trasferimenti,
-  palmarès, capocannonieri, xG — più `/v1/players/:id/club-form`, che dà
-  presenze, gol, assist, minuti e voto **della sola stagione 2025-26**;
-- **niente nazionalità, niente data di nascita, niente nome e cognome, niente
-  storico anno per anno.** La loro documentazione segnala anche che
-  *«player_season is not currently ingesting»*.
+Il 29 agosto un confronto fra tre API gratuite portato dall'utente ha
+**confermato la scelta**: API-Football è l'unica delle tre con anagrafica
+completa *e* storico per stagione. Football-Data.org non ha l'altezza né lo
+storico individuale nel piano gratuito; TheSportsDB ha biografia e immagini ma
+nessuna statistica stagionale.
 
-Il limite gratuito invece sarebbe stato abbondante: 1.000 richieste al giorno,
-2.000 collegando GitHub.
+**Attenzione:** la documentazione di API-Football non è stata letta in diretta —
+`api-football.com` sta dietro a un controllo anti-bot. Quello che sappiamo viene
+dal documento di confronto, non da una verifica nostra. È il motivo per cui il
+piano comincia con una sonda invece che con il codice.
 
-**Fonte scelta: API-Football (api-sports.io).** Ha tutti i campi richiesti —
-nome e cognome, età, data e luogo di nascita, nazionalità, altezza, peso, foto,
-presenze/gol/assist/minuti per stagione — e permette di elencare i giocatori
-**squadra per squadra**, quindi bastano ~20 richieste per coprire tutti e 548
-invece di 380.
+## Passo 0 — la sonda, prima di qualunque riga di codice
 
-**Domanda rimasta aperta:** quante stagioni di storico. Non è stata scelta.
-Riferimento: ~20 richieste per la sola stagione in corso, ~60 per tre stagioni,
-~100 per cinque — e il piano gratuito dà **100 richieste al giorno** e limita le
-stagioni accessibili in un modo che la documentazione pubblica non specifica.
-**Si saprà solo con una chiave in mano: è la prima cosa da misurare.**
+`scripts/sonda-api-football.mts`, già scritta. Si lancia con:
 
-## Il nostro lato, misurato sul database
+```
+node --experimental-strip-types scripts/sonda-api-football.mts
+```
 
-548 giocatori a listone. I nomi sono nel formato Fantacalcio:
+Tre richieste, tre domande:
 
-- **466 sono cognomi secchi** («Alajbegovic», «Angelino»);
-- **82 hanno l'iniziale del nome** («Miranda J.», «Adams C.»);
-- **14 cognomi sono condivisi** da due giocatori: thuram, colombo, konè, tourè,
-  adams, moro, perez, el azzouzi, carboni, stankovic e altri quattro.
+1. `/status` — quale piano e quanta quota resta oggi;
+2. `/leagues?id=135` — **quali stagioni di Serie A sono accessibili** e per
+   quali di esse la copertura include i giocatori;
+3. `/players?team=505&season=<in corso>&page=1` — la prova del nove: torna gente
+   vera con le statistiche?
 
-Colonne disponibili per l'aggancio in `giocatori`: `id` (listone), `nome`,
-`ruolo`, `squadra` (club di Serie A), `eta`, `ruolo_mantra`, `quotazione`.
-Squadra ed età bastano a sciogliere quasi tutti i casi ambigui, ma **qualcuno
-resterà da abbinare a mano**.
+Il piano gratuito dà 100 richieste al giorno ma **limita le stagioni in un modo
+che la documentazione pubblica non specifica**. Se la stagione in corso non è
+compresa, la scheda mostrerebbe la carriera di due anni fa: **in quel caso ci si
+ferma e si riapre la scelta della fonte**, invece di costruire su un dato
+vecchio.
 
-## Come andrebbe costruito
+Dalla terza risposta si ricava anche `paging.total`, cioè quante pagine servono
+per una squadra: è il numero da cui dipende il costo dell'intera
+sincronizzazione, e la sonda lo traduce da sola in richieste e minuti.
 
-**I dati vanno copiati nel nostro database, non chiesti a ogni apertura della
-scheda.** Con 100 richieste al giorno e quattordici manager che sfogliano una
-lista di 548 giocatori, una chiamata per clic esaurirebbe la quota in pochi
-minuti. La scheda deve leggere da noi.
+## I due vincoli che decidono l'architettura
 
-1. **Tabella nuova** `giocatori_dettagli`, chiave `giocatore_id` verso
-   `giocatori`, più i campi anagrafici e un jsonb per le stagioni. Lettura
-   libera come `giocatori`, scrittura solo service role.
-2. **Sincronizzazione da super admin**, in `/admin/setup` accanto agli import
-   esistenti: scorre le 20 squadre di Serie A, abbina per cognome + club, scrive
-   la tabella e **riporta l'elenco dei non abbinati** — stessa forma con cui
-   `importListone` riporta le «Fantasquadre non trovate» (vedi
-   `src/app/admin/actions.ts`).
-3. **La chiave sta solo lato server.** Variabile d'ambiente su Vercel, usata
-   dentro una server action o un route handler. Mai nel frontend: stessa regola
-   della chiave di servizio Supabase, scritta in `AGENTS.md`.
-4. **La colonna e la scheda** in `src/app/svincolati/SvincolatiClient.tsx`. Sul
-   telefono non serve una colonna: la tabella è già in formato scheda compatta
-   (`.fm-table-compatta`, introdotto in 1.8.0), quindi l'icona va nella riga del
-   titolo e la scheda si apre a tutta pagina dal basso, non come finestrella.
-5. **Riuso**: `src/components/Conferma.tsx` è già la finestra modale del
-   progetto — da guardare prima di scriverne un'altra.
+1. **10 richieste al minuto.** Un giro completo è 20 squadre per ~2 pagine più
+   una chiamata per gli id: 40-60 richieste, cioè **4-6 minuti di attesa
+   forzata**. Una funzione su Vercel viene interrotta molto prima: il pulsante in
+   `/admin/setup` immaginato all'inizio **non è praticabile** senza spezzarlo in
+   venti passaggi.
+2. **100 richieste al giorno.** Una stagione consuma metà o più della quota:
+   **una stagione al giorno, non di più.** Lo storico si accumula in giorni
+   successivi.
 
-### Trappole da non ripetere
+**Decisione: la sincronizzazione è uno script locale.** La chiave resta in
+`.env.local` e **non va mai su Vercel** — una variabile in meno da esporre, e il
+sito legge soltanto da Supabase.
 
-- **Non chiamare l'API dal browser.** Oltre alla chiave esposta, la quota è per
-  chiave, non per utente: un solo manager che scorre la lista la brucia.
-- **Non dare per buono l'abbinamento senza guardarlo.** Con 14 cognomi doppi,
-  un aggancio sbagliato mostra la carriera di un altro giocatore — un errore che
-  sembra un dato e non un guasto. Serve il rapporto dei non abbinati e un modo di
-  correggerli a mano.
-- **Non far sparire l'icona** per chi non è stato abbinato: va lasciata spenta
-  con il motivo, altrimenti sembra un difetto della pagina.
-- Il piano gratuito limita le stagioni: **provare prima con una chiave vera** su
-  dieci giocatori del nostro listone, e solo dopo decidere quante stagioni
-  mostrare.
+## Come va costruito
 
-## Cosa serve da te, quando si riprende
+### 1. Tabella `giocatori_dettagli`
 
-Un account gratuito su API-Football e la chiave, da mettere fra le variabili
-d'ambiente su Vercel: quello è un passaggio tuo, non mio.
+Migration nuova. Chiave `giocatore_id` verso `giocatori` con `ON DELETE
+CASCADE`, più `api_player_id` univoco, nome, cognome, data e luogo di nascita,
+nazionalità, altezza, peso, `foto_url`, un `jsonb` `stagioni` (annata, squadra,
+presenze, titolare, minuti, gol, assist, voto), `abbinamento` (`automatico` o
+`manuale`) e `aggiornato_il`.
+
+RLS con lo stesso schema di `giocatori` (vedi
+`supabase/migrations/20260801220100_consolidamento.sql`): lettura `USING (true)`,
+scrittura riservata a `public.is_admin()`. **La `GRANT SELECT` va scritta
+esplicitamente** — dimenticarla è una trappola già costata tempo qui.
+
+Il push della migration lo fa l'utente.
+
+### 2. Lo script di sincronizzazione
+
+`scripts/sincronizza-dettagli.mts`:
+
+- `/teams?league=135&season=<anno>` costruisce la mappa **nostro nome squadra →
+  id API**. Le venti squadre coincidono quasi tutte; servono pochi alias
+  (`Milan` → *AC Milan*, `Roma` → *AS Roma*). Una squadra non abbinata va
+  **segnalata, non saltata in silenzio**.
+- per ogni squadra `/players?team={id}&season={anno}&page={n}` finché
+  `paging.current < paging.total`;
+- **pausa di 6,5 secondi fra una chiamata e l'altra** per stare sotto le 10 al
+  minuto, e un contatore che si ferma prima di sfondare le 100 giornaliere
+  dicendo a che punto era arrivato;
+- `--stagione 2025` rifà il giro su un'annata precedente in un giorno diverso,
+  **accodando** al `jsonb` invece di sostituirlo.
+
+### 3. L'abbinamento, che è la parte che può sbagliare in silenzio
+
+I nostri nomi sono in formato Fantacalcio: **466 cognomi secchi, 82 con
+l'iniziale** («Miranda J.»), e **14 cognomi condivisi da due giocatori**
+(thuram, colombo, konè, tourè, adams, moro, perez, stankovic e altri).
+
+Si abbina **dentro la rosa del club**, il che scioglie quasi tutte le ambiguità,
+confrontando il cognome normalizzato — minuscolo e senza accenti, la
+normalizzazione c'è già in `slugify` dentro `src/app/admin/actions.ts`. Se
+restano due candidati decidono l'iniziale del nome e l'età, che a listone
+abbiamo.
+
+Lo script chiude con tre elenchi: **abbinati, ambigui, non trovati** — stessa
+forma con cui `importListone` riporta le «Fantasquadre non trovate». Le
+correzioni a mano stanno in `scripts/abbinamenti-manuali.json`, una mappa
+`{ "giocatore_id": api_player_id }` versionata, applicata **prima** di ogni
+euristica.
+
+**Trappola:** un abbinamento sbagliato mostra la carriera di un altro giocatore,
+e sembra un dato invece che un guasto. I tre elenchi si leggono davvero, e i
+primi dieci abbinamenti si controllano a mano prima di fidarsi degli altri 539.
+
+### 4. La scheda
+
+- Colonna in fondo a `/svincolati` con l'icona **i**. Sul telefono la tabella è
+  già in formato scheda (`.fm-table-compatta` + `.fm-table-incolonnata`):
+  **l'icona va nella riga del titolo accanto al nome, non in una quinta
+  colonna** — le tracce sono calibrate al pixel e non c'è spazio.
+- `src/components/SchedaGiocatore.tsx`, modellato su
+  `src/components/Conferma.tsx`, da cui si riprende la meccanica già risolta:
+  chiusura con Esc, clic sullo sfondo, focus all'apertura, `aria-modal`. Sul
+  telefono si apre a tutta pagina dal basso.
+- **La foto punta al CDN di API-Football**, deciso dall'utente il 29 agosto
+  sapendo che è la strada scartata per gli stemmi delle squadre. Serve un
+  `onError` che nasconde l'immagine: se cambiano gli indirizzi la scheda perde
+  la foto invece di riempirsi di riquadri rotti.
+- **L'icona di chi non è stato abbinato resta visibile ma spenta**, con il
+  motivo. Farla sparire sembrerebbe un difetto della pagina.
+
+### 5. Dove non va la chiave
+
+Solo in `.env.local`. Niente su Vercel, niente nel frontend — stessa regola
+della service role scritta in `AGENTS.md`. Il sito non parla mai con
+API-Football: legge `giocatori_dettagli` come legge `giocatori`.
+
+## Verifica
+
+1. **La sonda**, prima di tutto: se la stagione in corso non è coperta, ci si
+   ferma.
+2. **Il costo misurato, non stimato**: quante richieste consuma un giro completo.
+3. **Dieci abbinamenti a campione** controllati a mano, scelti fra i cognomi
+   condivisi: quelli sono i casi che sbagliano.
+4. Quanti dei 549 hanno un dettaglio, quanti no e perché.
+5. **La pagina a 360, 375 e 1280px**: la scheda di `/svincolati` deve restare di
+   **76px** e le colonne allineate. Se l'icona la fa crescere va rimpicciolita,
+   non accettata.
+6. Un giocatore non abbinato mostra l'icona spenta con il motivo, non un buco.
+7. **La chiave non deve comparire nel bundle**: `grep` dentro `.next` dopo il
+   build.
+
+## Cosa serve dall'utente
+
+- **Un account gratuito su API-Football** (<https://dashboard.api-football.com/register>,
+  non chiede la carta) e la chiave in `.env.local` come `API_FOOTBALL_KEY`.
+  È il passaggio che l'assistente non fa.
+- **Il push della migration** con `npx supabase db push`, quando sarà pronta.
