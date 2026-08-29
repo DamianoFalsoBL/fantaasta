@@ -445,12 +445,18 @@ numeri del database.
       entra con un altro e controlla che la sua lista sia vuota. Diversamente
       dalle buste, qui **nemmeno l'admin** legge i preferiti altrui — in questa
       lega l'amministratore gioca.
-- [ ] A fase buste aperta, in `/buste` premi **Riempi dai preferiti**.
-      **Atteso:** la selezione si riempie fino agli slot liberi prendendo i
-      preferiti nell'ordine in cui li hai messi, e un avviso dice quanti su
-      quanti, quanti non sono più disponibili e quanti sono avanzati.
-- [ ] Ripremilo con una selezione già fatta a mano.
-      **Atteso:** chiede conferma prima di sostituirla.
+- [ ] A fase buste aperta, in `/buste` premi **Aggiungi i preferiti**.
+      **Atteso:** i preferiti si aggiungono in coda a quello che hai già
+      scelto, nell'ordine in cui li hai messi, fino a riempire gli slot. Un
+      avviso dice quanti aggiunti su quanti, quanti erano già dentro, quanti
+      non sono più disponibili e quanti sono rimasti fuori.
+- [ ] Scegli due nomi a mano, poi premi il pulsante.
+      **Atteso:** i due restano e i preferiti si aggiungono dopo. **Non** deve
+      sostituire: la prima versione lo faceva e chiedeva conferma, che era il
+      comportamento sbagliato con un cerotto sopra.
+- [ ] Premilo due volte di fila.
+      **Atteso:** la seconda volta non aggiunge doppioni e lo dice
+      («erano già nella lista»).
 - [ ] Dopo il riempimento la pastiglia dice ancora **buste non salvate**: il
       pulsante riempie e basta, solo *Salva* fa fede.
 - [ ] La scheda di `/svincolati` resta di **76px** sul telefono, e le colonne

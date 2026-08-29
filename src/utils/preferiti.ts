@@ -58,35 +58,57 @@ export async function togliPreferito(
 }
 
 /**
- * Sceglie quali preferiti mettere nella busta.
+ * Sceglie quali preferiti aggiungere alla busta.
  *
  * Sta qui e non dentro la pagina perché è la parte che può dire il falso: se
  * il conteggio sbaglia, il manager legge «presi 10 su 14» e ne ha otto. Come
- * funzione pura si può provare davvero, con i tre casi che contano — preferiti
- * meno degli slot, esatti, più degli slot.
+ * funzione pura si può provare davvero, con tutti i casi che contano.
+ *
+ * **Aggiunge, non sostituisce.** La prima versione rimpiazzava la selezione in
+ * corso e chiedeva conferma prima di farlo: era il comportamento sbagliato con
+ * un cerotto sopra. Chi ha già scelto due nomi a mano e preme "riempi" vuole
+ * arrivare a dieci, non ricominciare da zero — e così sparisce anche la
+ * domanda di conferma, perché non si distrugge più niente.
  *
  * `disponibili` sono i giocatori che la pagina ha già ripulito da chi non è
  * libero e da chi è in coda per l'asta: l'incrocio serve perché un preferito
  * segnato una settimana fa può essere stato preso da qualcun altro.
  *
  * L'ordine è quello di `idsPreferiti`, cioè quello di inserimento: quando i
- * preferiti sono più degli slot, entrano i primi che sono stati messi.
+ * preferiti sono più dei posti rimasti, entrano i primi che sono stati messi.
  */
 export function scegliDaiPreferiti<T extends { id: number }>(
   idsPreferiti: number[],
   disponibili: T[],
-  slotLiberi: number
-): { presi: T[]; nonDisponibili: number; avanzati: number; mancanti: number } {
+  slotLiberi: number,
+  giaSelezionati: number[] = []
+): {
+  daAggiungere: T[]
+  giaPresenti: number
+  nonDisponibili: number
+  avanzati: number
+  mancanti: number
+} {
   const perId = new Map(disponibili.map((g) => [g.id, g]))
+  const dentro = new Set(giaSelezionati)
+
   const trovati = idsPreferiti
     .map((id) => perId.get(id))
     .filter((g): g is T => g !== undefined)
-  const presi = trovati.slice(0, Math.max(slotLiberi, 0))
+
+  // Un preferito già selezionato non si conta né come aggiunto né come
+  // avanzato: è dentro, e va detto a parte.
+  const giaPresenti = trovati.filter((g) => dentro.has(g.id)).length
+  const candidati = trovati.filter((g) => !dentro.has(g.id))
+
+  const posti = Math.max(slotLiberi - giaSelezionati.length, 0)
+  const daAggiungere = candidati.slice(0, posti)
 
   return {
-    presi,
+    daAggiungere,
+    giaPresenti,
     nonDisponibili: idsPreferiti.length - trovati.length,
-    avanzati: trovati.length - presi.length,
-    mancanti: Math.max(slotLiberi - presi.length, 0),
+    avanzati: candidati.length - daAggiungere.length,
+    mancanti: Math.max(slotLiberi - giaSelezionati.length - daAggiungere.length, 0),
   }
 }

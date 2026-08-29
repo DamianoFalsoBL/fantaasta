@@ -79,9 +79,6 @@ export default function BustePage() {
   // Al posto di `alert()`: erano le ultime finestre di sistema rimaste
   // nell'app, disegnate dal sistema operativo e fuori tema.
   const [avviso, setAvviso] = useState<{ tono: 'ok' | 'errore'; titolo: string; testo: string } | null>(null)
-  // Il riempimento dai preferiti sostituisce la selezione in corso, quindi
-  // quando c'è qualcosa da sostituire si chiede prima.
-  const [chiedeSostituzione, setChiedeSostituzione] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -275,26 +272,23 @@ export default function BustePage() {
   }
 
   /**
-   * Riempie la selezione con i preferiti preparati in /svincolati.
+   * Aggiunge alla selezione i preferiti preparati in /svincolati.
    *
    * Nasce dall'asta del 27 agosto: aperta la fase buste, tutti hanno aspettato
    * un manager che doveva cercare dieci nomi in una lista di 215.
    *
-   * Tre cose che questa funzione fa di proposito:
+   * **Aggiunge, non sostituisce.** La prima versione rimpiazzava la selezione e
+   * chiedeva conferma prima di farlo: il comportamento sbagliato con un cerotto
+   * sopra. Chi ha già scelto due nomi a mano vuole arrivare a dieci, non
+   * ricominciare — e così sparisce anche la domanda di conferma.
    *
-   * 1. **incrocia con `giocatoriLiberi`**, che la pagina ha già ripulito da chi
-   *    non è libero e da chi è in coda per l'asta. Un preferito segnato una
-   *    settimana fa può essere stato preso da qualcun altro.
-   * 2. **taglia a `slotLiberi`** tenendo l'ordine in cui i preferiti sono stati
-   *    messi (`leggiPreferiti` ordina per `created_at`), perché `submit_buste`
-   *    pretende esattamente quel numero.
-   * 3. **dice cosa è successo**, con i numeri. Riempire in silenzio e lasciar
-   *    scoprire dopo che mancano due nomi sarebbe peggio che non riempire.
+   * I conti li fa `scegliDaiPreferiti`, che è una funzione pura proprio perché
+   * è la parte che può dire il falso: se sbaglia, si legge «aggiunti 8» e ne
+   * arrivano sei.
    *
    * Non salva: resta la pastiglia "buste non salvate", e solo *Salva* fa fede.
    */
-  const eseguiRiempimento = async () => {
-    setChiedeSostituzione(false)
+  const riempiDaiPreferiti = async () => {
     const idsPreferiti = await leggiPreferiti(supabase)
 
     if (idsPreferiti.length === 0) {
@@ -306,37 +300,43 @@ export default function BustePage() {
       return
     }
 
-    const { presi, nonDisponibili, avanzati, mancanti } =
-      scegliDaiPreferiti(idsPreferiti, giocatoriLiberi, slotLiberi)
-    setSelezionati(presi)
+    const { daAggiungere, giaPresenti, nonDisponibili, avanzati, mancanti } =
+      scegliDaiPreferiti(idsPreferiti, giocatoriLiberi, slotLiberi, selezionati.map((g) => g.id))
 
-    const pezzi = [`Presi ${presi.length} dei tuoi ${idsPreferiti.length} preferiti.`]
+    setSelezionati([...selezionati, ...daAggiungere])
+
+    const pezzi: string[] = []
+    pezzi.push(
+      daAggiungere.length === 0
+        ? 'Nessun preferito aggiunto.'
+        : `Aggiunti ${daAggiungere.length} dei tuoi ${idsPreferiti.length} preferiti.`
+    )
+    if (giaPresenti > 0) {
+      pezzi.push(`${giaPresenti} ${giaPresenti === 1 ? 'era già' : 'erano già'} nella lista.`)
+    }
     if (nonDisponibili > 0) {
-      pezzi.push(`${nonDisponibili} non ${nonDisponibili === 1 ? 'è più disponibile' : 'sono più disponibili'}: ${nonDisponibili === 1 ? 'è stato preso' : 'sono stati presi'}, o ${nonDisponibili === 1 ? 'è' : 'sono'} in coda per l'asta.`)
+      pezzi.push(
+        `${nonDisponibili} non ${nonDisponibili === 1 ? 'è più disponibile' : 'sono più disponibili'}: ` +
+        `${nonDisponibili === 1 ? 'è stato preso' : 'sono stati presi'}, o ${nonDisponibili === 1 ? 'è' : 'sono'} in coda per l’asta.`
+      )
     }
     if (avanzati > 0) {
-      pezzi.push(`${avanzati} ${avanzati === 1 ? 'è avanzato' : 'sono avanzati'}: hai ${slotLiberi} slot.`)
+      pezzi.push(`${avanzati} ${avanzati === 1 ? 'è rimasto fuori' : 'sono rimasti fuori'}: gli slot sono finiti.`)
     }
     if (mancanti > 0) {
       pezzi.push(`Ne mancano ${mancanti} per arrivare a ${slotLiberi}: aggiungili dalla lista qui accanto.`)
     }
-    const costo = presi.reduce((somma, g) => somma + g.quotazione, 0)
-    if (costo > squadra!.crediti_residui) {
-      pezzi.push(`Attenzione: il costo (${costo} cr) supera i tuoi ${squadra!.crediti_residui} crediti.`)
+
+    const costo = [...selezionati, ...daAggiungere].reduce((somma, g) => somma + g.quotazione, 0)
+    if (squadra && costo > squadra.crediti_residui) {
+      pezzi.push(`Attenzione: il costo (${costo} cr) supera i tuoi ${squadra.crediti_residui} crediti.`)
     }
 
     setAvviso({
-      tono: mancanti > 0 || costo > squadra!.crediti_residui ? 'errore' : 'ok',
-      titolo: 'Riempito dai preferiti',
+      tono: mancanti > 0 || (squadra ? costo > squadra.crediti_residui : false) ? 'errore' : 'ok',
+      titolo: 'Preferiti aggiunti',
       testo: pezzi.join(' ') + ' Niente è ancora salvato: controlla e premi Salva la lista.',
     })
-  }
-
-  const riempiDaiPreferiti = () => {
-    // Cancellare in silenzio scelte fatte a mano sarebbe il difetto peggiore
-    // di tutta la funzione.
-    if (selezionati.length > 0) setChiedeSostituzione(true)
-    else void eseguiRiempimento()
   }
 
   const submitBuste = async () => {
@@ -728,10 +728,10 @@ export default function BustePage() {
                 </div>
 
                 <button
-                  onClick={riempiDaiPreferiti}
+                  onClick={() => void riempiDaiPreferiti()}
                   className="fm-btn fm-btn-ghost mb-2 w-full"
                 >
-                  Riempi dai preferiti
+                  Aggiungi i preferiti
                 </button>
 
                 <button
@@ -815,15 +815,6 @@ export default function BustePage() {
           </div>
         </div>
       )}
-
-      <Conferma
-        aperta={chiedeSostituzione}
-        titolo="Sostituire la selezione"
-        messaggio={`Hai già scelto ${selezionati.length} giocator${selezionati.length === 1 ? 'e' : 'i'}. Riempire dai preferiti li toglie e rimette al loro posto quelli della tua lista.`}
-        testoConferma="Sostituisci"
-        onAnnulla={() => setChiedeSostituzione(false)}
-        onConferma={() => { void eseguiRiempimento() }}
-      />
 
       <Conferma
         aperta={avviso !== null}
