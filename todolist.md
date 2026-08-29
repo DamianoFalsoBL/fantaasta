@@ -144,12 +144,11 @@ così si vede il risultato invece di indovinarlo.
 
 ## Notato di sfuggita
 
-- **Il collaudo di oggi è tutto da eseguire.** Le modifiche del 29 agosto hanno
-  aggiunto le caselle A11c (reset password dal super admin), B6 (titoli
-  allineati), C2c (stemmi) e C2d (colonne sul telefono), e hanno **tolto la
-  spunta ad A4**, perché il messaggio d'errore dell'accesso è cambiato. Nessuna
-  di queste è stata provata sulla produzione: sono state verificate in
-  sviluppo, misurando, ma è un'altra cosa.
+- **Il collaudo del 29 agosto è stato eseguito sulla produzione**, versione
+  1.21.0, e non ha fatto emergere difetti. Resta fuori solo quello che dipende
+  da una situazione: il «Mi ritiro» spostato a destra e la fascia di asta finita
+  vogliono **un'asta in corso**, F13b una chiamata dalla console, il blocco K il
+  mercato aperto.
 - **Il pulsante *Nuova password* si vede anche dall'admin semplice.** `/admin`
   è protetto da `requireAdmin()`, che lascia passare ADMIN e SUPER_ADMIN,
   quindi *Budget e Fasi* è raggiungibile da entrambi. Il reset però è riservato

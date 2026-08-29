@@ -53,10 +53,31 @@ sempre ed è quasi sempre quello che spiega il problema.
 
 ### Stato del collaudo
 
-Aggiornato all'8 agosto 2026, sulla produzione.
+Aggiornato al **29 agosto 2026**, sulla produzione, versione 1.21.0.
 
 | Blocco | Esito |
 |---|---|
+| A — Accessi e permessi | superato, compresi i messaggi d'errore tradotti (A4), il cambio password (A11b) e il reset dal super admin (A11c) |
+| B — Navigazione e interfaccia | superato: titoli allineati (B6) e larghezze uniformi (B7) |
+| C — Lettura dei dati | superato per stemmi, colonne sul telefono e ordine Mantra (C1b, C2c, C2d); restano C4/C5/C6, assorbiti in altre pagine |
+| D — Asta live | superati D14 e D18; **il resto aspetta un'asta viva** |
+| E — Modalità delega | superato |
+| F — Buste | da fare, **tranne F13b** che aspetta una chiamata dalla console |
+| G — Manutenzione admin | da fare |
+| H — Export | da fare |
+| I — Telefono | il giro del 29 agosto ha coperto svincolati, aste, buste e mia-rosa |
+| J — Distruttivi | da fare, solo a fine stagione |
+| K — Mercato trasferimenti | da fare, funzione mai provata |
+
+Nessun test fallito finora.
+
+**Cosa resta e perché.** Quasi tutto il non spuntato non è pigrizia ma
+dipendenza da una situazione: il «Mi ritiro» spostato a destra, la fascia di
+asta finita e la terza casella di D20 si vedono **solo con un'asta in corso**;
+F13b vuole una chiamata a `submit_buste` dalla console con un giocatore già in
+coda; il blocco K si prova solo a mercato aperto.
+
+---|---|
 | A — Accessi e permessi | superato, tranne A6 e A7: i menu sono stati rinominati |
 | B — Navigazione e interfaccia | superato, tranne B1: voci nuove da riaprire |
 | C — Lettura dei dati | superato, tranne C4/C5/C6: Storico e Controllo Slot sono stati assorbiti in altre pagine |
@@ -107,10 +128,10 @@ Non scrive nulla. Si può eseguire in qualunque momento, anche a lega in corso.
 Le prime due caselle erano superate, ma il messaggio d'errore ora è tradotto in
 italiano: va riguardato, non dato per buono.
 
-- [ ] Username giusto, password sbagliata.
+- [x] Username giusto, password sbagliata.
   **Atteso:** riquadro rosso dentro *Accedi* con scritto **«Utente o password
   non corretti.»**, e si resta sulla pagina.
-- [ ] Username inesistente.
+- [x] Username inesistente.
   **Atteso:** **lo stesso identico messaggio.** Non è una svista: Supabase
   risponde `invalid_credentials` in tutti e due i casi, per non far scoprire
   quali account esistono. Se un giorno i due messaggi differiscono, è un
@@ -159,7 +180,7 @@ italiano: va riguardato, non dato per buono.
 
 ### A11b · Il manager si cambia la password
 - [ ] Da manager, in fondo a *La mia Rosa*, apri *Cambia la tua password*.
-- [ ] Sbaglia di proposito la **password attuale**.
+- [x] Sbaglia di proposito la **password attuale**.
   **Atteso:** *«La password attuale non è corretta»*, e niente viene cambiato.
   Serve a impedire che chi trova un telefono con la sessione aperta cambi la
   password a qualcun altro.
@@ -190,12 +211,12 @@ italiano: va riguardato, non dato per buono.
 - [ ] Chiudi la finestra e cerca di rivedere la password.
       **Atteso:** non c'è modo. Non è un difetto: non viene salvata da nessuna
       parte, né a database né altrove. Per riaverne una si rifà il reset.
-- [ ] Entra come quel manager con la password nuova → funziona. Con quella di
+- [x] Entra come quel manager con la password nuova → funziona. Con quella di
       prima → non funziona.
 - [x] La password non contiene mai `l`, `1`, `o`, `0`.
       **Atteso:** vero per costruzione — sono i caratteri che si scambiano
       dettandola al telefono.
-- [ ] **Controprova del gate.** Attenzione, la prima stesura di questa casella
+- [x] **Controprova del gate.** Attenzione, la prima stesura di questa casella
       era sbagliata: `/admin` è protetto da `requireAdmin()`, che lascia passare
       **anche l'admin semplice**. Quindi *Budget e Fasi* è raggiungibile e il
       pulsante *Nuova password* si vede.
@@ -256,29 +277,29 @@ che non funzionava — un manager ci è finito e non è riuscito a entrare.
 
 ### B6 · Titoli allineati
 
-- [ ] Gira tutte le pagine: **ogni titolo sta a sinistra**, e ha la stessa
+- [x] Gira tutte le pagine: **ogni titolo sta a sinistra**, e ha la stessa
       dimensione. Prima `/svincolati` e `/aste` usavano la testata di un
       riquadro al posto del titolo di pagina, e si leggevano più piccole.
-- [ ] Le testate dei riquadri (*Stato squadre*, *I tuoi risultati*, *Fase
+- [x] Le testate dei riquadri (*Stato squadre*, *I tuoi risultati*, *Fase
       buste*) hanno il titolo a sinistra e il numero o la pastiglia
       all'estremità destra.
       **Atteso:** prima finivano fuori asse — a destra quando il titolo era
       solo, al centro quando c'era anche una pastiglia. La causa era la
       barretta colorata, che è un `::before` e contava come primo elemento
       della fila.
-- [ ] Restano centrati di proposito, e non sono difetti: il nome del giocatore
+- [x] Restano centrati di proposito, e non sono difetti: il nome del giocatore
       sul tabellone d'asta, i messaggi di lista vuota, e il riquadro di accesso
       sulla home.
 
 ### B7 · Larghezza delle pagine
 
-- [ ] Passa da `/svincolati` a `/aste` a `/rose` a `/buste` su schermo grande:
+- [x] Passa da `/svincolati` a `/aste` a `/rose` a `/buste` su schermo grande:
       il contenuto comincia e finisce **alla stessa distanza dai bordi**, senza
       saltare da una pagina all'altra.
       **Atteso:** prima c'erano cinque larghezze massime diverse e quattro
       rientri diversi. Ora sono due misure sole — larga per le tabelle, stretta
       per i pannelli di lavoro — scritte in un posto solo.
-- [ ] Le pagine strette sono `/asta`, `/mia-rosa`, la regia asta e le
+- [x] Le pagine strette sono `/asta`, `/mia-rosa`, la regia asta e le
       impostazioni. Anche loro fra di loro sono allineate.
 - [ ] Ricarica una pagina lenta (`/rose`) e guarda la schermata *Caricamento*:
       **non deve essere più stretta della pagina che sta caricando**, altrimenti
@@ -309,27 +330,27 @@ numeri del database.
 
 ### C1b · Rose senza la pastiglia del reparto
 
-- [ ] `/rose` e `/mia-rosa`: prima del nome del calciatore **non c'è più** la
+- [x] `/rose` e `/mia-rosa`: prima del nome del calciatore **non c'è più** la
       pastiglia P/D/C/A.
       **Atteso:** ripeteva quello che i ruoli Mantra dicono già — Por implica P,
       Dc implica D. L'ordine delle righe è ancora per reparto, portieri in
       testa.
-- [ ] Le righe seguono **l'ordine della leggenda Mantra** dentro ogni reparto:
+- [x] Le righe seguono **l'ordine della leggenda Mantra** dentro ogni reparto:
       portieri, poi Ds, Dc, Dd, B, poi E, M, C, poi W, T, poi A, Pc.
       **Atteso:** con più ruoli conta il più arretrato — chi è «B / Ds / E» sta
       con i terzini sinistri, non in fondo ai difensori.
-- [ ] Il reparto classico resta la divisione principale.
+- [x] Il reparto classico resta la divisione principale.
       **Atteso:** voluto. Dimarco è un difensore che gioca E e Neres un
       attaccante che gioca W: ordinando per solo Mantra finirebbero in mezzo ai
       centrocampisti, dove chi conta i difensori non li cerca. Sono 18
       giocatori su 549; sugli altri 531 le due strade danno lo stesso ordine.
-- [ ] La tendina **Ruolo** in `/svincolati` e `/aste` elenca i ruoli Mantra
+- [x] La tendina **Ruolo** in `/svincolati` e `/aste` elenca i ruoli Mantra
       nello stesso ordine: Por, Ds, Dc, Dd, B, E, M, C, W, T, A, Pc.
-- [ ] I ruoli Mantra sono **incolonnati**: scorrendo la rosa stanno uno sotto
+- [x] I ruoli Mantra sono **incolonnati**: scorrendo la rosa stanno uno sotto
       l'altro anche quando un giocatore ne ha uno e quello dopo tre. In `/rose`
       vale anche fra una squadra e l'altra, perché le tre schede affiancate
       usano le stesse larghezze.
-- [ ] In `/rose` i crediti sono allineati a destra, in colonna.
+- [x] In `/rose` i crediti sono allineati a destra, in colonna.
 - [x] Sul telefono, in `/mia-rosa`, la riga di dettaglio dice *«CAGLIARI · 25 ·
       PAGATO 9 CR · QUOT. 10»* su **una riga sola**, senza puntini di
       troncamento. *Quotazione* è abbreviato come nel listone.
