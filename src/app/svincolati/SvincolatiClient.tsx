@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import RuoliGiocatore from '@/components/RuoliGiocatore'
+import StellaPreferito from '@/components/StellaPreferito'
 import LogoSquadra from '@/components/LogoSquadra'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import PannelloFiltri from '@/components/PannelloFiltri'
@@ -25,7 +26,19 @@ const INTESTAZIONI: { colonna: Colonna; etichetta: string }[] = [
   { colonna: 'quotazione', etichetta: 'Quotazione' },
 ]
 
-export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
+export default function SvincolatiClient({
+  giocatori,
+  squadraId,
+  preferitiIniziali,
+  preferitiNonDisponibili,
+}: {
+  giocatori: any[]
+  /** Nullo per il super admin, che non ha squadra: niente stelle. */
+  squadraId: string | null
+  preferitiIniziali: number[]
+  /** Quanti preferiti non compaiono più in lista perché non sono più liberi. */
+  preferitiNonDisponibili: number
+}) {
   const [searchNome, setSearchNome] = useState('')
   const [searchSquadra, setSearchSquadra] = useState('')
   const [searchRuolo, setSearchRuolo] = useState('')
@@ -34,6 +47,19 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
   // consegna già i dati (`.order('nome')`), così l'aspetto non cambia da solo.
   const [colonna, setColonna] = useState<Colonna>('nome')
   const [verso, setVerso] = useState<Verso>('asc')
+  // Un Set e non un array: la stella si disegna 215 volte e ogni riga chiede
+  // "ci sono dentro?".
+  const [preferiti, setPreferiti] = useState<Set<number>>(new Set(preferitiIniziali))
+  const [soloPreferiti, setSoloPreferiti] = useState(false)
+
+  const cambiaPreferito = (id: number, ora: boolean) => {
+    setPreferiti((prima) => {
+      const dopo = new Set(prima)
+      if (ora) dopo.add(id)
+      else dopo.delete(id)
+      return dopo
+    })
+  }
 
   const ordinaPer = (c: Colonna) => {
     if (c === colonna) setVerso(verso === 'asc' ? 'desc' : 'asc')
@@ -63,10 +89,11 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
     return giocatori.filter(g => {
       const matchSquadra = searchSquadra === '' || g.squadra === searchSquadra
       const matchEta = searchEta === '' || (g.eta && g.eta <= parseInt(searchEta))
+      const matchPreferiti = !soloPreferiti || preferiti.has(g.id)
 
-      return passaFiltri(g, searchNome, searchRuolo) && matchSquadra && matchEta
+      return passaFiltri(g, searchNome, searchRuolo) && matchSquadra && matchEta && matchPreferiti
     })
-  }, [giocatori, searchNome, searchSquadra, searchRuolo, searchEta])
+  }, [giocatori, searchNome, searchSquadra, searchRuolo, searchEta, soloPreferiti, preferiti])
 
   const giocatoriOrdinati = useMemo(
     () => ordinaGiocatori(giocatoriFiltrati, colonna, verso),
@@ -75,12 +102,13 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
   // Quanti filtri sono attivi oltre la ricerca: è il numero sul pulsante che
   // apre il pannello. L'ordinamento non conta, perché non nasconde righe.
   const filtriAttivi =
-    (searchSquadra ? 1 : 0) + (searchRuolo ? 1 : 0) + (searchEta ? 1 : 0)
+    (searchSquadra ? 1 : 0) + (searchRuolo ? 1 : 0) + (searchEta ? 1 : 0) + (soloPreferiti ? 1 : 0)
 
   const azzeraFiltri = () => {
     setSearchSquadra('')
     setSearchRuolo('')
     setSearchEta('')
+    setSoloPreferiti(false)
   }
 
   return (
@@ -142,6 +170,27 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
             onChange={(e) => setSearchEta(e.target.value)}
           />
         </div>
+        {squadraId && (
+          <div className="flex flex-wrap items-center gap-3 md:col-span-full">
+            <label className="flex items-center gap-2 text-sm font-medium text-ink-mid">
+              <input
+                type="checkbox"
+                className="rounded"
+                checked={soloPreferiti}
+                onChange={(e) => setSoloPreferiti(e.target.checked)}
+              />
+              Solo i preferiti
+              <span className="fm-badge fm-badge-mid">{preferiti.size}</span>
+            </label>
+            {/* Una stella non è una busta: senza questa riga qualcuno
+                preparerebbe la lista e crederebbe di aver già consegnato. */}
+            <span className="text-xs text-ink-dim">
+              La lista è solo tua e non vale come busta: si consegna da
+              <strong className="text-ink-mid"> Buste</strong>.
+            </span>
+          </div>
+        )}
+
         {/* Sotto md la tabella diventa una pila di schede e l'intestazione
             sparisce, quindi le colonne non sono più cliccabili: senza questa
             tendina l'ordinamento non esisterebbe proprio sul telefono, che è
@@ -164,6 +213,18 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
           </select>
         </div>
       </PannelloFiltri>
+
+      {/* Un preferito che finisce in coda per l'asta sparisce da questa lista,
+          perche' la pagina mostra solo chi e' davvero prendibile. Senza questa
+          riga il manager conterebbe dieci preferiti e ne troverebbe otto,
+          scoprendolo al momento peggiore. */}
+      {soloPreferiti && preferitiNonDisponibili > 0 && (
+        <div className="fm-alert fm-alert-warn mb-4 text-sm">
+          {preferitiNonDisponibili === 1
+            ? 'Un giocatore fra i tuoi preferiti non è più disponibile: è stato preso, o è in coda per l’asta.'
+            : `${preferitiNonDisponibili} giocatori fra i tuoi preferiti non sono più disponibili: sono stati presi, o sono in coda per l’asta.`}
+        </div>
+      )}
 
       {/* Tabella Svincolati */}
       <div className="fm-table-scroll rounded-md border border-line">
@@ -207,7 +268,31 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
               // c'è già l'intestazione di colonna.
               giocatoriOrdinati.map((g) => (
                 <tr key={g.id}>
-                  <td data-label="Nome" className="fm-nome">{g.nome}</td>
+                  {/* La stella sta DENTRO la cella del nome e non in una
+                      colonna sua: le tracce della griglia mobile sono calibrate
+                      al pixel (5.9rem, 1fr, 1.4rem, 2.7rem, misurate su 215
+                      righe a 360px) e una quinta colonna le farebbe saltare
+                      tutte. Qui finisce in fondo alla colonna Nome su schermo
+                      grande e in fondo alla riga del titolo sul telefono, che
+                      e' a tutta larghezza. */}
+                  <td data-label="Nome" className="fm-nome">
+                    {/* `w-full`: senza, lo span si dimensiona sul contenuto e
+                        la stella finisce attaccata al nome, a un'ascissa
+                        diversa per ogni riga. All'estremità si trova sempre
+                        nello stesso punto, che è come si scorre una lista. */}
+                    <span className="flex w-full items-center justify-between gap-2">
+                      <span className="min-w-0 truncate">{g.nome}</span>
+                      {squadraId && (
+                        <StellaPreferito
+                          giocatoreId={g.id}
+                          squadraId={squadraId}
+                          nome={g.nome}
+                          attiva={preferiti.has(g.id)}
+                          onCambia={cambiaPreferito}
+                        />
+                      )}
+                    </span>
+                  </td>
                   <td data-label="Ruoli" className="fm-meta">
                     {/* `inline-flex` e non `flex`: dentro una cella `inline` un
                         figlio di tipo blocco spezzerebbe la riga compatta. */}

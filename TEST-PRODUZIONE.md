@@ -432,6 +432,30 @@ numeri del database.
 - [x] La data è nella forma breve: **«27/08/26, 20:00»**, non più
       «27/08/2026, 20:00:00». Vale anche su schermo grande.
 
+### C2e · Preferiti e riempimento delle buste
+
+- [ ] `/svincolati`: accanto a ogni nome c'è una stella spenta. Toccane una →
+      si accende e resta accesa **anche ricaricando la pagina**.
+- [ ] Entra dal telefono con lo stesso manager: **le stelle ci sono anche lì**.
+      È il motivo per cui i preferiti stanno sul server e non nel browser.
+- [ ] La casella *Solo i preferiti* mostra il numero accanto e filtra la lista.
+- [ ] **Da super admin la stella non c'è.** Non ha una squadra, e la policy
+      rifiuterebbe ogni scrittura: meglio non disegnarla che farla fallire.
+- [ ] **Prova che la lista è privata:** metti una stella da un manager, poi
+      entra con un altro e controlla che la sua lista sia vuota. Diversamente
+      dalle buste, qui **nemmeno l'admin** legge i preferiti altrui — in questa
+      lega l'amministratore gioca.
+- [ ] A fase buste aperta, in `/buste` premi **Riempi dai preferiti**.
+      **Atteso:** la selezione si riempie fino agli slot liberi prendendo i
+      preferiti nell'ordine in cui li hai messi, e un avviso dice quanti su
+      quanti, quanti non sono più disponibili e quanti sono avanzati.
+- [ ] Ripremilo con una selezione già fatta a mano.
+      **Atteso:** chiede conferma prima di sostituirla.
+- [ ] Dopo il riempimento la pastiglia dice ancora **buste non salvate**: il
+      pulsante riempie e basta, solo *Salva* fa fede.
+- [ ] La scheda di `/svincolati` resta di **76px** sul telefono, e le colonne
+      restano allineate. Misurato: con e senza stella è identica.
+
 ### C2b · Gli svincolati non contengono chi è già in coda per l'asta
 - [ ] Con almeno un giocatore conteso in attesa d'asta (`/aste` → *Da
   assegnare*), cercalo in `/svincolati`.
