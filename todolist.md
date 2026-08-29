@@ -150,6 +150,17 @@ così si vede il risultato invece di indovinarlo.
   spunta ad A4**, perché il messaggio d'errore dell'accesso è cambiato. Nessuna
   di queste è stata provata sulla produzione: sono state verificate in
   sviluppo, misurando, ma è un'altra cosa.
+- **Il pulsante *Nuova password* si vede anche dall'admin semplice.** `/admin`
+  è protetto da `requireAdmin()`, che lascia passare ADMIN e SUPER_ADMIN,
+  quindi *Budget e Fasi* è raggiungibile da entrambi. Il reset però è riservato
+  al super admin dalla server action, che risponde *«Accesso negato»*.
+  Non è un buco — il controllo è dove conta — ma un pulsante che si vede e
+  rifiuta è meno chiaro di uno spento con il motivo, come si è fatto per
+  l'icona degli stemmi. Si risolve leggendo il ruolo in
+  `src/app/admin/riepilogo/page.tsx` e disegnando la colonna *Accesso* solo per
+  il super admin. **Scorciatoia sbagliata:** togliere il controllo dall'azione
+  perché "tanto il pulsante non si vede" — quello è l'unico che protegge
+  davvero.
 - **A 320px il nome della squadra si tronca** in `/svincolati`. È il ripiego
   previsto e non un difetto scoperto per caso: sotto quella larghezza le
   quattro colonne non entrano. Riguarda i telefoni molto vecchi (iPhone SE di

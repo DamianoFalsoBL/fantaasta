@@ -195,10 +195,16 @@ italiano: va riguardato, non dato per buono.
 - [x] La password non contiene mai `l`, `1`, `o`, `0`.
       **Atteso:** vero per costruzione — sono i caratteri che si scambiano
       dettandola al telefono.
-- [ ] **Controprova del gate:** da *admin* semplice (non super admin) la pagina
-      *Budget e Fasi* non è raggiungibile. Se qualcuno arrivasse comunque a
-      chiamare l'azione, deve rispondere *«Accesso negato: azione riservata al
-      Super Admin»*.
+- [ ] **Controprova del gate.** Attenzione, la prima stesura di questa casella
+      era sbagliata: `/admin` è protetto da `requireAdmin()`, che lascia passare
+      **anche l'admin semplice**. Quindi *Budget e Fasi* è raggiungibile e il
+      pulsante *Nuova password* si vede.
+      **Atteso:** premendolo, l'azione risponde *«Accesso negato: azione
+      riservata al Super Admin»* — il controllo è nella server action, dove
+      conta, perché una Server Action è un endpoint POST raggiungibile da
+      chiunque ne conosca l'id.
+      **Difetto minore, non un buco:** un pulsante che si vede e rifiuta è meno
+      chiaro di uno spento con il motivo. Annotato in `todolist.md`.
 
 ### A12 · Uscita
 - [x] Premi *Esci*.
