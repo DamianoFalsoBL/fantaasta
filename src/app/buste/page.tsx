@@ -204,40 +204,43 @@ export default function BustePage() {
       const idsAttesa = new Set<number>((busteInAttesa ?? []).map((b) => b.giocatore_id))
       setIdsSalvati(idsAttesa)
 
-      if (idsAttesa.size > 0) {
-        setSelezionati(liberi.filter((g) => idsAttesa.has(g.id)))
-        setBozzaRiletta(true)
-      } else {
-        // Nessuna busta consegnata: si riprende la bozza lasciata nel browser.
-        //
-        // Serve al caso piu' banale e piu' fastidioso: ne scegli due, esci a
-        // cercare informazioni su un giocatore, torni e li avevi persi.
-        //
-        // Il server vince sempre quando ha qualcosa: una busta consegnata e'
-        // un fatto, la bozza e' un appunto.
-        //
-        // Si incrocia con `liberi` perche' un giocatore appuntato ieri puo'
-        // essere stato preso da qualcun altro: rimetterlo dentro farebbe
-        // fallire il salvataggio con un messaggio che non spiega niente.
-        const chiave = `fantaasta:bozza-buste:${sq.id}:${rData?.turno_buste ?? 1}`
-        try {
-          const grezzo = window.localStorage.getItem(chiave)
-          if (grezzo) {
-            const idsBozza: number[] = JSON.parse(grezzo)
-            const perId = new Map(liberi.map((g) => [g.id, g]))
-            const ripresi = idsBozza
-              .map((id) => perId.get(id))
-              .filter((g): g is Giocatore => g !== undefined)
-            if (ripresi.length > 0) setSelezionati(ripresi)
-          }
-        } catch {
-          // Navigazione privata, spazio esaurito, JSON rovinato: si riparte da
-          // una lista vuota, che e' esattamente com'era prima della bozza.
+      // Cosa si rimette a schermo: **prima la bozza, poi la busta consegnata**.
+      //
+      // La bozza esiste solo se qualcosa e' cambiato DOPO l'ultimo salvataggio:
+      // salvando la si cancella. Quindi quando c'e', e' piu' recente di quello
+      // che il server ha registrato, e riproporre la versione salvata vorrebbe
+      // dire annullare le modifiche di chi e' andato a controllare un nome e
+      // sta tornando indietro.
+      //
+      // Non c'e' ambiguita' su cosa vale: la pastiglia in cima dice "buste
+      // salvate" o "buste non salvate" confrontando quello che si vede con
+      // `idsSalvati`, che resta quello del server.
+      //
+      // Si incrocia con `liberi` perche' un giocatore appuntato ieri puo'
+      // essere stato preso da qualcun altro: rimetterlo dentro farebbe fallire
+      // il salvataggio con un messaggio che non spiega niente.
+      let ripresi: Giocatore[] = []
+      const chiave = `fantaasta:bozza-buste:${sq.id}:${rData?.turno_buste ?? 1}`
+      try {
+        const grezzo = window.localStorage.getItem(chiave)
+        if (grezzo) {
+          const idsBozza: number[] = JSON.parse(grezzo)
+          const perId = new Map(liberi.map((g) => [g.id, g]))
+          ripresi = idsBozza
+            .map((id) => perId.get(id))
+            .filter((g): g is Giocatore => g !== undefined)
         }
-        // Solo adesso l'effetto puo' scrivere: prima cancellerebbe quello che
-        // stava per leggere.
-        setBozzaRiletta(true)
+      } catch {
+        // Navigazione privata, spazio esaurito, JSON rovinato: si prosegue con
+        // quello che dice il server.
       }
+
+      if (ripresi.length > 0) setSelezionati(ripresi)
+      else if (idsAttesa.size > 0) setSelezionati(liberi.filter((g) => idsAttesa.has(g.id)))
+
+      // Solo adesso l'effetto puo' scrivere: prima cancellerebbe quello che
+      // stava per leggere.
+      setBozzaRiletta(true)
 
     } else {
       // Carica le buste elaborate e non
@@ -433,6 +436,16 @@ export default function BustePage() {
       return
     }
 
+    const scelti = selezionati.filter((g) => g.ruolo === 'P').length
+    if (scelti !== portieriDisponibili) {
+      setAvviso({
+        tono: 'errore',
+        titolo: 'Portieri sbagliati',
+        testo: `Devi scegliere esattamente ${portieriDisponibili} portier${portieriDisponibili === 1 ? 'e' : 'i'}: adesso ne hai ${scelti}. La busta riempie tutti gli slot, quindi a rosa piena non ci sarebbe piu' modo di prenderne un altro.`,
+      })
+      return
+    }
+
     const costoTotale = selezionati.reduce((sum, g) => sum + g.quotazione, 0)
     if (costoTotale > squadra.crediti_residui) {
       setAvviso({
@@ -470,10 +483,25 @@ export default function BustePage() {
   const costoTotale = selezionati.reduce((sum, g) => sum + g.quotazione, 0)
   const portieriScelti = selezionati.filter(g => g.ruolo === 'P').length
   const portieriResidui = portieriDisponibili - portieriScelti
+  /**
+   * I portieri devono essere **esattamente** quelli che mancano, non "al
+   * massimo".
+   *
+   * La busta riempie sempre tutti gli slot liberi, quindi a fine turno la rosa
+   * sara' completa: se i portieri chiesti non sono quelli mancanti, quella rosa
+   * completa avra' il numero sbagliato di portieri e non ci sara' piu' modo di
+   * rimediare, perche' gli slot sono finiti.
+   *
+   * Prima si controllava solo il tetto (`portieriResidui >= 0`): impediva di
+   * prenderne troppi e lasciava passare chi non ne prendeva affatto. Una busta
+   * da sei giocatori senza il portiere che mancava veniva salvata.
+   */
+  const portieriGiusti = portieriScelti === portieriDisponibili
+
   const isValida =
     selezionati.length === slotLiberi &&
     costoTotale <= squadra.crediti_residui &&
-    portieriResidui >= 0
+    portieriGiusti
 
   // Confronto fra INSIEMI, non fra lunghezze: togliere un giocatore e
   // aggiungerne un altro lascia il conto identico e la lista diversa, che è
@@ -807,7 +835,7 @@ export default function BustePage() {
                   {portieriDisponibili > 0 || portieriScelti > 0 ? (
                     <div className="mt-1.5 flex items-center justify-between">
                       <span className="fm-label">Portieri</span>
-                      <span className={`text-lg font-bold tabular-nums ${portieriResidui < 0 ? 'text-rosso' : 'text-ink'}`}>
+                      <span className={`text-lg font-bold tabular-nums ${portieriGiusti ? 'text-neon' : 'text-rosso'}`}>
                         {portieriScelti} / {portieriDisponibili}
                       </span>
                     </div>
@@ -830,8 +858,8 @@ export default function BustePage() {
                 </button>
                 {!isValida ? (
                   <p className="mt-2.5 text-center text-xs font-semibold text-rosso">
-                    {portieriResidui < 0
-                      ? `Puoi prendere al massimo ${portieriDisponibili} portier${portieriDisponibili === 1 ? 'e' : 'i'}.`
+                    {!portieriGiusti
+                      ? `Devi scegliere esattamente ${portieriDisponibili} portier${portieriDisponibili === 1 ? 'e' : 'i'}: adesso ne hai ${portieriScelti}. A rosa piena non potrai piu' rimediare.`
                       : 'Devi riempire esattamente tutti gli slot e non superare il budget.'}
                   </p>
                 ) : statoBuste === 'modificate' ? (

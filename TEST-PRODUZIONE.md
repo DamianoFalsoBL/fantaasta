@@ -463,9 +463,25 @@ numeri del database.
       su un'altra pagina o un'altra scheda del browser e torna su `/buste`.
       **Atteso:** i due nomi sono ancora lì, e la pastiglia dice *buste non
       salvate*. Vale anche ricaricando la pagina.
-- [ ] Salva la busta, poi cambia la selezione senza salvare e ricarica.
-      **Atteso:** torna quella **salvata**, non la modifica. Vale quello che hai
-      consegnato — la bozza è un appunto, la busta è un fatto.
+- [ ] Salva la busta, poi **togli un nome** senza salvare, vai su `/svincolati`
+      e torna.
+      **Atteso:** il nome resta tolto, e la pastiglia dice *buste non salvate*.
+      La bozza esiste solo se qualcosa è cambiato **dopo** l'ultimo
+      salvataggio — salvando viene cancellata — quindi quando c'è è più recente
+      di quello che il server ha registrato, e riproporre la versione salvata
+      annullerebbe le modifiche di chi è andato a controllare un nome.
+- [ ] **I portieri.** Se alla tua rosa manca un portiere, prova a salvare una
+      busta che riempie tutti gli slot **senza** portieri.
+      **Atteso:** il salvataggio è bloccato, e il messaggio dice quanti ne
+      servono e quanti ne hai. Il contatore *Portieri* è rosso finché il numero
+      non è esatto.
+      **Perché esatti e non "al massimo":** la busta riempie sempre tutti gli
+      slot liberi, quindi a fine turno la rosa è completa. Se i portieri chiesti
+      non sono quelli mancanti, non c'è più modo di rimediare.
+- [ ] **Controprova dal server:** chiama `submit_buste` dalla console con una
+      lista giusta di numero ma senza il portiere che manca.
+      **Atteso:** *«Devi scegliere esattamente N portieri»*. Il controllo nella
+      pagina rende l'errore evidente prima, ma è la funzione a garantirlo.
 - [ ] La bozza è **di quel browser**: aperta dal telefono non c'è. È il
       compromesso scelto, non un difetto.
 - [ ] La scheda di `/svincolati` resta di **76px** sul telefono, e le colonne

@@ -242,6 +242,7 @@ tornata.
 
 | Quando | Cosa |
 |---|---|
+| 29 ago 2026 | La busta deve contenere i portieri che mancano, e non lo controllava nessuno |
 | 29 ago 2026 | La colonna *Buste* dice sì o no, e le intestazioni seguono le colonne |
 | 29 ago 2026 | La bozza non si rileggeva: la cancellava l'effetto che la salva |
 | 29 ago 2026 | I preferiti si aggiungono alla busta invece di sostituirla |
