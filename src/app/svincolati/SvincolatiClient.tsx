@@ -205,10 +205,22 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
                   <td data-label="Nome" className="fm-nome">{g.nome}</td>
                   <td data-label="Ruoli" className="fm-meta">
                     {/* `inline-flex` e non `flex`: dentro una cella `inline` un
-                        figlio di tipo blocco spezzerebbe la riga compatta. */}
+                        figlio di tipo blocco spezzerebbe la riga compatta.
+
+                        La lettera del reparto classico non si mostra più
+                        accanto ai ruoli Mantra: è la stessa informazione detta
+                        due volte, visto che Pc implica A e Dc implica D, e in
+                        una riga stretta ruba spazio a quello che distingue
+                        davvero un giocatore dall'altro.
+
+                        Resta come ripiego quando i ruoli Mantra mancano, che
+                        oggi non capita — verificato: 0 su 549 — ma capirebbe
+                        con un listone in formato classico, e senza il ripiego
+                        la colonna resterebbe vuota per tutti. */}
                     <span className="inline-flex items-center gap-2 align-middle">
-                      <span className="text-ink-mid">{g.ruolo}</span>
-                      {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
+                      {g.ruolo_mantra && g.ruolo_mantra.length > 0
+                        ? <MantraBadge ruoli={g.ruolo_mantra} />
+                        : <span className="text-ink-mid">{g.ruolo}</span>}
                     </span>
                   </td>
                   <td data-label="Squadra" className="fm-meta uppercase text-ink-mid">

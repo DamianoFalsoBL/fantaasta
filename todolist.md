@@ -105,7 +105,8 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
-| 29 ago 2026 | Stemmi di Serie A in `/svincolati`, e via la lettera del reparto |
+| 29 ago 2026 | Via la lettera del reparto dalla riga degli svincolati |
+| 29 ago 2026 | Stemmi di Serie A in `/svincolati` |
 | 29 ago 2026 | Su schermo grande *Mi ritiro* non sta più in mezzo ai nomi in gara |
 | 29 ago 2026 | Gli errori di autenticazione parlano italiano |
 | 28 ago 2026 | Accesso e cambio password sfrondano gli spazi ai bordi |

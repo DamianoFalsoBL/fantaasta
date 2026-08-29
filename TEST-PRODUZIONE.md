@@ -300,6 +300,12 @@ numeri del database.
       **Atteso:** il disegno originale è tutto nero e sul fondo scuro
       sparirebbe. È l'unico dei venti in quelle condizioni — misurato: luminanza
       media 0 e zero pixel chiari, contro i 64 del secondo più scuro.
+- [ ] Nella riga delle informazioni **non c'è più** la lettera del reparto
+      (P, D, C, A) prima dei ruoli Mantra.
+      **Atteso:** era la stessa cosa detta due volte — Pc implica A. La lettera
+      ricompare solo se un giocatore non ha ruoli Mantra, cosa che oggi non
+      capita per nessuno dei 549.
+
 ### C2b · Gli svincolati non contengono chi è già in coda per l'asta
 - [ ] Con almeno un giocatore conteso in attesa d'asta (`/aste` → *Da
   assegnare*), cercalo in `/svincolati`.
