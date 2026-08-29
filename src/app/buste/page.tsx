@@ -418,7 +418,7 @@ export default function BustePage() {
             <PannelloFiltri
               attivi={filtriAttivi}
               onAzzera={azzeraFiltri}
-              griglia="sm:grid-cols-2"
+              griglia="sm:grid-cols-2 md:grid-cols-5"
               ricerca={
                 <input
                   type="text"

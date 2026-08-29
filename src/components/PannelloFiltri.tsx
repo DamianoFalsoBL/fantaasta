@@ -27,15 +27,24 @@ export default function PannelloFiltri({
   /** Quanti filtri sono attivi oltre la ricerca. */
   attivi: number
   onAzzera: () => void
-  /** Le colonne del pannello su schermo grande: le pagine ne hanno diverse. */
+  /**
+   * Le colonne su schermo grande. **Contano anche la ricerca**, che da md in su
+   * entra nella griglia: se una pagina ha tre filtri servono quattro colonne.
+   */
   griglia?: string
   children: ReactNode
 }) {
   const [aperto, setAperto] = useState(false)
 
   return (
-    <div className="mb-4 rounded-md border border-line bg-panel-hi p-3">
-      <div className="flex items-end gap-2">
+    /* Su schermo grande i due contenitori interni diventano `contents`: le
+       scatole spariscono e i loro figli entrano tutti nella STESSA griglia,
+       quindi ricerca e filtri stanno su una riga sola e allineati fra loro.
+       Sotto md i contenitori restano scatole vere, e il telefono conserva la
+       ricerca sopra e il pannello richiudibile sotto — che e' l'unica
+       disposizione che ci sta. */
+    <div className={`mb-4 rounded-md border border-line bg-panel-hi p-3 md:grid md:gap-3 ${griglia}`}>
+      <div className="flex items-end gap-2 md:contents">
         <div className="min-w-0 flex-1">{ricerca}</div>
         <button
           type="button"
@@ -54,7 +63,7 @@ export default function PannelloFiltri({
 
       <div
         id="pannello-filtri"
-        className={`gap-3 ${griglia} ${aperto ? 'mt-3 grid' : 'hidden md:mt-3 md:grid'}`}
+        className={`gap-3 ${griglia} ${aperto ? 'mt-3 grid' : 'hidden'} md:contents`}
       >
         {children}
 
