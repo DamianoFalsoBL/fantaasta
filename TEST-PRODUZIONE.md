@@ -288,6 +288,18 @@ numeri del database.
   tendina *Ordina per* e funziona. Senza quella, sul telefono l'ordinamento non
   esisterebbe, perché le intestazioni sono nascoste.
 
+### C2c · Stemmi delle squadre di Serie A
+
+- [ ] `/svincolati`, sul telefono: accanto al nome della squadra c'è lo stemma,
+      e la scheda del giocatore resta di **tre righe** come prima. Se le righe
+      sono diventate quattro, l'immagine è troppo alta.
+- [ ] Scorri fino in fondo alla lista: **nessun riquadro con l'icona di
+      immagine rotta**. Gli stemmi si disegnano solo per le venti squadre che
+      hanno il file; per le altre non compare niente, di proposito.
+- [ ] Lo stemma della **Juventus** si vede bianco, non nero.
+      **Atteso:** il disegno originale è tutto nero e sul fondo scuro
+      sparirebbe. È l'unico dei venti in quelle condizioni — misurato: luminanza
+      media 0 e zero pixel chiari, contro i 64 del secondo più scuro.
 ### C2b · Gli svincolati non contengono chi è già in coda per l'asta
 - [ ] Con almeno un giocatore conteso in attesa d'asta (`/aste` → *Da
   assegnare*), cercalo in `/svincolati`.

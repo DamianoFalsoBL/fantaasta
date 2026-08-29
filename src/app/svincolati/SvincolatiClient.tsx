@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import MantraBadge from '@/components/MantraBadge'
+import LogoSquadra from '@/components/LogoSquadra'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti } from '@/utils/ruoli'
@@ -210,7 +211,15 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
                       {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
                     </span>
                   </td>
-                  <td data-label="Squadra" className="fm-meta uppercase text-ink-mid">{g.squadra}</td>
+                  <td data-label="Squadra" className="fm-meta uppercase text-ink-mid">
+                    {/* `inline-flex` come per i ruoli: dentro una cella che
+                        sotto md diventa `inline`, un figlio di tipo blocco
+                        spezzerebbe la riga compatta. */}
+                    <span className="inline-flex items-center gap-1.5 align-middle">
+                      <LogoSquadra squadra={g.squadra} />
+                      {g.squadra}
+                    </span>
+                  </td>
                   <td data-label="Età" className="fm-meta tabular-nums text-ink-mid">
                     {g.eta ? <>{g.eta}<span className="md:hidden"> anni</span></> : '—'}
                   </td>

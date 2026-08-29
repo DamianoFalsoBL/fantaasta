@@ -13,24 +13,6 @@ dice cosa va verificato, questo dice cosa va costruito.
 
 ---
 
-## Segnalato dai manager dopo la prima asta vera (27 agosto 2026)
-
-L'asta è andata bene. Questi sono i suggerimenti raccolti a caldo, in ordine di
-quanto valgono rispetto a quanto costano.
-
-### Facoltativo: logo della squadra di Serie A in `/svincolati`
-
-Il meno convincente del gruppo, e va detto perché.
-
-Non abbiamo gli asset: servirebbero venti file locali. Prenderli a caldo dal
-sito altrui è discutibile su banda e su diritti. E in `/svincolati` le righe
-sono state appena compattate (v1.8.0) proprio per farne stare di più in una
-schermata: un'immagine per riga rimangia parte di quel guadagno.
-
-Se si fa, **con file SVG nostri**, non con collegamenti a immagini altrui.
-
----
-
 ## Prestazioni e infrastruttura
 
 ### `fetchAsta()` ricarica tutta la lista chiamate ogni 15 secondi
@@ -123,6 +105,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
+| 29 ago 2026 | Stemmi di Serie A in `/svincolati`, e via la lettera del reparto |
 | 29 ago 2026 | Su schermo grande *Mi ritiro* non sta più in mezzo ai nomi in gara |
 | 29 ago 2026 | Gli errori di autenticazione parlano italiano |
 | 28 ago 2026 | Accesso e cambio password sfrondano gli spazi ai bordi |
