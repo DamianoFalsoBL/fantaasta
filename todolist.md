@@ -80,8 +80,42 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 ---
 
+## Deciso da te, non ancora fatto
+
+### Le pastiglie di ruolo in `/rose`, `/mia-rosa` e `/trasferimenti`
+
+Il 29 agosto avevi approvato di togliere la lettera del reparto **anche** da
+queste pagine, e io non l'ho fatto: lì non è testo in una riga stretta, è una
+pastiglia colorata in testa alla riga, e quella colonna di colori è come si
+conta a colpo d'occhio quanti portieri e quanti difensori si hanno. I ruoli
+Mantra non la sostituiscono — `Dc`, `Ds`, `E`, `B` sono tutti difensori ma non
+lo dicono guardandoli.
+
+**È una mia scelta contro la tua**, quindi sta qui e non archiviata: se la
+rivuoi uguale ovunque, è una modifica di pochi minuti in quattro file
+(`src/app/rose/page.tsx`, `src/app/mia-rosa/page.tsx`,
+`src/app/trasferimenti/TrasferimentiClient.tsx`,
+`src/components/OffertaTrasferimento.tsx`).
+
+---
+
 ## Notato di sfuggita
 
+- **Il collaudo di oggi è tutto da eseguire.** Le modifiche del 29 agosto hanno
+  aggiunto le caselle A11c (reset password dal super admin), B6 (titoli
+  allineati), C2c (stemmi) e C2d (colonne sul telefono), e hanno **tolto la
+  spunta ad A4**, perché il messaggio d'errore dell'accesso è cambiato. Nessuna
+  di queste è stata provata sulla produzione: sono state verificate in
+  sviluppo, misurando, ma è un'altra cosa.
+- **A 320px il nome della squadra si tronca** in `/svincolati`. È il ripiego
+  previsto e non un difetto scoperto per caso: sotto quella larghezza le
+  quattro colonne non entrano. Riguarda i telefoni molto vecchi (iPhone SE di
+  prima generazione); se salta fuori qualcuno che ce l'ha, la strada è togliere
+  una colonna, non stringerle tutte.
+- **`public/loghi/serie-a.png` non è usato da nessuna parte.** È lo stemma del
+  campionato, scaricato insieme agli altri venti. Lasciato lì perché non dà
+  fastidio e potrebbe servire da segnaposto, ma se si vuole fare pulizia si può
+  togliere.
 - **F13b non è ancora chiuso.** L'elenco di `/buste` nasconde i giocatori già
   in coda per l'asta — verificato il 27 agosto — ma nessuno ha ancora chiamato
   `submit_buste` dalla console per controllare che la funzione li **rifiuti**.
@@ -105,15 +139,15 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 | Quando | Cosa |
 |---|---|
-| 29 ago 2026 | Via la lettera del reparto anche da `/aste`, `/buste`, regia e tabellone |
-| 29 ago 2026 | Via la lettera del reparto dalla riga degli svincolati |
 | 29 ago 2026 | Incolonnati anche gli assegnati, con la data in forma breve |
 | 29 ago 2026 | Sul telefono ruoli, squadra, età e crediti sono incolonnati |
 | 29 ago 2026 | Titoli di pagina e testate dei riquadri tutti allineati a sinistra |
 | 29 ago 2026 | Stemmi di Serie A anche in `/aste` e `/buste` |
+| 29 ago 2026 | Via la lettera del reparto anche da `/aste`, `/buste`, regia e tabellone |
+| 29 ago 2026 | Via la lettera del reparto dalla riga degli svincolati |
 | 29 ago 2026 | Stemmi di Serie A in `/svincolati` |
-| 29 ago 2026 | Su schermo grande *Mi ritiro* non sta più in mezzo ai nomi in gara |
 | 29 ago 2026 | Gli errori di autenticazione parlano italiano |
+| 28 ago 2026 | Su schermo grande *Mi ritiro* non sta più in mezzo ai nomi in gara |
 | 28 ago 2026 | Accesso e cambio password sfrondano gli spazi ai bordi |
 | 28 ago 2026 | Il super admin genera una password nuova a una squadra da *Budget e Fasi* |
 | 28 ago 2026 | L'import del budget non riscrive più le password scelte, se la cella è vuota |
