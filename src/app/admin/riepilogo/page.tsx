@@ -51,9 +51,11 @@ function CredenzialiGenerate({ squadra, email, password }: { squadra: string; em
 
   const copia = async () => {
     try {
-      await navigator.clipboard.writeText(`Accesso ${squadra}
-Utente: ${email}
-Password: ${password}`)
+      // Solo la password, non anche l'utente: chi la riceve deve poterla
+      // incollare direttamente nel campo, e le due righe di contorno
+      // andrebbero cancellate a mano ogni volta. L'utente resta scritto qui
+      // sopra per chi non se lo ricorda.
+      await navigator.clipboard.writeText(password)
       setStatoCopia('copiato')
       setTimeout(() => setStatoCopia('pronto'), 2000)
     } catch {
@@ -77,11 +79,11 @@ Password: ${password}`)
         <div className="font-mono text-xl font-bold tracking-wider text-neon">{password}</div>
       </div>
       <button onClick={copia} className="fm-btn fm-btn-ghost fm-btn-sm">
-        {statoCopia === 'copiato' ? 'Copiato' : 'Copia utente e password'}
+        {statoCopia === 'copiato' ? 'Copiata' : 'Copia la password'}
       </button>
       {statoCopia === 'negato' && (
         <p className="text-xs text-rosso">
-          Il browser non ha concesso gli appunti: seleziona e copia il testo qui sopra a mano.
+          Il browser non ha concesso gli appunti: seleziona e copia la password a mano.
         </p>
       )}
     </div>

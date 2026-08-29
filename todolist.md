@@ -182,6 +182,7 @@ così si vede il risultato invece di indovinarlo.
 
 | Quando | Cosa |
 |---|---|
+| 29 ago 2026 | Il pulsante del reset copia la sola password |
 | 29 ago 2026 | Le rose seguono l'ordine della leggenda Mantra, e così il filtro |
 | 29 ago 2026 | Via la pastiglia del reparto da `/rose` e `/mia-rosa`, ruoli Mantra in colonna |
 | 29 ago 2026 | Incolonnati anche gli assegnati, con la data in forma breve |

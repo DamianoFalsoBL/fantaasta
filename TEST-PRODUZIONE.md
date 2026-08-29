@@ -175,23 +175,24 @@ italiano: va riguardato, non dato per buono.
 
 ### A11c · Il super admin genera una password nuova
 
-- [ ] Da super admin, in *Budget e Fasi*, colonna **Accesso**, premi *Nuova
+- [x] Da super admin, in *Budget e Fasi*, colonna **Accesso**, premi *Nuova
       password* su una squadra.
       **Atteso:** una finestra rossa avvisa che quella attuale smette di
       funzionare subito e che la nuova si vede una volta sola.
-- [ ] Conferma.
+- [x] Conferma.
       **Atteso:** compare **utente e password**, la password in verde e grande.
-      Il pulsante *Copia utente e password* mette negli appunti tutte e tre le
-      righe (squadra, utente, password): incollale da qualche parte per
-      controllarlo. Se il browser nega gli appunti, sotto al pulsante compare
-      *«Il browser non ha concesso gli appunti»* — quel caso è stato provato,
-      il pulsante non fallisce in silenzio.
+      Il pulsante *Copia la password* mette negli appunti **solo la password**,
+      così si incolla dritta nel campo di accesso senza cancellare due righe di
+      contorno. L'utente resta scritto sopra per chi non se lo ricorda. Se il
+      browser nega gli appunti compare *«Il browser non ha concesso gli
+      appunti»* — quel caso è stato provato, il pulsante non fallisce in
+      silenzio.
 - [ ] Chiudi la finestra e cerca di rivedere la password.
       **Atteso:** non c'è modo. Non è un difetto: non viene salvata da nessuna
       parte, né a database né altrove. Per riaverne una si rifà il reset.
 - [ ] Entra come quel manager con la password nuova → funziona. Con quella di
       prima → non funziona.
-- [ ] La password non contiene mai `l`, `1`, `o`, `0`.
+- [x] La password non contiene mai `l`, `1`, `o`, `0`.
       **Atteso:** vero per costruzione — sono i caratteri che si scambiano
       dettandola al telefono.
 - [ ] **Controprova del gate:** da *admin* semplice (non super admin) la pagina
@@ -305,7 +306,7 @@ numeri del database.
       vale anche fra una squadra e l'altra, perché le tre schede affiancate
       usano le stesse larghezze.
 - [ ] In `/rose` i crediti sono allineati a destra, in colonna.
-- [ ] Sul telefono, in `/mia-rosa`, la riga di dettaglio dice *«CAGLIARI · 25 ·
+- [x] Sul telefono, in `/mia-rosa`, la riga di dettaglio dice *«CAGLIARI · 25 ·
       PAGATO 9 CR · QUOT. 10»* su **una riga sola**, senza puntini di
       troncamento. *Quotazione* è abbreviato come nel listone.
 
@@ -333,13 +334,13 @@ numeri del database.
 
 ### C2c · Stemmi delle squadre di Serie A
 
-- [ ] `/svincolati`, sul telefono: accanto al nome della squadra c'è lo stemma,
+- [x] `/svincolati`, sul telefono: accanto al nome della squadra c'è lo stemma,
       e la scheda del giocatore resta di **tre righe** come prima. Se le righe
       sono diventate quattro, l'immagine è troppo alta.
 - [ ] Gli stemmi ci sono anche in `/aste` (scheda *Da assegnare*) e in `/buste`
       (elenco delle scelte, riepilogo e sommario). In *Assegnati* no: lì la
       colonna è la **fantasquadra**, non il club di Serie A.
-- [ ] Scorri fino in fondo alla lista: **nessun riquadro con l'icona di
+- [x] Scorri fino in fondo alla lista: **nessun riquadro con l'icona di
       immagine rotta**. Gli stemmi si disegnano solo per le venti squadre che
       hanno il file; per le altre non compare niente, di proposito.
 - [ ] Lo stemma della **Juventus** si vede bianco, non nero.
@@ -356,7 +357,7 @@ numeri del database.
       più scritta da nessuna parte. Il filtro guarda i dati, non quello che si
       vede. Provalo anche su un reparto vuoto: la lista resta vuota, non torna
       piena.
-- [ ] Nella riga delle informazioni **non c'è più** la lettera del reparto
+- [x] Nella riga delle informazioni **non c'è più** la lettera del reparto
       (P, D, C, A) prima dei ruoli Mantra.
       **Atteso:** era la stessa cosa detta due volte — Pc implica A. La lettera
       ricompare solo se un giocatore non ha ruoli Mantra, cosa che oggi non
@@ -364,26 +365,26 @@ numeri del database.
 
 ### C2d · Colonne allineate sul telefono
 
-- [ ] `/svincolati` sul telefono: scorrendo la lista, **ruoli, squadra, età e
+- [x] `/svincolati` sul telefono: scorrendo la lista, **ruoli, squadra, età e
       crediti stanno uno sotto l'altro** da una scheda all'altra, anche quando
       un giocatore ha una sola pastiglia di ruolo e quello dopo ne ha tre.
-- [ ] Cerca un giocatore con **tre ruoli** (per esempio Marusic o Biraghi, che
+- [x] Cerca un giocatore con **tre ruoli** (per esempio Marusic o Biraghi, che
       hanno DD/DS/E): le tre pastiglie stanno su una riga sola, non vanno a
       capo, e la scheda resta alta come le altre.
-- [ ] Guarda una riga della **Fiorentina** o del **Frosinone**, i nomi più
+- [x] Guarda una riga della **Fiorentina** o del **Frosinone**, i nomi più
       lunghi: si leggono per intero, senza puntini di troncamento.
-- [ ] L'età ora è il solo numero, senza «anni».
+- [x] L'età ora è il solo numero, senza «anni».
       **Atteso:** è voluto — in colonna il numero basta, e la parola costava i
       pixel che servivano al nome della squadra. Chi usa un lettore di schermo
       sente comunque «30 anni».
-- [ ] Stessa cosa in `/aste`, scheda *Da assegnare*.
-- [ ] `/aste`, scheda *Assegnati*: ruoli, prezzo e data sono incolonnati, e la
+- [x] Stessa cosa in `/aste`, scheda *Da assegnare*.
+- [x] `/aste`, scheda *Assegnati*: ruoli, prezzo e data sono incolonnati, e la
       **fantasquadra sta su una riga sua in fondo alla scheda**.
       **Atteso:** è voluto. «Amsterdamsche FCA» è il valore più largo della
       tabella — misurati 149px — e in fila con gli altri verrebbe troncato
       proprio nella lista che serve a sapere chi si è preso chi. Su schermo
       grande resta invece una colonna in mezzo, dove sta comoda.
-- [ ] La data è nella forma breve: **«27/08/26, 20:00»**, non più
+- [x] La data è nella forma breve: **«27/08/26, 20:00»**, non più
       «27/08/2026, 20:00:00». Vale anche su schermo grande.
 
 ### C2b · Gli svincolati non contengono chi è già in coda per l'asta
