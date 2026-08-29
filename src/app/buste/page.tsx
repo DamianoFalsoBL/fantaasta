@@ -79,6 +79,18 @@ export default function BustePage() {
    * prima vorrebbe dire scrivere sulla chiave sbagliata.
    */
   const [chiaveBozza, setChiaveBozza] = useState<string | null>(null)
+  /**
+   * Se la bozza e' gia' stata riletta.
+   *
+   * **Serve a non cancellarla prima di averla letta**, ed e' il difetto che la
+   * prima versione aveva: `setChiaveBozza` avviene a meta' del caricamento e
+   * poi ci sono altre `await` prima della rilettura. React non raggruppa gli
+   * aggiornamenti attraverso un `await`, quindi in mezzo c'e' un disegno con la
+   * chiave gia' nota e la selezione ancora vuota — e l'effetto che salva vedeva
+   * zero nomi e faceva `removeItem`. Cancellava la bozza un istante prima che
+   * qualcuno la leggesse.
+   */
+  const [bozzaRiletta, setBozzaRiletta] = useState(false)
 
   // Per fase chiusa
   const [risultati, setRisultati] = useState<BustaConGiocatore[]>([])
@@ -194,6 +206,7 @@ export default function BustePage() {
 
       if (idsAttesa.size > 0) {
         setSelezionati(liberi.filter((g) => idsAttesa.has(g.id)))
+        setBozzaRiletta(true)
       } else {
         // Nessuna busta consegnata: si riprende la bozza lasciata nel browser.
         //
@@ -221,6 +234,9 @@ export default function BustePage() {
           // Navigazione privata, spazio esaurito, JSON rovinato: si riparte da
           // una lista vuota, che e' esattamente com'era prima della bozza.
         }
+        // Solo adesso l'effetto puo' scrivere: prima cancellerebbe quello che
+        // stava per leggere.
+        setBozzaRiletta(true)
       }
 
     } else {
@@ -319,7 +335,7 @@ export default function BustePage() {
    * l'appunto" non lo sarebbe.
    */
   useEffect(() => {
-    if (!chiaveBozza || !faseAperta) return
+    if (!chiaveBozza || !faseAperta || !bozzaRiletta) return
     try {
       if (selezionati.length === 0) window.localStorage.removeItem(chiaveBozza)
       else window.localStorage.setItem(chiaveBozza, JSON.stringify(selezionati.map((g) => g.id)))
@@ -327,7 +343,7 @@ export default function BustePage() {
       // Se il browser non concede lo spazio si continua senza bozza: la pagina
       // funziona esattamente come prima che esistesse.
     }
-  }, [selezionati, chiaveBozza, faseAperta])
+  }, [selezionati, chiaveBozza, faseAperta, bozzaRiletta])
 
   const toggleSelezionato = (giocatore: Giocatore) => {
     if (selezionati.find(s => s.id === giocatore.id)) {
