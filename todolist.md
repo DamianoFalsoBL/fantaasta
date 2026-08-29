@@ -82,20 +82,17 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 
 ## Deciso da te, non ancora fatto
 
-### Le pastiglie di ruolo in `/rose`, `/mia-rosa` e `/trasferimenti`
+### La pastiglia del reparto in `/trasferimenti`
 
-Il 29 agosto avevi approvato di togliere la lettera del reparto **anche** da
-queste pagine, e io non l'ho fatto: lì non è testo in una riga stretta, è una
-pastiglia colorata in testa alla riga, e quella colonna di colori è come si
-conta a colpo d'occhio quanti portieri e quanti difensori si hanno. I ruoli
-Mantra non la sostituiscono — `Dc`, `Ds`, `E`, `B` sono tutti difensori ma non
-lo dicono guardandoli.
+Il 29 agosto le pastiglie P/D/C/A prima del nome sono sparite da `/rose` e da
+`/mia-rosa`, come chiesto. Restano in due punti che non erano stati nominati e
+che **non ho potuto guardare**, perché si vedono solo a mercato aperto e il
+mercato è chiuso: la tabella di `src/app/trasferimenti/TrasferimentiClient.tsx`
+e il riquadro d'offerta `src/components/OffertaTrasferimento.tsx`.
 
-**È una mia scelta contro la tua**, quindi sta qui e non archiviata: se la
-rivuoi uguale ovunque, è una modifica di pochi minuti in quattro file
-(`src/app/rose/page.tsx`, `src/app/mia-rosa/page.tsx`,
-`src/app/trasferimenti/TrasferimentiClient.tsx`,
-`src/components/OffertaTrasferimento.tsx`).
+Sono lo stesso identico schema — pastiglia colorata, poi il nome, poi i ruoli
+Mantra — quindi la modifica è la stessa. Da fare quando il mercato si riapre,
+così si vede il risultato invece di indovinarlo.
 
 ---
 
@@ -139,6 +136,7 @@ rivuoi uguale ovunque, è una modifica di pochi minuti in quattro file
 
 | Quando | Cosa |
 |---|---|
+| 29 ago 2026 | Via la pastiglia del reparto da `/rose` e `/mia-rosa`, ruoli Mantra in colonna |
 | 29 ago 2026 | Incolonnati anche gli assegnati, con la data in forma breve |
 | 29 ago 2026 | Sul telefono ruoli, squadra, età e crediti sono incolonnati |
 | 29 ago 2026 | Titoli di pagina e testate dei riquadri tutti allineati a sinistra |

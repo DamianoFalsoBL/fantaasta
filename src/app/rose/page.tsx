@@ -108,28 +108,28 @@ export default async function RosePage() {
                       {giocatori.map((g: any, i: number) => {
                         const isRiparazione = giocatoriRiparazione.has(g.id);
                         return (
-                        <li key={i} className={`flex items-center justify-between gap-2 rounded-sm px-1.5 py-1.5 ${isRiparazione ? 'bg-panel-hi' : ''}`}>
-                          <div className="flex min-w-0 items-center gap-2">
-                            {/* La mappa ruolo->colore duplicava quella di MantraBadge
-                                con una palette diversa, e le due finivano sulla
-                                stessa riga. Ora usano lo stesso vocabolario. */}
-                            <span className={`fm-badge shrink-0 ${
-                              g.ruolo === 'P' ? 'fm-badge-mid' :
-                              g.ruolo === 'D' ? 'fm-badge-top' :
-                              g.ruolo === 'C' ? 'fm-badge-good' :
-                              'fm-badge-bad'
-                            }`}>
-                              {g.ruolo}
-                            </span>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="fm-nome truncate">{g.nome}</span>
-                                {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
-                              </div>
-                              <div className="fm-label truncate">{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</div>
-                            </div>
+                        /* Tre colonne di larghezza fissa, uguali per tutte le
+                           righe e per tutte le squadre: è l'unico modo di far
+                           combaciare i ruoli e i prezzi da una riga all'altra,
+                           perché una traccia `auto` si dimensiona su ogni riga
+                           per conto suo.
+
+                           5.9rem sono i 90px che servono a tre pastiglie
+                           Mantra, misurati; 3.9rem bastano a "127 cr", cioè al
+                           budget iniziale più alto della lega — oggi il prezzo
+                           più alto pagato è 63, ma la colonna deve reggere il
+                           caso limite e non quello capitato finora. */
+                        <li key={i} className={`grid items-center gap-2 rounded-sm px-1.5 py-1.5 ${isRiparazione ? 'bg-panel-hi' : ''}`}
+                            style={{ gridTemplateColumns: 'minmax(0, 1fr) 5.9rem 3.9rem' }}>
+                          <div className="min-w-0">
+                            {/* Via la pastiglia del reparto che stava prima del
+                                nome: P/D/C/A ripeteva quello che i ruoli Mantra
+                                dicono già — Por implica P, Dc implica D. */}
+                            <div className="fm-nome truncate">{g.nome}</div>
+                            <div className="fm-label truncate">{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</div>
                           </div>
-                          <div className={`shrink-0 font-bold tabular-nums ${isRiparazione ? 'text-viola-hi' : 'text-ink'}`}>
+                          {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
+                          <div className={`text-right font-bold tabular-nums ${isRiparazione ? 'text-viola-hi' : 'text-ink'}`}>
                             {g.prezzo_pagato} <span className="text-xs font-normal text-ink-dim">cr</span>
                           </div>
                         </li>

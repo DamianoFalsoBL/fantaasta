@@ -282,6 +282,22 @@ numeri del database.
 - [x] Somma a campione: per una squadra, i crediti residui più la spesa devono
   tornare col budget iniziale mostrato in `/admin/riepilogo`.
 
+### C1b · Rose senza la pastiglia del reparto
+
+- [ ] `/rose` e `/mia-rosa`: prima del nome del calciatore **non c'è più** la
+      pastiglia P/D/C/A.
+      **Atteso:** ripeteva quello che i ruoli Mantra dicono già — Por implica P,
+      Dc implica D. L'ordine delle righe è ancora per reparto, portieri in
+      testa.
+- [ ] I ruoli Mantra sono **incolonnati**: scorrendo la rosa stanno uno sotto
+      l'altro anche quando un giocatore ne ha uno e quello dopo tre. In `/rose`
+      vale anche fra una squadra e l'altra, perché le tre schede affiancate
+      usano le stesse larghezze.
+- [ ] In `/rose` i crediti sono allineati a destra, in colonna.
+- [ ] Sul telefono, in `/mia-rosa`, la riga di dettaglio dice *«CAGLIARI · 25 ·
+      PAGATO 9 CR · QUOT. 10»* su **una riga sola**, senza puntini di
+      troncamento. *Quotazione* è abbreviato come nel listone.
+
 ### C2 · Svincolati e filtri
 - [x] `/svincolati`: la lista carica.
 - [x] Scrivi tre lettere nel campo di ricerca → la lista si restringe.

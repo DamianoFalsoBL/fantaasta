@@ -7,7 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import MantraBadge from '@/components/MantraBadge'
 import Conferma from '@/components/Conferma'
 import CambiaPassword from '@/components/CambiaPassword'
-import { badgeRuolo, ORDINE_RUOLI, trasferimentiAttivi, type GiocatoreMercato } from '@/utils/trasferimenti'
+import { ORDINE_RUOLI, trasferimentiAttivi, type GiocatoreMercato } from '@/utils/trasferimenti'
 
 type RigaRosa = GiocatoreMercato & {
   prezzo_pagato: number
@@ -151,17 +151,29 @@ export default function MiaRosaPage() {
                         g.in_vendita ? 'bg-panel-hi' : ''
                       }`}
                     >
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span className={`fm-badge shrink-0 ${badgeRuolo(g.ruolo)}`}>{g.ruolo}</span>
+                      {/* Stesse colonne di /rose: il nome si allarga, i ruoli
+                          Mantra stanno in una traccia fissa da 5.9rem — i 90px
+                          misurati per tre pastiglie — così si incolonnano da
+                          una riga all'altra. La pastiglia del reparto che
+                          stava prima del nome è sparita: ripeteva quello che i
+                          ruoli Mantra dicono già. */}
+                      <div
+                        className="grid min-w-0 flex-1 items-center gap-2"
+                        style={{ gridTemplateColumns: 'minmax(0, 1fr) 5.9rem' }}
+                      >
                         <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="fm-nome truncate">{g.nome}</span>
-                            {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
-                          </div>
-                          <div className="fm-label truncate">
-                            {g.squadra}{g.eta ? ` · ${g.eta}` : ''} · pagato {g.prezzo_pagato} cr · quotazione {g.quotazione}
+                          <div className="fm-nome truncate">{g.nome}</div>
+                          {/* Sul telefono la riga di dettaglio va a capo invece
+                              di troncarsi: qui dice squadra, età, prezzo pagato
+                              e quotazione, e con la colonna dei ruoli accanto
+                              non ci sta più — misurate 14 righe su 30 troncate
+                              a 360px, tutte proprio sulla quotazione. Da sm in
+                              su lo spazio c'è e resta su una riga sola. */}
+                          <div className="fm-label sm:truncate">
+                            {g.squadra}{g.eta ? ` · ${g.eta}` : ''} · pagato {g.prezzo_pagato} cr · quot. {g.quotazione}
                           </div>
                         </div>
+                        {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
                       </div>
 
                       {/* Tutta la colonna dei comandi esiste solo a
