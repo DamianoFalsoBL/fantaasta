@@ -561,6 +561,13 @@
     text-align: right;
     white-space: nowrap;
   }
+
+  /* L'intestazione deve seguire la sua colonna.
+     `.fm-table thead th` vale 0,1,2 di specificita' e `.fm-num` 0,1,0: nella
+     stessa @layer vince la prima, quindi i numeri finivano a destra e le loro
+     etichette restavano a sinistra. Si vedeva a occhio come "allineamenti
+     diversi in ogni colonna", ma la causa era questa. */
+  .fm-table thead th.fm-num { text-align: right; }
   .fm-nome {
     font-family: var(--font-display);
     font-size: .9375rem;

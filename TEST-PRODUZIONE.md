@@ -1002,9 +1002,15 @@ esiti diventano pubblici.
 ### G2b · Chi ha già consegnato la busta
 
 - [ ] A fase buste aperta, in *Budget e Fasi* la tabella *Stato squadre* ha la
-      colonna **Buste**: mostra `0 / 30` per chi non ha ancora consegnato, il
-      conteggio parziale per chi sta lavorando, e una **✓ verde** per chi ha
-      consegnato il numero esatto.
+      colonna **Buste**: **✗ rossa** per chi non ha consegnato, **✓ verde** per
+      chi sì.
+      **Atteso:** un sì o un no, non una frazione. `submit_buste` riscrive tutto
+      in un colpo e pretende il numero esatto, quindi quel conteggio può valere
+      solo zero o il totale — e il totale era già scritto nella colonna *Slot*
+      accanto. Se comparisse un numero intermedio si vede: è un'anomalia, non
+      un salvataggio parziale.
+- [ ] Le intestazioni sono allineate come i valori sotto: numeri a destra,
+      pastiglie e comandi al centro, nomi a sinistra.
 - [ ] Fai consegnare una squadra e **aspetta venti secondi senza ricaricare**.
       **Atteso:** la colonna si aggiorna da sola. Una spunta ferma sarebbe
       peggio di nessuna spunta: si chiuderebbe la fase credendo che abbiano

@@ -91,24 +91,29 @@ function CredenzialiGenerate({ squadra, email, password }: { squadra: string; em
 }
 
 /**
- * Se una squadra ha consegnato la busta completa per il turno in corso.
+ * Se una squadra ha consegnato la busta per il turno in corso.
  *
- * `submit_buste` pretende esattamente tanti giocatori quanti sono gli slot
- * liberi, quindi "completa" non e' un'opinione: o il numero combacia o la
- * busta non e' stata accettata.
+ * **E' un si' o un no, non una frazione.** `submit_buste` pretende esattamente
+ * tanti giocatori quanti sono gli slot liberi e riscrive tutto in un colpo:
+ * quel conteggio puo' valere solo zero o il totale, mai una via di mezzo. La
+ * prima versione mostrava "0 / 4", che ripeteva il denominatore gia' scritto
+ * nella colonna Slot e faceva credere possibile un salvataggio parziale.
  *
- * Si mostra il conteggio e non solo la spunta, perche' "3 / 28" dice se il
- * ritardatario sta lavorando o non ha ancora cominciato — che e' la domanda
- * vera quando si aspetta.
+ * Resta un ramo per il numero strano: se un giorno comparisse un valore
+ * intermedio — una riga scritta a mano, una funzione cambiata — si vede invece
+ * di sparire dietro una crocetta.
  */
 function StatoBuste({ aperta, consegnate, slotLiberi }: { aperta: boolean; consegnate: number; slotLiberi: number }) {
   if (!aperta) return <span className="text-ink-dim">—</span>
   if (slotLiberi <= 0) return <span className="fm-label">rosa piena</span>
   if (consegnate === slotLiberi) {
-    return <span className="font-bold text-neon" title={`${consegnate} su ${slotLiberi}`}>✓</span>
+    return <span className="text-lg font-bold text-neon" title={`Consegnata: ${consegnate} giocatori`}>✓</span>
+  }
+  if (consegnate === 0) {
+    return <span className="text-lg font-bold text-rosso" title="Non ancora consegnata">✗</span>
   }
   return (
-    <span className={`fm-badge ${consegnate === 0 ? 'fm-badge-bad' : 'fm-badge-mid'}`}>
+    <span className="fm-badge fm-badge-mid" title="Numero inatteso: una busta e' completa o non c'e'">
       {consegnate} / {slotLiberi}
     </span>
   )
@@ -385,7 +390,7 @@ export default function AdminRiepilogoPage() {
                   <th className="fm-num">Budget iniziale</th>
                   <th className="fm-num">Budget residuo</th>
                   <th className="text-center">Aggiungi / togli crediti</th>
-                  <th className="fm-num">Slot</th>
+                  <th className="text-center">Slot</th>
                   <th className="text-center">Buste</th>
                   <th className="text-center">Accesso</th>
                 </tr>
@@ -403,7 +408,7 @@ export default function AdminRiepilogoPage() {
                     <td className="text-center">
                       <BudgetAdjuster onApply={(delta) => modificaBudget(s.id, delta)} />
                     </td>
-                    <td className="fm-num">
+                    <td className="text-center">
                       <span className={`fm-badge ${(s.slot_occupati ?? 0) < slotTotali ? 'fm-badge-mid' : 'fm-badge-top'}`}>
                         {s.slot_occupati ?? 0} / {slotTotali}
                       </span>
