@@ -686,6 +686,59 @@
   /* Lo stato vuoto usa colSpan e non deve ereditare il rientro della riga. */
   .fm-table-compatta tbody td[colspan] { margin: 0 -.7rem; }
 
+  /* ---- Colonne che combaciano fra una scheda e l'altra ----
+
+     `.fm-table-compatta` mette le celle in fila come testo, e va bene finché
+     i valori sono corti: ma le pastiglie dei ruoli sono una, due o tre, e
+     quello che viene dopo si sposta di conseguenza. Leggendo la lista in
+     verticale non si riesce a confrontare due giocatori.
+
+     Qui la riga diventa una griglia con tracce di larghezza FISSA. È l'unico
+     modo di far combaciare le colonne fra schede diverse: una traccia `auto`
+     si dimensiona su ogni riga per conto suo, e l'allineamento non c'è.
+
+     L'ordine delle colonne cambia da tabella a tabella — in /svincolati la
+     squadra viene prima dell'età, in /aste dopo — quindi la misura arriva da
+     `--fm-colonne`, che ogni tabella imposta.
+
+     Misurato a 375px su tutte e 215 le righe: ruoli 90px con tre pastiglie,
+     squadra 102px con "Fiorentina" e il suo stemma. Da qui le tracce. */
+  .fm-table-incolonnata tbody tr {
+    display: grid;
+    grid-template-columns: var(--fm-colonne);
+    align-items: center;
+    /* .375rem e non .5rem: i 6px recuperati sui tre spazi sono quelli che a
+       360px fanno entrare "Fiorentina" per intero invece di troncarla. */
+    column-gap: .375rem;
+  }
+  .fm-table-incolonnata tbody td.fm-meta {
+    display: flex;
+    align-items: center;
+    /* Senza questo una cella non scende sotto il suo contenuto e sfonda la
+       griglia invece di troncare. */
+    min-width: 0;
+    overflow: hidden;
+  }
+  .fm-table-incolonnata tbody td.fm-meta > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Il punto separatore non serve più: a dividere le celle ci pensa la
+     colonna, e un `·` in mezzo a una griglia sarebbe solo rumore. */
+  .fm-table-incolonnata tbody td.fm-meta + td.fm-meta::before {
+    content: none;
+    margin-inline: 0;
+  }
+
+  /* Il nome, le celle a tutta riga e lo stato vuoto occupano l'intera
+     larghezza invece di finire in una colonna. */
+  .fm-table-incolonnata tbody td:first-child,
+  .fm-table-incolonnata tbody td.fm-piena,
+  .fm-table-incolonnata tbody td[colspan] { grid-column: 1 / -1; }
+
   /* Le pastiglie dei contendenti sono l'informazione per cui /aste esiste, e
      non vanno troncate: si stringono per farne stare tre per riga. */
   .fm-table-compatta .fm-chip {

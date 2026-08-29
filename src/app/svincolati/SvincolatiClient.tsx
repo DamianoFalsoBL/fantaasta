@@ -167,7 +167,12 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
 
       {/* Tabella Svincolati */}
       <div className="fm-table-scroll rounded-md border border-line">
-        <table className="fm-table fm-table-cards fm-table-compatta">
+        {/* Le tracce valgono solo sotto md, dove la riga diventa una griglia.
+            L'ordine è quello delle colonne: ruoli, squadra, età, quotazione. */}
+        <table
+          className="fm-table fm-table-cards fm-table-compatta fm-table-incolonnata"
+          style={{ '--fm-colonne': '5.9rem minmax(0, 1fr) 1.4rem 2.7rem' } as React.CSSProperties}
+        >
           <thead>
             <tr>
               {INTESTAZIONI.map(({ colonna: c, etichetta }) => (
@@ -220,7 +225,7 @@ export default function SvincolatiClient({ giocatori }: { giocatori: any[] }) {
                     </span>
                   </td>
                   <td data-label="Età" className="fm-meta tabular-nums text-ink-mid">
-                    {g.eta ? <>{g.eta}<span className="md:hidden"> anni</span></> : '—'}
+                    {g.eta ? <>{g.eta}<span className="sr-only"> anni</span></> : '—'}
                   </td>
                   <td data-label="Quotazione" className="fm-meta tabular-nums">
                     <span className="fm-badge fm-badge-good align-middle">

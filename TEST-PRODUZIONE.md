@@ -335,6 +335,24 @@ numeri del database.
       ricompare solo se un giocatore non ha ruoli Mantra, cosa che oggi non
       capita per nessuno dei 549.
 
+### C2d · Colonne allineate sul telefono
+
+- [ ] `/svincolati` sul telefono: scorrendo la lista, **ruoli, squadra, età e
+      crediti stanno uno sotto l'altro** da una scheda all'altra, anche quando
+      un giocatore ha una sola pastiglia di ruolo e quello dopo ne ha tre.
+- [ ] Cerca un giocatore con **tre ruoli** (per esempio Marusic o Biraghi, che
+      hanno DD/DS/E): le tre pastiglie stanno su una riga sola, non vanno a
+      capo, e la scheda resta alta come le altre.
+- [ ] Guarda una riga della **Fiorentina** o del **Frosinone**, i nomi più
+      lunghi: si leggono per intero, senza puntini di troncamento.
+- [ ] L'età ora è il solo numero, senza «anni».
+      **Atteso:** è voluto — in colonna il numero basta, e la parola costava i
+      pixel che servivano al nome della squadra. Chi usa un lettore di schermo
+      sente comunque «30 anni».
+- [ ] Stessa cosa in `/aste`, scheda *Da assegnare*. La scheda *Assegnati* no:
+      lì le colonne sono fantasquadra, prezzo e data completa, e a quelle
+      larghezze non ci stanno incolonnate.
+
 ### C2b · Gli svincolati non contengono chi è già in coda per l'asta
 - [ ] Con almeno un giocatore conteso in attesa d'asta (`/aste` → *Da
   assegnare*), cercalo in `/svincolati`.

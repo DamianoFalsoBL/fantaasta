@@ -193,7 +193,12 @@ export default function AsteClient({
       </PannelloFiltri>
 
       <div className="fm-table-scroll rounded-md border border-line">
-        <table className="fm-table fm-table-cards fm-table-compatta">
+        {/* Stesse colonne di /svincolati, in ordine diverso: qui l'età viene
+            prima della squadra. */}
+        <table
+          className="fm-table fm-table-cards fm-table-compatta fm-table-incolonnata"
+          style={{ '--fm-colonne': '5.9rem 1.4rem minmax(0, 1fr) 2.7rem' } as React.CSSProperties}
+        >
           <thead>
             <tr>
               <th>Nome</th>
@@ -232,7 +237,7 @@ export default function AsteClient({
                     </span>
                   </td>
                   <td data-label="Età" className="fm-meta tabular-nums text-ink-mid">
-                    {r.eta ? <>{r.eta}<span className="md:hidden"> anni</span></> : '—'}
+                    {r.eta ? <>{r.eta}<span className="sr-only"> anni</span></> : '—'}
                   </td>
                   <td data-label="Squadra" className="fm-meta text-ink-mid">
                     <span className="inline-flex items-center gap-1.5 align-middle">
