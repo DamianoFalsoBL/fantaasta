@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import RuoliGiocatore from '@/components/RuoliGiocatore'
+import LogoSquadra from '@/components/LogoSquadra'
 import Conferma from '@/components/Conferma'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import { mantraPresenti } from '@/utils/ruoli'
@@ -373,7 +374,10 @@ export default function BustePage() {
                       {/* Optional chaining: una busta orfana faceva crashare l'intera pagina */}
                       <div className="fm-nome text-base">{r.giocatori?.nome ?? 'Giocatore rimosso'}</div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                        <span>{r.giocatori?.squadra}{r.giocatori?.eta ? ` · ${r.giocatori.eta}` : ''}</span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <LogoSquadra squadra={r.giocatori?.squadra} />
+                          {r.giocatori?.squadra}{r.giocatori?.eta ? ` · ${r.giocatori.eta}` : ''}
+                        </span>
                         <RuoliGiocatore ruolo={r.giocatori?.ruolo} ruoloMantra={r.giocatori?.ruolo_mantra} />
                       </div>
                     </div>
@@ -529,7 +533,10 @@ export default function BustePage() {
                       <div className="min-w-0">
                         <div className="fm-nome truncate text-base">{g.nome}</div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                          <span>{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <LogoSquadra squadra={g.squadra} />
+                            {g.squadra}{g.eta ? ` · ${g.eta}` : ''}
+                          </span>
                           <RuoliGiocatore ruolo={g.ruolo} ruoloMantra={g.ruolo_mantra} />
                         </div>
                       </div>
@@ -716,7 +723,10 @@ export default function BustePage() {
                         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm">
                           <span className="font-semibold text-viola-hi">{b.squadre?.nome ?? '—'}</span>
                           <span className="text-ink-dim">·</span>
-                          <span className="text-ink-mid">{b.giocatori?.squadra}</span>
+                          <span className="inline-flex items-center gap-1.5 text-ink-mid">
+                            <LogoSquadra squadra={b.giocatori?.squadra} />
+                            {b.giocatori?.squadra}
+                          </span>
                           <RuoliGiocatore ruolo={b.giocatori?.ruolo} ruoloMantra={b.giocatori?.ruolo_mantra} />
                         </div>
                       </div>

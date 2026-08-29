@@ -293,6 +293,9 @@ numeri del database.
 - [ ] `/svincolati`, sul telefono: accanto al nome della squadra c'è lo stemma,
       e la scheda del giocatore resta di **tre righe** come prima. Se le righe
       sono diventate quattro, l'immagine è troppo alta.
+- [ ] Gli stemmi ci sono anche in `/aste` (scheda *Da assegnare*) e in `/buste`
+      (elenco delle scelte, riepilogo e sommario). In *Assegnati* no: lì la
+      colonna è la **fantasquadra**, non il club di Serie A.
 - [ ] Scorri fino in fondo alla lista: **nessun riquadro con l'icona di
       immagine rotta**. Gli stemmi si disegnano solo per le venti squadre che
       hanno il file; per le altre non compare niente, di proposito.

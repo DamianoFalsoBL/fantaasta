@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import RuoliGiocatore from '@/components/RuoliGiocatore'
+import LogoSquadra from '@/components/LogoSquadra'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
@@ -233,7 +234,12 @@ export default function AsteClient({
                   <td data-label="Età" className="fm-meta tabular-nums text-ink-mid">
                     {r.eta ? <>{r.eta}<span className="md:hidden"> anni</span></> : '—'}
                   </td>
-                  <td data-label="Squadra" className="fm-meta text-ink-mid">{r.squadra ?? '—'}</td>
+                  <td data-label="Squadra" className="fm-meta text-ink-mid">
+                    <span className="inline-flex items-center gap-1.5 align-middle">
+                      <LogoSquadra squadra={r.squadra} />
+                      {r.squadra ?? '—'}
+                    </span>
+                  </td>
                   <td data-label="Prezzo" className="fm-meta tabular-nums">
                     <span className="fm-badge fm-badge-good align-middle">
                       {r.quotazione}<span className="md:hidden">&nbsp;cr</span>
