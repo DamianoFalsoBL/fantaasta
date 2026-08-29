@@ -20,10 +20,15 @@ dice cosa va verificato, questo dice cosa va costruito.
 `src/components/TabelloneAsta.tsx` rifà cinque interrogazioni a ogni giro del
 salvagente e a ogni evento in tempo reale.
 
-Parcheggiata in attesa dei consumi, ma **attenzione a non trarre la conclusione
-sbagliata dai numeri di agosto**: il collaudo del 18 e l'asta del 27 non hanno
-messo sotto sforzo questa query, perché le liste erano corte — le rose erano
-state importate, non battute. Con le liste piene torna a pesare.
+**Non è un problema di consumi, e ora è misurato invece che supposto.** L'asta
+del 27 agosto è costata 126 MB di egress su 5 GB e 4.832 messaggi realtime su
+2 milioni: quaranta volte di margine sulla voce più stretta. Anche con le liste
+piene — quel giorno erano corte, perché le rose erano state importate e non
+battute — non si arriva vicino al limite.
+
+Resta eventualmente una questione di **reattività**, non di quota: cinque query
+ogni 15 secondi su liste lunghe si sentono sul telefono di chi ha la linea
+lenta. Ma è un'ottimizzazione da fare se qualcuno se ne lamenta, non prima.
 
 **Trappola:** non disattivare il salvagente quando non c'è un'asta in corso. È
 esattamente il caso per cui esiste.
@@ -56,21 +61,31 @@ manager: non c'entrano con il carico dell'asta.
 
 **Vercel non è il collo di bottiglia.** Resta da guardare Supabase.
 
-### Leggere i consumi di Supabase
+### Consumi Supabase: letti il 29 agosto, e il tempo reale ha retto
 
-**Il numero che conta è il picco di connessioni realtime**, non l'egress. Se
-arriva al numero dei presenti, il tempo reale ha funzionato per tutti; se resta
-a 5-6, una parte dei telefoni riceveva gli aggiornamenti solo grazie al
-salvagente ogni 15 secondi — cioè «sembrava funzionare».
+Ciclo 12 agosto - 12 settembre, piano Free, filtrato sul solo progetto
+`asta-fantacalcio`.
 
-La fotografia dell'8 agosto: egress 71 MB, database 26,83 MB, realtime 1.000
-messaggi, **picco connessioni 6**, 46 MAU.
+| Voce | 8 ago | 29 ago | Limite | Quanto ne usiamo |
+|---|---|---|---|---|
+| **Picco connessioni realtime** | **6** | **13** | 200 | 6,5% |
+| Messaggi realtime | 1.000 | 4.832 | 2.000.000 | 0,2% |
+| Egress | 71 MB | 126 MB | 5 GB | 2,5% |
+| Dimensione database | 26,83 MB | 29 MB | 500 MB | 6% |
+| Utenti attivi mensili | 46 | 44 | 50.000 | <1% |
 
-Il ciclo Supabase si è chiuso il 12 agosto: il confronto va fatto sul grafico
-giornaliero, non sul totale del mese.
+**La domanda aperta aveva una risposta, ed è quella buona.** Il picco di 13
+connessioni contemporanee è del 27 agosto — il grafico giornaliero lo mostra
+come unica barra che tocca il tetto, con il 18 agosto (il collaudo in due) a 8
+e tutti gli altri giorni fra 1 e 4. A database ci sono **10 squadre e 11
+account**: 13 connessioni sono più delle persone, quindi il tempo reale è
+arrivato a tutti e qualcuno aveva due schede o due dispositivi aperti.
 
-Il 29 agosto non si è potuto leggere: nel browser la sessione Supabase non
-c'era e l'accesso lo fa l'utente. Serve solo che tu entri, poi lo leggo.
+Non era «sembrava funzionare» grazie al salvagente: funzionava.
+
+Anche i messaggi realtime dicono la stessa cosa: 4.832 nel ciclo, quasi tutti
+concentrati il 27. Filtrando sul solo progetto dell'asta i numeri non cambiano,
+quindi gli altri due progetti dell'organizzazione non c'entrano nulla.
 
 ### Duplicare il sito per una seconda lega
 
