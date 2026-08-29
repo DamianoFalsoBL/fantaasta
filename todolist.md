@@ -142,13 +142,56 @@ così si vede il risultato invece di indovinarlo.
 
 ---
 
+## Da decidere insieme
+
+### La busta si consegna tutta o niente: teniamo la regola?
+
+`submit_buste` pretende **esattamente** tanti giocatori quanti sono gli slot
+liberi. Non è un vincolo dell'interfaccia: sta nel database e vale anche per chi
+scavalcasse la pagina.
+
+Il tema è emerso il 29 agosto e **non è stato deciso**, perché nel frattempo si
+è capito che il problema vero era un altro — la bozza che si perdeva, ora
+risolta. Il ragionamento però è già fatto e vale la pena non rifarlo.
+
+**Perché la regola esiste.** Nelle buste chi chiede un giocatore che nessun
+altro ha chiesto se lo prende **alla quotazione**, cioè al minimo. Chiedere
+tutti gli slot è quindi quasi sempre conveniente: la regola obbliga tutti a
+giocarsi quel vantaggio ogni turno, e nessuno può «passare».
+
+**Cosa cambierebbe permettendo di meno.** Il turno diventerebbe veloce — nessuno
+aspetta chi deve compilare trenta caselle — ma chi ha fretta ne consegna cinque
+e chi ha pazienza trenta, e il secondo riempie la rosa a prezzo di listino
+mentre il primo dovrà comprare all'asta. È un vantaggio che oggi la regola
+annulla.
+
+**Un caso in cui la regola si rompe da sola:** se i giocatori disponibili
+fossero **meno** degli slot liberi, nessuno potrebbe consegnare e la fase
+resterebbe bloccata. Oggi è lontano — 215 disponibili contro 30 slot — ma il
+vincolo non lo prevede.
+
+Tre strade, dalla meno alla più invasiva: lasciare com'è; permettere di
+consegnare meno con un minimo di uno; oppure tenere l'obbligo e tapparlo solo
+dove si rompe, cioè quando i disponibili sono meno degli slot. Le ultime due
+sono una migration su `submit_buste`.
+
+### Dire ai manager che la stellina esiste
+
+I preferiti pagano solo se la lista si prepara **prima**. Il 29 agosto tutti
+hanno trenta slot da riempire: se scoprono la stellina la sera stessa, si
+aspetta come il 27. Vale un messaggio qualche giorno prima della prossima
+tornata.
+
+---
+
 ## Notato di sfuggita
 
-- **Il collaudo del 29 agosto è stato eseguito sulla produzione**, versione
-  1.21.0, e non ha fatto emergere difetti. Resta fuori solo quello che dipende
-  da una situazione: il «Mi ritiro» spostato a destra e la fascia di asta finita
-  vogliono **un'asta in corso**, F13b una chiamata dalla console, il blocco K il
-  mercato aperto.
+- **Il collaudo del 29 agosto è stato eseguito sulla produzione** fino alla
+  versione 1.21.0, e non ha fatto emergere difetti. **Le caselle nate dopo sono
+  da eseguire**: C2e (preferiti, bozza e riempimento) e G2b (la colonna *Buste*
+  e gli allineamenti). Resta fuori quello che dipende da una situazione: il
+  «Mi ritiro» spostato a destra e la fascia di asta finita vogliono **un'asta in
+  corso**, F13b una chiamata dalla console, il blocco K il mercato aperto.
 - **Il pulsante *Nuova password* si vede anche dall'admin semplice.** `/admin`
   è protetto da `requireAdmin()`, che lascia passare ADMIN e SUPER_ADMIN,
   quindi *Budget e Fasi* è raggiungibile da entrambi. Il reset però è riservato
@@ -160,6 +203,13 @@ così si vede il risultato invece di indovinarlo.
   il super admin. **Scorciatoia sbagliata:** togliere il controllo dall'azione
   perché "tanto il pulsante non si vede" — quello è l'unico che protegge
   davvero.
+- **Le intestazioni di tabella e la specificità.** `.fm-table thead th` vale
+  0,1,2 e `.fm-num` 0,1,0: nella stessa `@layer` vince la prima, quindi
+  un'intestazione marcata `fm-num` restava allineata a sinistra mentre i suoi
+  valori andavano a destra. Corretto il 29 agosto con una regola esplicita in
+  `globals.css`. **Chi aggiunge una colonna nuova con un allineamento suo
+  controlli che l'intestazione lo segua**, perché il difetto non salta all'occhio
+  come un errore ma come «ogni colonna fa storia a sé».
 - **A 320px il nome della squadra si tronca** in `/svincolati`. È il ripiego
   previsto e non un difetto scoperto per caso: sotto quella larghezza le
   quattro colonne non entrano. Riguarda i telefoni molto vecchi (iPhone SE di
@@ -192,6 +242,9 @@ così si vede il risultato invece di indovinarlo.
 
 | Quando | Cosa |
 |---|---|
+| 29 ago 2026 | La colonna *Buste* dice sì o no, e le intestazioni seguono le colonne |
+| 29 ago 2026 | La bozza non si rileggeva: la cancellava l'effetto che la salva |
+| 29 ago 2026 | I preferiti si aggiungono alla busta invece di sostituirla |
 | 29 ago 2026 | La busta a metà non si perde più, e l'admin vede chi ha consegnato |
 | 29 ago 2026 | Preferiti con la stellina in `/svincolati`, e le buste si riempiono da lì |
 | 29 ago 2026 | Tutte le pagine hanno la stessa larghezza e lo stesso rientro |
