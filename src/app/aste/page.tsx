@@ -103,15 +103,14 @@ export default async function AstePage() {
   return (
     <main className="py-6 sm:py-8">
       <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="fm-panel overflow-hidden">
-          <div className="fm-panel-head">
-            <div>
-              <h1 className="fm-title text-xl">Sommario aste</h1>
-              <p className="mt-0.5 text-xs font-normal normal-case tracking-normal text-ink-dim">
-                Chi resta da assegnare e chi è già stato aggiudicato.
-              </p>
-            </div>
-          </div>
+        <div className="mb-5">
+          <h1 className="fm-title text-2xl sm:text-3xl">Sommario aste</h1>
+          <p className="mt-1 text-sm text-ink-mid">
+            Chi resta da assegnare e chi è già stato aggiudicato.
+          </p>
+        </div>
+
+        <div>
 
           {error ? (
             <div className="p-4">

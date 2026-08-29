@@ -27,19 +27,21 @@ export default async function SvincolatiPage() {
   return (
     <main className="py-6 sm:py-8">
       <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="fm-panel overflow-hidden">
-          <div className="fm-panel-head">
-            <div>
-              <h1 className="fm-title text-xl">Lista svincolati</h1>
-              <p className="mt-0.5 text-xs font-normal normal-case tracking-normal text-ink-dim">
-                I giocatori ancora disponibili per essere acquistati.
-              </p>
-            </div>
-            <span className="fm-chip shrink-0">{disponibili.length}</span>
+        {/* Stessa intestazione di ogni altra pagina: titolo a sinistra fuori
+            dal pannello. Prima stava dentro una `fm-panel-head`, che e' la
+            testata di un riquadro e non il titolo di una pagina: si leggeva
+            piu' piccola, in maiuscolo, e finiva pure fuori asse. */}
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="fm-title text-2xl sm:text-3xl">Lista svincolati</h1>
+            <p className="mt-1 text-sm text-ink-mid">
+              I giocatori ancora disponibili per essere acquistati.
+            </p>
           </div>
-
-          <SvincolatiClient giocatori={disponibili} />
+          <span className="fm-chip shrink-0">{disponibili.length}</span>
         </div>
+
+        <SvincolatiClient giocatori={disponibili} />
       </div>
     </main>
   )

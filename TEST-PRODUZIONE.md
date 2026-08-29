@@ -247,6 +247,22 @@ che non funzionava — un manager ci è finito e non è riuscito a entrare.
 - [x] Apri `/qualcosa-che-non-esiste`.
   **Atteso:** pagina 404, con lo stesso tema del resto.
 
+### B6 · Titoli allineati
+
+- [ ] Gira tutte le pagine: **ogni titolo sta a sinistra**, e ha la stessa
+      dimensione. Prima `/svincolati` e `/aste` usavano la testata di un
+      riquadro al posto del titolo di pagina, e si leggevano più piccole.
+- [ ] Le testate dei riquadri (*Stato squadre*, *I tuoi risultati*, *Fase
+      buste*) hanno il titolo a sinistra e il numero o la pastiglia
+      all'estremità destra.
+      **Atteso:** prima finivano fuori asse — a destra quando il titolo era
+      solo, al centro quando c'era anche una pastiglia. La causa era la
+      barretta colorata, che è un `::before` e contava come primo elemento
+      della fila.
+- [ ] Restano centrati di proposito, e non sono difetti: il nome del giocatore
+      sul tabellone d'asta, i messaggi di lista vuota, e il riquadro di accesso
+      sulla home.
+
 ### B5 · Nessun errore in console
 - [x] Su ogni pagina, apri gli strumenti da sviluppatore → *Console*.
   **Atteso:** nessun messaggio rosso. Gli avvisi gialli si possono ignorare.

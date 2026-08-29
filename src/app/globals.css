@@ -220,6 +220,17 @@
     margin: -.5rem .5rem -.5rem -.875rem;
     background: var(--color-viola);
   }
+  /* La barretta colorata e' un ::before, quindi conta come primo elemento
+     della fila flex: con `space-between` un'intestazione dal titolo solo
+     finiva a DESTRA, e una con titolo piu' pastiglia finiva al CENTRO.
+     Misurato su un'intestazione larga 285px: titolo solo a 185px dal bordo
+     sinistro, titolo di una coppia a 102px.
+
+     Il margine automatico sul primo elemento vero riporta il titolo a
+     sinistra e lascia intatto il caso a due, dove il secondo elemento deve
+     restare all'altro capo. */
+  .fm-panel-head > *:first-child { margin-right: auto; }
+
   .fm-panel-head--neon::before  { background: var(--color-neon); }
   .fm-panel-head--rosso::before { background: var(--color-rosso); }
   .fm-panel-head--ambra::before { background: var(--color-ambra); }
