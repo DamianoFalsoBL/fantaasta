@@ -459,6 +459,15 @@ numeri del database.
       («erano già nella lista»).
 - [ ] Dopo il riempimento la pastiglia dice ancora **buste non salvate**: il
       pulsante riempie e basta, solo *Salva* fa fede.
+- [ ] **La busta a metà non si perde.** Scegli due nomi, **non salvare**, vai
+      su un'altra pagina o un'altra scheda del browser e torna su `/buste`.
+      **Atteso:** i due nomi sono ancora lì, e la pastiglia dice *buste non
+      salvate*. Vale anche ricaricando la pagina.
+- [ ] Salva la busta, poi cambia la selezione senza salvare e ricarica.
+      **Atteso:** torna quella **salvata**, non la modifica. Vale quello che hai
+      consegnato — la bozza è un appunto, la busta è un fatto.
+- [ ] La bozza è **di quel browser**: aperta dal telefono non c'è. È il
+      compromesso scelto, non un difetto.
 - [ ] La scheda di `/svincolati` resta di **76px** sul telefono, e le colonne
       restano allineate. Misurato: con e senza stella è identica.
 
@@ -989,6 +998,22 @@ esiti diventano pubblici.
 - [ ] Prova a togliere più crediti di quanti ne abbia.
   **Atteso:** o viene rifiutato, o il residuo va sotto zero in modo visibile —
   **annota quale dei due**, perché cambia come si gestisce l'errore.
+
+### G2b · Chi ha già consegnato la busta
+
+- [ ] A fase buste aperta, in *Budget e Fasi* la tabella *Stato squadre* ha la
+      colonna **Buste**: mostra `0 / 30` per chi non ha ancora consegnato, il
+      conteggio parziale per chi sta lavorando, e una **✓ verde** per chi ha
+      consegnato il numero esatto.
+- [ ] Fai consegnare una squadra e **aspetta venti secondi senza ricaricare**.
+      **Atteso:** la colonna si aggiorna da sola. Una spunta ferma sarebbe
+      peggio di nessuna spunta: si chiuderebbe la fase credendo che abbiano
+      consegnato tutti.
+- [ ] A fase chiusa la colonna mostra `—`, e per chi ha la rosa piena
+      *rosa piena*.
+- [ ] **Non compaiono i nomi dei giocatori**, solo i numeri. In questa lega
+      l'amministratore gioca: vedere le scelte altrui prima dello spoglio
+      sarebbe un vantaggio.
 
 ### G3 · Ricalcolo degli slot
 - [ ] `/admin/setup` → *Ricalcola slot occupati*.

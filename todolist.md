@@ -192,6 +192,7 @@ così si vede il risultato invece di indovinarlo.
 
 | Quando | Cosa |
 |---|---|
+| 29 ago 2026 | La busta a metà non si perde più, e l'admin vede chi ha consegnato |
 | 29 ago 2026 | Preferiti con la stellina in `/svincolati`, e le buste si riempiono da lì |
 | 29 ago 2026 | Tutte le pagine hanno la stessa larghezza e lo stesso rientro |
 | 29 ago 2026 | Su schermo grande i filtri stanno su una riga sola |

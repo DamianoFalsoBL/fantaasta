@@ -90,6 +90,30 @@ function CredenzialiGenerate({ squadra, email, password }: { squadra: string; em
   )
 }
 
+/**
+ * Se una squadra ha consegnato la busta completa per il turno in corso.
+ *
+ * `submit_buste` pretende esattamente tanti giocatori quanti sono gli slot
+ * liberi, quindi "completa" non e' un'opinione: o il numero combacia o la
+ * busta non e' stata accettata.
+ *
+ * Si mostra il conteggio e non solo la spunta, perche' "3 / 28" dice se il
+ * ritardatario sta lavorando o non ha ancora cominciato — che e' la domanda
+ * vera quando si aspetta.
+ */
+function StatoBuste({ aperta, consegnate, slotLiberi }: { aperta: boolean; consegnate: number; slotLiberi: number }) {
+  if (!aperta) return <span className="text-ink-dim">—</span>
+  if (slotLiberi <= 0) return <span className="fm-label">rosa piena</span>
+  if (consegnate === slotLiberi) {
+    return <span className="font-bold text-neon" title={`${consegnate} su ${slotLiberi}`}>✓</span>
+  }
+  return (
+    <span className={`fm-badge ${consegnate === 0 ? 'fm-badge-bad' : 'fm-badge-mid'}`}>
+      {consegnate} / {slotLiberi}
+    </span>
+  )
+}
+
 // Al posto di `confirm()`: si registra qui l'azione in attesa di conferma.
 type AzioneInAttesa = {
   titolo: string
@@ -115,6 +139,19 @@ export default function AdminRiepilogoPage() {
   // La password appena generata. Vive solo qui, finche' la finestra resta
   // aperta: non viene salvata da nessuna parte e non si puo' rileggere.
   const [credenziali, setCredenziali] = useState<{ squadra: string; email: string; password: string } | null>(null)
+  /**
+   * Quante buste ha gia' consegnato ogni squadra nel turno in corso.
+   *
+   * Serve a sapere chi manca senza chiederlo a voce: all'asta del 27 agosto si
+   * e' aspettato senza sapere se il ritardatario stesse compilando o si fosse
+   * distratto.
+   *
+   * L'admin puo' leggerle: `lettura_buste` glielo concede perche' gli serve per
+   * lo spoglio. Qui pero' si mostra **solo il conteggio**, mai quali giocatori:
+   * in questa lega l'amministratore gioca, e sapere i nomi altrui prima dello
+   * spoglio sarebbe un vantaggio.
+   */
+  const [busteConsegnate, setBusteConsegnate] = useState<Map<string, number>>(new Map())
 
   const fetchData = async () => {
     setLoading(true)
@@ -138,19 +175,63 @@ export default function AdminRiepilogoPage() {
 
     // Fetch regole_lega
     const { data: rData } = await supabase
-      .from('regole_lega').select('fase_buste_aperta, slot_totali').limit(1).maybeSingle()
+      .from('regole_lega').select('fase_buste_aperta, slot_totali, turno_buste').limit(1).maybeSingle()
     // La colonna ammette NULL: qui vale "fase chiusa", come il default.
     if (rData) {
       setFaseBusteAperta(rData.fase_buste_aperta ?? false)
       setSlotTotali(rData.slot_totali ?? 30)
     }
 
+    await contaBuste(rData?.turno_buste ?? 1)
+
     setLoading(false)
+  }
+
+  /**
+   * Il conteggio delle buste in attesa, turno per turno.
+   *
+   * Sta in una funzione sua perche' e' l'unica cosa che cambia mentre la fase
+   * e' aperta, e va riletta da sola invece di ricaricare tutta la pagina.
+   */
+  const contaBuste = async (turno: number) => {
+    const { data } = await supabase
+      .from('buste')
+      .select('squadra_id')
+      .eq('esito', 'ATTESA')
+      .eq('turno', turno)
+
+    const conto = new Map<string, number>()
+    for (const b of data ?? []) {
+      conto.set(b.squadra_id, (conto.get(b.squadra_id) ?? 0) + 1)
+    }
+    setBusteConsegnate(conto)
   }
 
   useEffect(() => {
     fetchData()
   }, [])
+
+  /**
+   * Mentre la fase e' aperta il conteggio si aggiorna da solo.
+   *
+   * Senza, la colonna direbbe come stavano le cose all'apertura della pagina, e
+   * una spunta verde ferma e' peggio di nessuna spunta: si chiude la fase
+   * credendo che abbiano consegnato tutti.
+   *
+   * Venti secondi, una query sola, e **solo a fase aperta**: a fase chiusa non
+   * c'e' niente che possa cambiare.
+   */
+  useEffect(() => {
+    if (!faseBusteAperta) return
+    const t = setInterval(() => { void ricontaBuste() }, 20000)
+    return () => clearInterval(t)
+  }, [faseBusteAperta])
+
+  const ricontaBuste = async () => {
+    const { data } = await supabase
+      .from('regole_lega').select('turno_buste').limit(1).maybeSingle()
+    await contaBuste(data?.turno_buste ?? 1)
+  }
 
   const modificaBudget = (squadraId: string, delta: number) => {
     const squadra = squadre.find((s) => s.id === squadraId)
@@ -305,12 +386,13 @@ export default function AdminRiepilogoPage() {
                   <th className="fm-num">Budget residuo</th>
                   <th className="text-center">Aggiungi / togli crediti</th>
                   <th className="fm-num">Slot</th>
+                  <th className="text-center">Buste</th>
                   <th className="text-center">Accesso</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={6} className="p-8 text-center text-ink-dim">Caricamento in corso…</td></tr>
+                  <tr><td colSpan={7} className="p-8 text-center text-ink-dim">Caricamento in corso…</td></tr>
                 ) : squadre.map(s => (
                   <tr key={s.id}>
                     <td className="fm-nome">{s.nome}</td>
@@ -325,6 +407,13 @@ export default function AdminRiepilogoPage() {
                       <span className={`fm-badge ${(s.slot_occupati ?? 0) < slotTotali ? 'fm-badge-mid' : 'fm-badge-top'}`}>
                         {s.slot_occupati ?? 0} / {slotTotali}
                       </span>
+                    </td>
+                    <td className="text-center">
+                      <StatoBuste
+                        aperta={faseBusteAperta}
+                        consegnate={busteConsegnate.get(s.id) ?? 0}
+                        slotLiberi={slotTotali - (s.slot_occupati ?? 0)}
+                      />
                     </td>
                     <td className="text-center">
                       <button

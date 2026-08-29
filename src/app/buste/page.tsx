@@ -68,6 +68,17 @@ export default function BustePage() {
   // Gli id che il server ha registrato, non quelli che si vedono a schermo:
   // servono a distinguere le due cose. `null` finché non si è letto.
   const [idsSalvati, setIdsSalvati] = useState<Set<number> | null>(null)
+  /**
+   * La chiave della bozza, che vive nel browser.
+   *
+   * Contiene squadra e turno di proposito: una bozza rimasta lì dal turno
+   * scorso non deve rientrare nel turno nuovo, e un altro manager che entra
+   * dallo stesso computer non deve trovarsi i nomi di chi c'era prima.
+   *
+   * Resta nulla finché non si sa a quale squadra e turno appartiene: scrivere
+   * prima vorrebbe dire scrivere sulla chiave sbagliata.
+   */
+  const [chiaveBozza, setChiaveBozza] = useState<string | null>(null)
 
   // Per fase chiusa
   const [risultati, setRisultati] = useState<BustaConGiocatore[]>([])
@@ -137,13 +148,15 @@ export default function BustePage() {
 
     const { data: rData } = await supabase
       .from('regole_lega')
-      .select('fase_buste_aperta, slot_totali, slot_p')
+      .select('fase_buste_aperta, slot_totali, slot_p, turno_buste')
       .limit(1)
       .maybeSingle()
     const aperta = rData?.fase_buste_aperta || false
     setSlotTotali(rData?.slot_totali ?? 30)
     setMaxPortieri(rData?.slot_p ?? 3)
     setFaseAperta(aperta)
+    const turno = rData?.turno_buste ?? 1
+    setChiaveBozza(`fantaasta:bozza-buste:${sq.id}:${turno}`)
 
     const { data: pDisp } = await supabase.rpc('portieri_disponibili', { p_squadra_id: sq.id })
     setPortieriDisponibili(pDisp ?? 0)
@@ -181,6 +194,33 @@ export default function BustePage() {
 
       if (idsAttesa.size > 0) {
         setSelezionati(liberi.filter((g) => idsAttesa.has(g.id)))
+      } else {
+        // Nessuna busta consegnata: si riprende la bozza lasciata nel browser.
+        //
+        // Serve al caso piu' banale e piu' fastidioso: ne scegli due, esci a
+        // cercare informazioni su un giocatore, torni e li avevi persi.
+        //
+        // Il server vince sempre quando ha qualcosa: una busta consegnata e'
+        // un fatto, la bozza e' un appunto.
+        //
+        // Si incrocia con `liberi` perche' un giocatore appuntato ieri puo'
+        // essere stato preso da qualcun altro: rimetterlo dentro farebbe
+        // fallire il salvataggio con un messaggio che non spiega niente.
+        const chiave = `fantaasta:bozza-buste:${sq.id}:${rData?.turno_buste ?? 1}`
+        try {
+          const grezzo = window.localStorage.getItem(chiave)
+          if (grezzo) {
+            const idsBozza: number[] = JSON.parse(grezzo)
+            const perId = new Map(liberi.map((g) => [g.id, g]))
+            const ripresi = idsBozza
+              .map((id) => perId.get(id))
+              .filter((g): g is Giocatore => g !== undefined)
+            if (ripresi.length > 0) setSelezionati(ripresi)
+          }
+        } catch {
+          // Navigazione privata, spazio esaurito, JSON rovinato: si riparte da
+          // una lista vuota, che e' esattamente com'era prima della bozza.
+        }
       }
 
     } else {
@@ -262,6 +302,32 @@ export default function BustePage() {
     setFiltroSquadra('')
     setFiltroEta('')
   }
+
+  /**
+   * La bozza si riscrive a ogni cambio della selezione.
+   *
+   * Non c'e' un pulsante "salva bozza": un appunto che bisogna ricordarsi di
+   * salvare non serve a niente, perche' chi esce di fretta e' proprio quello
+   * che se lo dimentica.
+   *
+   * Non si scrive finche' la chiave non e' nota: prima vorrebbe dire scrivere
+   * sulla chiave sbagliata.
+   *
+   * La regola di precedenza sta al caricamento, non qui: **se una busta e'
+   * stata consegnata vince quella**, e la bozza viene ignorata. E' una regola
+   * che si tiene a mente — vale quello che hai salvato — mentre "a volte vince
+   * l'appunto" non lo sarebbe.
+   */
+  useEffect(() => {
+    if (!chiaveBozza || !faseAperta) return
+    try {
+      if (selezionati.length === 0) window.localStorage.removeItem(chiaveBozza)
+      else window.localStorage.setItem(chiaveBozza, JSON.stringify(selezionati.map((g) => g.id)))
+    } catch {
+      // Se il browser non concede lo spazio si continua senza bozza: la pagina
+      // funziona esattamente come prima che esistesse.
+    }
+  }, [selezionati, chiaveBozza, faseAperta])
 
   const toggleSelezionato = (giocatore: Giocatore) => {
     if (selezionati.find(s => s.id === giocatore.id)) {
@@ -367,6 +433,11 @@ export default function BustePage() {
     if (error) {
       setAvviso({ tono: 'errore', titolo: 'Salvataggio non riuscito', testo: error.message })
     } else {
+      // Consegnata la busta, l'appunto non serve piu': da qui in poi la verita'
+      // e' quella che risponde il server.
+      if (chiaveBozza) {
+        try { window.localStorage.removeItem(chiaveBozza) } catch { /* niente da fare */ }
+      }
       setAvviso({
         tono: 'ok',
         titolo: 'Lista salvata',
