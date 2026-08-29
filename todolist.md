@@ -28,21 +28,49 @@ state importate, non battute. Con le liste piene torna a pesare.
 **Trappola:** non disattivare il salvagente quando non c'è un'asta in corso. È
 esattamente il caso per cui esiste.
 
-### Leggere i consumi di Supabase e Vercel dopo l'asta del 27 agosto
+### Consumi Vercel: letti il 29 agosto, nessun problema
 
-Ora che un'asta vera c'è stata, il confronto ha senso. La fotografia di
-partenza dell'8 agosto: Supabase egress 71 MB, database 26,83 MB, realtime
-1.000 messaggi, picco connessioni 6, 46 MAU; Vercel Fast Data 44,51 MB su
-100 GB, Fast Origin 34,09 MB su 10 GB, Edge Requests 4.852 su 1M, Invocations
-5.973 su 1M.
+Finestra di 30 giorni, 30 luglio - 29 agosto, piano Hobby.
 
-**Il numero che conta non è l'egress ma il picco di connessioni realtime.** Se
+| Voce | 8 ago | 29 ago | Limite | Quanto ne usiamo |
+|---|---|---|---|---|
+| Fast Data Transfer | 44,51 MB | 216,51 MB | 100 GB | 0,2% |
+| Fast Origin Transfer | 34,09 MB | 174,37 MB | 10 GB | 1,7% |
+| Edge Requests | 4.852 | 23.551 | 1M | 2,4% |
+| Function Invocations | 5.973 | 25.000 | 1M | 2,5% |
+| **Fluid Active CPU** | — | **33m 57s** | **4h** | **14%** |
+| Fluid Provisioned Memory | — | 10,1 GB-Hrs | 360 GB-Hrs | 2,8% |
+| Edge Request CPU Duration | — | 4s | 1h | 0,1% |
+
+**La voce da guardare non è la banda ma Fluid Active CPU**, l'unica a due
+cifre. Le altre sono così lontane dal limite che non varrà la pena riguardarle.
+
+I due giorni dell'asta (27-28 agosto) isolati: 31,36 MB di Fast Data, 25,29 MB
+di Fast Origin, 3.500 Edge Requests, 4.600 invocazioni, **4m 32s di Fluid
+Active CPU**. Cioè una serata d'asta costa circa il **2% del mese** sulla voce
+più stretta: dieci aste come quella starebbero dentro il piano gratuito.
+Il picco orario si vede alle 18 del 27, con 5,1 MB in un'ora.
+
+I 46 minuti di Build CPU di quei due giorni sono i nostri deploy, non i
+manager: non c'entrano con il carico dell'asta.
+
+**Vercel non è il collo di bottiglia.** Resta da guardare Supabase.
+
+### Leggere i consumi di Supabase
+
+**Il numero che conta è il picco di connessioni realtime**, non l'egress. Se
 arriva al numero dei presenti, il tempo reale ha funzionato per tutti; se resta
 a 5-6, una parte dei telefoni riceveva gli aggiornamenti solo grazie al
 salvagente ogni 15 secondi — cioè «sembrava funzionare».
 
+La fotografia dell'8 agosto: egress 71 MB, database 26,83 MB, realtime 1.000
+messaggi, **picco connessioni 6**, 46 MAU.
+
 Il ciclo Supabase si è chiuso il 12 agosto: il confronto va fatto sul grafico
 giornaliero, non sul totale del mese.
+
+Il 29 agosto non si è potuto leggere: nel browser la sessione Supabase non
+c'era e l'accesso lo fa l'utente. Serve solo che tu entri, poi lo leggo.
 
 ### Duplicare il sito per una seconda lega
 
