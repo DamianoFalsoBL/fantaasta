@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import MantraBadge from '@/components/MantraBadge'
+import RuoliGiocatore from '@/components/RuoliGiocatore'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
@@ -227,8 +227,7 @@ export default function AsteClient({
                     {/* `inline-flex` e non `flex`: dentro una cella `inline` un
                         figlio di tipo blocco spezzerebbe la riga compatta. */}
                     <span className="inline-flex items-center gap-2 align-middle">
-                      <span className="text-ink-mid">{r.ruolo}</span>
-                      {r.ruolo_mantra && r.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.ruolo_mantra} />}
+                      <RuoliGiocatore ruolo={r.ruolo} ruoloMantra={r.ruolo_mantra} />
                     </span>
                   </td>
                   <td data-label="Età" className="fm-meta tabular-nums text-ink-mid">
@@ -335,8 +334,7 @@ function SchedaAssegnati({
                 </td>
                 <td data-label="Ruoli" className="fm-meta">
                   <span className="inline-flex items-center gap-2 align-middle">
-                    <span className="text-ink-mid">{r.ruolo}</span>
-                    {r.ruolo_mantra && r.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.ruolo_mantra} />}
+                    <RuoliGiocatore ruolo={r.ruolo} ruoloMantra={r.ruolo_mantra} />
                   </span>
                 </td>
                 <td data-label="Fantasquadra" className="fm-meta font-semibold text-viola-hi">{r.fantasquadra}</td>

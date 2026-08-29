@@ -300,6 +300,16 @@ numeri del database.
       **Atteso:** il disegno originale è tutto nero e sul fondo scuro
       sparirebbe. È l'unico dei venti in quelle condizioni — misurato: luminanza
       media 0 e zero pixel chiari, contro i 64 del secondo più scuro.
+- [ ] La lettera del reparto è sparita **anche** da `/aste` (tutte e due le
+      schede), `/buste` (elenco, scelte e sommario), dalla regia asta e dal
+      tabellone. Restano invece le pastiglie colorate in `/rose`, `/mia-rosa` e
+      `/trasferimenti`: lì la colonna di colori è come si conta a colpo d'occhio
+      quanti portieri e quanti difensori si hanno.
+- [ ] **Il filtro *Ruolo* funziona ancora**, in `/svincolati` e in `/aste`.
+      **Atteso:** *Difensori (D)* lascia solo i difensori anche se la D non è
+      più scritta da nessuna parte. Il filtro guarda i dati, non quello che si
+      vede. Provalo anche su un reparto vuoto: la lista resta vuota, non torna
+      piena.
 - [ ] Nella riga delle informazioni **non c'è più** la lettera del reparto
       (P, D, C, A) prima dei ruoli Mantra.
       **Atteso:** era la stessa cosa detta due volte — Pc implica A. La lettera

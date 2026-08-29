@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import MantraBadge from '@/components/MantraBadge'
+import RuoliGiocatore from '@/components/RuoliGiocatore'
 import Conferma from '@/components/Conferma'
 
 export default function AdminAstaPage() {
@@ -373,8 +373,8 @@ export default function AdminAstaPage() {
                 )}
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                <span>{g.ruolo} · {g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
-                {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
+                <span>{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
+                <RuoliGiocatore ruolo={g.ruolo} ruoloMantra={g.ruolo_mantra} />
               </div>
               {g.contendenti && g.contendenti.length > 0 && (
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">

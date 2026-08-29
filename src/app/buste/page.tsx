@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import MantraBadge from '@/components/MantraBadge'
+import RuoliGiocatore from '@/components/RuoliGiocatore'
 import Conferma from '@/components/Conferma'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import { mantraPresenti } from '@/utils/ruoli'
@@ -373,8 +373,8 @@ export default function BustePage() {
                       {/* Optional chaining: una busta orfana faceva crashare l'intera pagina */}
                       <div className="fm-nome text-base">{r.giocatori?.nome ?? 'Giocatore rimosso'}</div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                        <span>{r.giocatori?.ruolo} · {r.giocatori?.squadra}{r.giocatori?.eta ? ` · ${r.giocatori.eta}` : ''}</span>
-                        {r.giocatori?.ruolo_mantra && r.giocatori.ruolo_mantra.length > 0 && <MantraBadge ruoli={r.giocatori.ruolo_mantra} />}
+                        <span>{r.giocatori?.squadra}{r.giocatori?.eta ? ` · ${r.giocatori.eta}` : ''}</span>
+                        <RuoliGiocatore ruolo={r.giocatori?.ruolo} ruoloMantra={r.giocatori?.ruolo_mantra} />
                       </div>
                     </div>
                     <div className="shrink-0">
@@ -529,8 +529,8 @@ export default function BustePage() {
                       <div className="min-w-0">
                         <div className="fm-nome truncate text-base">{g.nome}</div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                          <span>{g.ruolo} · {g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
-                          {g.ruolo_mantra && g.ruolo_mantra.length > 0 && <MantraBadge ruoli={g.ruolo_mantra} />}
+                          <span>{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
+                          <RuoliGiocatore ruolo={g.ruolo} ruoloMantra={g.ruolo_mantra} />
                         </div>
                       </div>
                       <div className="shrink-0">
@@ -716,10 +716,8 @@ export default function BustePage() {
                         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm">
                           <span className="font-semibold text-viola-hi">{b.squadre?.nome ?? '—'}</span>
                           <span className="text-ink-dim">·</span>
-                          <span className="text-ink-mid">{b.giocatori?.ruolo} · {b.giocatori?.squadra}</span>
-                          {b.giocatori?.ruolo_mantra && b.giocatori.ruolo_mantra.length > 0 && (
-                            <MantraBadge ruoli={b.giocatori.ruolo_mantra} />
-                          )}
+                          <span className="text-ink-mid">{b.giocatori?.squadra}</span>
+                          <RuoliGiocatore ruolo={b.giocatori?.ruolo} ruoloMantra={b.giocatori?.ruolo_mantra} />
                         </div>
                       </div>
                       <span className="fm-badge fm-badge-good shrink-0">{b.giocatori?.quotazione} cr</span>

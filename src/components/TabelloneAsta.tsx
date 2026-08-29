@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import MantraBadge from '@/components/MantraBadge'
+import RuoliGiocatore from '@/components/RuoliGiocatore'
 
 /**
  * `aste.abbandoni` è una colonna jsonb, quindi arriva tipizzata come Json.
@@ -540,10 +540,10 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                     <div className="fm-nome text-lg text-ink">{item.giocatori.nome}</div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
                       <span>
-                        {item.giocatori.ruolo} · {item.giocatori.squadra}
+                        {item.giocatori.squadra}
                         {item.giocatori.eta ? ` · ${item.giocatori.eta}` : ''}
                       </span>
-                      {item.giocatori.ruolo_mantra && item.giocatori.ruolo_mantra.length > 0 && <MantraBadge ruoli={item.giocatori.ruolo_mantra} />}
+                      <RuoliGiocatore ruolo={item.giocatori.ruolo} ruoloMantra={item.giocatori.ruolo_mantra} />
                       <span className="fm-badge fm-badge-low">Base {item.giocatori.quotazione}</span>
                     </div>
                     {contendenti.length > 0 ? (
@@ -709,8 +709,6 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
         <div className="relative flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1 border-b border-line-hi bg-panel-hi px-3 py-2 text-center sm:block sm:px-4 sm:py-4">
           <h2 className="fm-title text-xl sm:text-3xl">{asta.giocatori.nome}</h2>
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-sm text-ink-mid sm:mt-1.5">
-            <span>{asta.giocatori.ruolo}</span>
-            <span className="text-ink-dim">&bull;</span>
             <span>{asta.giocatori.squadra}</span>
             {asta.giocatori.eta && (
               <>
@@ -718,12 +716,10 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                 <span>{asta.giocatori.eta}</span>
               </>
             )}
-            {asta.giocatori.ruolo_mantra && asta.giocatori.ruolo_mantra.length > 0 && (
-              <>
-                <span className="text-ink-dim">&bull;</span>
-                <MantraBadge ruoli={asta.giocatori.ruolo_mantra} />
-              </>
-            )}
+            {/* Il punto elenco non è più condizionato: `RuoliGiocatore`
+                qualcosa disegna sempre, o le pastiglie Mantra o la lettera. */}
+            <span className="text-ink-dim">&bull;</span>
+            <RuoliGiocatore ruolo={asta.giocatori.ruolo} ruoloMantra={asta.giocatori.ruolo_mantra} />
           </div>
           {isChiamata && (
             <div className="fm-chip fm-chip-ambra absolute right-3 top-3 uppercase">
