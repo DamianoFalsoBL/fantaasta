@@ -107,6 +107,7 @@ Serve un account gratuito e la chiave fra le variabili d'ambiente su Vercel:
 |---|---|
 | 29 ago 2026 | Via la lettera del reparto anche da `/aste`, `/buste`, regia e tabellone |
 | 29 ago 2026 | Via la lettera del reparto dalla riga degli svincolati |
+| 29 ago 2026 | Incolonnati anche gli assegnati, con la data in forma breve |
 | 29 ago 2026 | Sul telefono ruoli, squadra, età e crediti sono incolonnati |
 | 29 ago 2026 | Titoli di pagina e testate dei riquadri tutti allineati a sinistra |
 | 29 ago 2026 | Stemmi di Serie A anche in `/aste` e `/buste` |

@@ -324,7 +324,12 @@ function SchedaAssegnati({
       </div>
 
       <div className="fm-table-scroll rounded-md border border-line">
-        <table className="fm-table fm-table-cards fm-table-compatta">
+        {/* Qui le colonne sono ruoli, prezzo e data: la fantasquadra scende
+            sotto, a riga intera. */}
+        <table
+          className="fm-table fm-table-cards fm-table-compatta fm-table-incolonnata"
+          style={{ '--fm-colonne': '5.9rem 2.7rem minmax(0, 1fr)' } as React.CSSProperties}
+        >
           <thead>
             <tr>
               <th scope="col">Calciatore</th>
@@ -348,15 +353,19 @@ function SchedaAssegnati({
                     <RuoliGiocatore ruolo={r.ruolo} ruoloMantra={r.ruolo_mantra} />
                   </span>
                 </td>
-                <td data-label="Fantasquadra" className="fm-meta font-semibold text-viola-hi">{r.fantasquadra}</td>
+                {/* `fm-piena` e non `fm-meta`: sul telefono si prende una riga
+                    sua in fondo alla scheda. E' il nome piu' lungo della
+                    tabella e in colonna verrebbe troncato proprio nella lista
+                    che serve a sapere chi si e' preso chi. */}
+                <td data-label="Fantasquadra" className="fm-piena font-semibold text-viola-hi">{r.fantasquadra}</td>
                 <td data-label="Prezzo" className="fm-meta tabular-nums">
                   <span className="fm-badge fm-badge-top align-middle">{r.prezzo}<span className="md:hidden">&nbsp;cr</span></span>
                 </td>
-                {/* Niente `whitespace-nowrap`: la data in formato italiano è la
-                    cella più larga, e lasciarla andare a capo è ciò che toglie
-                    lo sforamento su schermo stretto. */}
+                {/* Data breve: "27/08/26, 20:00" invece di "27/08/2026,
+                    20:00:00". I secondi non dicono niente a nessuno e l'anno
+                    per esteso costava larghezza in una riga che ne ha poca. */}
                 <td data-label="Data" className="fm-meta text-ink-dim">
-                  {new Date(r.quando).toLocaleString('it-IT')}
+                  {new Date(r.quando).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' })}
                 </td>
               </tr>
             ))}

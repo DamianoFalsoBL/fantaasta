@@ -739,6 +739,17 @@
   .fm-table-incolonnata tbody td.fm-piena,
   .fm-table-incolonnata tbody td[colspan] { grid-column: 1 / -1; }
 
+  /* Una cella a tutta riga scende in fondo alla scheda anche se nel markup
+     sta in mezzo. Serve in /aste: la fantasquadra che si e' aggiudicata il
+     giocatore e' la colonna piu' larga di tutte — misurati 149px per
+     "Amsterdamsche FCA" — e in fila con le altre non ci sta a nessuna
+     larghezza di telefono. Sotto, a riga intera, si legge per intero.
+
+     Si usa `order` e non lo spostamento nel markup perche' su schermo grande
+     l'ordine delle colonne deve restare quello, con la fantasquadra al centro
+     e non in coda. */
+  .fm-table-incolonnata tbody td.fm-piena { order: 1; }
+
   /* Le pastiglie dei contendenti sono l'informazione per cui /aste esiste, e
      non vanno troncate: si stringono per farne stare tre per riga. */
   .fm-table-compatta .fm-chip {

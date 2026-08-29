@@ -349,9 +349,15 @@ numeri del database.
       **Atteso:** è voluto — in colonna il numero basta, e la parola costava i
       pixel che servivano al nome della squadra. Chi usa un lettore di schermo
       sente comunque «30 anni».
-- [ ] Stessa cosa in `/aste`, scheda *Da assegnare*. La scheda *Assegnati* no:
-      lì le colonne sono fantasquadra, prezzo e data completa, e a quelle
-      larghezze non ci stanno incolonnate.
+- [ ] Stessa cosa in `/aste`, scheda *Da assegnare*.
+- [ ] `/aste`, scheda *Assegnati*: ruoli, prezzo e data sono incolonnati, e la
+      **fantasquadra sta su una riga sua in fondo alla scheda**.
+      **Atteso:** è voluto. «Amsterdamsche FCA» è il valore più largo della
+      tabella — misurati 149px — e in fila con gli altri verrebbe troncato
+      proprio nella lista che serve a sapere chi si è preso chi. Su schermo
+      grande resta invece una colonna in mezzo, dove sta comoda.
+- [ ] La data è nella forma breve: **«27/08/26, 20:00»**, non più
+      «27/08/2026, 20:00:00». Vale anche su schermo grande.
 
 ### C2b · Gli svincolati non contengono chi è già in coda per l'asta
 - [ ] Con almeno un giocatore conteso in attesa d'asta (`/aste` → *Da
