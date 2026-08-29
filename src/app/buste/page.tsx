@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import RuoliGiocatore from '@/components/RuoliGiocatore'
 import LogoSquadra from '@/components/LogoSquadra'
 import Conferma from '@/components/Conferma'
-import { leggiPreferiti } from '@/utils/preferiti'
+import { leggiPreferiti, scegliDaiPreferiti } from '@/utils/preferiti'
 import OpzioniRuolo from '@/components/OpzioniRuolo'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
@@ -306,16 +306,9 @@ export default function BustePage() {
       return
     }
 
-    const perId = new Map(giocatoriLiberi.map((g) => [g.id, g]))
-    const disponibili = idsPreferiti
-      .map((id) => perId.get(id))
-      .filter((g): g is Giocatore => g !== undefined)
-    const presi = disponibili.slice(0, slotLiberi)
+    const { presi, nonDisponibili, avanzati, mancanti } =
+      scegliDaiPreferiti(idsPreferiti, giocatoriLiberi, slotLiberi)
     setSelezionati(presi)
-
-    const nonDisponibili = idsPreferiti.length - disponibili.length
-    const avanzati = disponibili.length - presi.length
-    const mancanti = slotLiberi - presi.length
 
     const pezzi = [`Presi ${presi.length} dei tuoi ${idsPreferiti.length} preferiti.`]
     if (nonDisponibili > 0) {

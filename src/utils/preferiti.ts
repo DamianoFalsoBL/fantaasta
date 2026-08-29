@@ -56,3 +56,37 @@ export async function togliPreferito(
     .eq('giocatore_id', giocatoreId)
   return error?.message ?? null
 }
+
+/**
+ * Sceglie quali preferiti mettere nella busta.
+ *
+ * Sta qui e non dentro la pagina perché è la parte che può dire il falso: se
+ * il conteggio sbaglia, il manager legge «presi 10 su 14» e ne ha otto. Come
+ * funzione pura si può provare davvero, con i tre casi che contano — preferiti
+ * meno degli slot, esatti, più degli slot.
+ *
+ * `disponibili` sono i giocatori che la pagina ha già ripulito da chi non è
+ * libero e da chi è in coda per l'asta: l'incrocio serve perché un preferito
+ * segnato una settimana fa può essere stato preso da qualcun altro.
+ *
+ * L'ordine è quello di `idsPreferiti`, cioè quello di inserimento: quando i
+ * preferiti sono più degli slot, entrano i primi che sono stati messi.
+ */
+export function scegliDaiPreferiti<T extends { id: number }>(
+  idsPreferiti: number[],
+  disponibili: T[],
+  slotLiberi: number
+): { presi: T[]; nonDisponibili: number; avanzati: number; mancanti: number } {
+  const perId = new Map(disponibili.map((g) => [g.id, g]))
+  const trovati = idsPreferiti
+    .map((id) => perId.get(id))
+    .filter((g): g is T => g !== undefined)
+  const presi = trovati.slice(0, Math.max(slotLiberi, 0))
+
+  return {
+    presi,
+    nonDisponibili: idsPreferiti.length - trovati.length,
+    avanzati: trovati.length - presi.length,
+    mancanti: Math.max(slotLiberi - presi.length, 0),
+  }
+}
