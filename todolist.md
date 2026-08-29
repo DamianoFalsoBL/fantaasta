@@ -182,6 +182,8 @@ così si vede il risultato invece di indovinarlo.
 
 | Quando | Cosa |
 |---|---|
+| 29 ago 2026 | Tutte le pagine hanno la stessa larghezza e lo stesso rientro |
+| 29 ago 2026 | Su schermo grande i filtri stanno su una riga sola |
 | 29 ago 2026 | Il pulsante del reset copia la sola password |
 | 29 ago 2026 | Le rose seguono l'ordine della leggenda Mantra, e così il filtro |
 | 29 ago 2026 | Via la pastiglia del reparto da `/rose` e `/mia-rosa`, ruoli Mantra in colonna |

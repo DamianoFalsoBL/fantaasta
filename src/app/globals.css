@@ -235,6 +235,43 @@
   .fm-panel-head--rosso::before { background: var(--color-rosso); }
   .fm-panel-head--ambra::before { background: var(--color-ambra); }
 
+  /* ------------------------------------------------------- CONTENITORE PAGINA
+
+     Un posto solo per la larghezza e i rientri di ogni pagina. Prima erano
+     scritti riga per riga e avevano preso strade diverse: cinque larghezze
+     massime (7xl, 6xl, 5xl, 4xl, 3xl) e quattro rientri, con il risultato che
+     due pagine affiancate non si allineavano e le schermate di caricamento
+     erano piu' strette della pagina che stavano caricando.
+
+     Due misure sole, e la regola per scegliere:
+
+       .fm-pagina         larga  — tabelle con molte colonne e liste lunghe
+       .fm-pagina-stretta stretta — un pannello di lavoro, o un elenco con una
+                                    riga per voce, dove allargare significa solo
+                                    allontanare gli estremi della riga */
+  .fm-pagina {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 80rem;
+    padding: 1.5rem .75rem;
+  }
+  .fm-pagina-stretta { max-width: 64rem; }
+
+  /* Sul telefono il tabellone d'asta stringe i margini verticali: la
+     compattazione di 1.14.0 ha portato quella schermata da 917 a 611px
+     contando i pixel uno per uno, e restituirgliene 24 qui li rimetterebbe
+     esattamente dove erano stati tolti. */
+  @media (max-width: 639px) {
+    .fm-pagina-fitta { padding-block: .75rem; }
+  }
+
+  @media (min-width: 640px) {
+    .fm-pagina { padding: 2rem 1.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .fm-pagina { padding-inline: 2rem; }
+  }
+
   .fm-panel-body { padding: .875rem; }
 
   /* ----------------------------------------------------------------- BOTTONI */

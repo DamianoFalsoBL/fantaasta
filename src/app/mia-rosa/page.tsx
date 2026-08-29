@@ -110,7 +110,7 @@ export default function MiaRosaPage() {
 
   if (!squadra) {
     return (
-      <div className="mx-auto w-full max-w-3xl p-6">
+      <div className="fm-pagina fm-pagina-stretta">
         <div className="fm-alert fm-alert-warn font-semibold">
           Nessuna squadra associata al tuo profilo: non c’è una rosa da mostrare.
         </div>
@@ -119,8 +119,8 @@ export default function MiaRosaPage() {
   }
 
   return (
-    <div className="px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <div className="mx-auto w-full max-w-5xl space-y-4">
+    <div>
+      <div className="fm-pagina fm-pagina-stretta space-y-4">
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="fm-title text-2xl sm:text-3xl">La mia rosa</h1>

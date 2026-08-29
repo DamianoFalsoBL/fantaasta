@@ -101,8 +101,8 @@ export default async function AstePage() {
   lista.forEach((r) => r.contendenti.sort((a, b) => a.localeCompare(b)))
 
   return (
-    <main className="py-6 sm:py-8">
-      <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
+    <main>
+      <div className="fm-pagina">
         <div className="mb-5">
           <h1 className="fm-title text-2xl sm:text-3xl">Sommario aste</h1>
           <p className="mt-1 text-sm text-ink-mid">

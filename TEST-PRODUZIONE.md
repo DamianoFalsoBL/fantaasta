@@ -264,6 +264,24 @@ che non funzionava — un manager ci è finito e non è riuscito a entrare.
       sul tabellone d'asta, i messaggi di lista vuota, e il riquadro di accesso
       sulla home.
 
+### B7 · Larghezza delle pagine
+
+- [ ] Passa da `/svincolati` a `/aste` a `/rose` a `/buste` su schermo grande:
+      il contenuto comincia e finisce **alla stessa distanza dai bordi**, senza
+      saltare da una pagina all'altra.
+      **Atteso:** prima c'erano cinque larghezze massime diverse e quattro
+      rientri diversi. Ora sono due misure sole — larga per le tabelle, stretta
+      per i pannelli di lavoro — scritte in un posto solo.
+- [ ] Le pagine strette sono `/asta`, `/mia-rosa`, la regia asta e le
+      impostazioni. Anche loro fra di loro sono allineate.
+- [ ] Ricarica una pagina lenta (`/rose`) e guarda la schermata *Caricamento*:
+      **non deve essere più stretta della pagina che sta caricando**, altrimenti
+      il contenuto salta quando arriva.
+- [ ] Sul telefono il tabellone d'asta ha i margini verticali più stretti delle
+      altre pagine.
+      **Atteso:** voluto, e misurato: la compattazione di 1.14.0 aveva portato
+      quella schermata da 917 a 611px contando i pixel uno per uno.
+
 ### B5 · Nessun errore in console
 - [x] Su ogni pagina, apri gli strumenti da sviluppatore → *Console*.
   **Atteso:** nessun messaggio rosso. Gli avvisi gialli si possono ignorare.

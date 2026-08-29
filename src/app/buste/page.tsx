@@ -338,7 +338,7 @@ export default function BustePage() {
         : 'modificate'
 
   return (
-    <div className="mx-auto w-full max-w-7xl p-3 sm:p-6 md:p-8">
+    <div className="fm-pagina">
       <h1 className="fm-title mb-5 text-2xl sm:text-3xl">Mercato di riparazione · Buste</h1>
 
       {!faseAperta ? (

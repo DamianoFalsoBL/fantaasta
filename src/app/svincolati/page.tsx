@@ -25,8 +25,8 @@ export default async function SvincolatiPage() {
   const disponibili = (giocatori ?? []).filter((g) => !inCoda.has(g.id))
 
   return (
-    <main className="py-6 sm:py-8">
-      <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
+    <main>
+      <div className="fm-pagina">
         {/* Stessa intestazione di ogni altra pagina: titolo a sinistra fuori
             dal pannello. Prima stava dentro una `fm-panel-head`, che e' la
             testata di un riquadro e non il titolo di una pagina: si leggeva

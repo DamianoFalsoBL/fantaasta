@@ -218,8 +218,7 @@ export default function TrasferimentiClient() {
   if (loading) return <div className="p-12 text-center text-ink-mid">Caricamento…</div>
 
   return (
-    <div className="px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <div className="mx-auto w-full max-w-7xl space-y-4">
+    <div className="fm-pagina space-y-4">
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="fm-title text-2xl sm:text-3xl">Lista trasferimenti</h1>
@@ -403,7 +402,6 @@ export default function TrasferimentiClient() {
               </ul>
             )}
           </div>
-        </div>
       </div>
 
       {bersaglio && (

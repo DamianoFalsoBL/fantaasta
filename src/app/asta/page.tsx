@@ -16,8 +16,7 @@ export default async function AstaLivePage() {
     // Niente `min-h-screen`: dentro un <main flex-1> sotto un <body min-h-full>
     // forzava l'altezza del viewport PIÙ la navbar, lasciando ~64px di scroll
     // fantasma su ogni pagina.
-    <div className="px-3 py-3 sm:px-6 sm:py-10 lg:px-8">
-      <div className="mx-auto w-full max-w-5xl">
+    <div className="fm-pagina fm-pagina-stretta fm-pagina-fitta">
         {/* Il titolo sparisce sul telefono. Durante un'asta ogni riga in cima e'
             una riga che manca in fondo, e questa non porta informazione: la
             barra sopra dice gia' dove sei, e sotto c'e' un tabellone che non
@@ -30,7 +29,6 @@ export default async function AstaLivePage() {
 
         {/* Componente Client per Supabase Realtime */}
         <TabelloneAsta squadraId={squadraId} isAdmin={isAdmin} />
-      </div>
     </div>
   )
 }
