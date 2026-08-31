@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
-import { descriviStato, type AstaCorrente, type Annuncio } from '@/utils/statoLega'
+import { descriviStato, elencoAbbandoni, type AstaCorrente, type Annuncio } from '@/utils/statoLega'
 
 /**
  * La fascia sotto la barra che dice sempre «a che punto siamo».
@@ -40,6 +40,7 @@ type RigaAsta = {
   prezzo_corrente: number
   squadra_in_testa: string | null
   scadenza_corrente: string | null
+  abbandoni: unknown
   giocatori: { nome: string; stato: string } | null
 }
 
@@ -111,7 +112,7 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
     // consente, ma un `limit(1)` costa meno di una pagina che esplode).
     const { data: righeAsta } = await supabase
       .from('aste')
-      .select('id, stato, giocatore_id, prezzo_corrente, squadra_in_testa, scadenza_corrente, giocatori(nome, stato)')
+      .select('id, stato, giocatore_id, prezzo_corrente, squadra_in_testa, scadenza_corrente, abbandoni, giocatori(nome, stato)')
       .in('stato', ['CHIAMATA', 'IN_CORSO'])
       .limit(1)
     if (smontato.current) return
@@ -119,12 +120,22 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
     const riga = (righeAsta ?? [])[0] as unknown as RigaAsta | undefined
     if (riga) {
       astaRef.current = { id: riga.id, giocatoreId: riga.giocatore_id }
+
+      // Chi e' in gara per questo giocatore. Sta qui e non nella callback dei
+      // rilanci perche' non cambia per tutta la durata dell'asta: i ritiri
+      // arrivano invece dentro `aste.abbandoni`, che viaggia gia' nel payload.
+      const { data: inGara } = await supabase
+        .from('liste_aste').select('squadra_id').eq('giocatore_id', riga.giocatore_id)
+      if (smontato.current) return
+
       setAsta({
         stato: riga.stato as 'CHIAMATA' | 'IN_CORSO',
         giocatore: riga.giocatori?.nome ?? 'un giocatore',
         prezzo: riga.prezzo_corrente,
         squadraInTesta: riga.squadra_in_testa,
         scadenza: riga.scadenza_corrente,
+        contendenti: (inGara ?? []).map((r: { squadra_id: string }) => r.squadra_id),
+        abbandoni: elencoAbbandoni(riga.abbandoni),
       })
       // Con un'asta aperta il «poi tocca a…» non si mostra: risparmia la
       // query e non c'è nessuno a cui interessi il turno successivo adesso.
@@ -268,6 +279,9 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
             // "campo assente" e la barra continuerebbe a nominare chi non c'è più.
             squadraInTesta: n.squadra_in_testa !== undefined ? n.squadra_in_testa : prec.squadraInTesta,
             scadenza: n.scadenza_corrente ?? null,
+            // Un ritiro e' un UPDATE su questa colonna: arriva di qui, senza
+            // una query in piu'. `contendenti` resta com'e', non cambia.
+            abbandoni: n.abbandoni !== undefined ? elencoAbbandoni(n.abbandoni) : prec.abbandoni,
           }))
           return
         }
@@ -322,12 +336,17 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
 
   return (
     <div className={`fm-stato fm-stato-${riga.tono}`}>
-      <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 sm:px-6 lg:px-8">
-        <span className="fm-stato-punto" aria-hidden="true" />
-        <Link href={riga.href} className="min-w-0 flex-1 truncate hover:underline">
+      <div className="mx-auto flex max-w-7xl items-center gap-2.5 px-3 sm:px-6 lg:px-8">
+        {/* L'etichetta di fase al posto del pallino: occupa lo stesso spazio e
+            porta un'informazione invece di una decorazione. */}
+        <span className="fm-stato-tag">{riga.etichetta}</span>
+        <Link href={riga.href} className="fm-stato-testo min-w-0 flex-1 truncate">
           {riga.testo}
-          {riga.scadenza && <ContoAllaRovescia scadenza={riga.scadenza} />}
         </Link>
+        {/* Il conto alla rovescia staccato dal testo e in fondo: appeso in coda
+            spariva sotto i puntini di sospensione proprio sugli schermi
+            stretti, cioe' dove serve di piu'. */}
+        {riga.scadenza && <ContoAllaRovescia scadenza={riga.scadenza} />}
         {riga.dettaglio.length > 0 && (
           <button
             type="button"
@@ -382,8 +401,8 @@ function ContoAllaRovescia({ scadenza }: { scadenza: string }) {
 
   if (restano === null) return null
   return (
-    <span className={`ml-1.5 font-bold tabular-nums ${restano <= 5 ? 'text-rosso' : ''}`}>
-      {restano}s
+    <span className={`fm-stato-tempo ${restano <= 5 ? 'animate-battito' : ''}`}>
+      {restano}<span className="opacity-60">s</span>
     </span>
   )
 }

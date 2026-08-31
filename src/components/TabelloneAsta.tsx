@@ -2,14 +2,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import RuoliGiocatore from '@/components/RuoliGiocatore'
-
-/**
- * `aste.abbandoni` è una colonna jsonb, quindi arriva tipizzata come Json.
- * Qui contiene sempre un array di id squadra, ma va ristretto esplicitamente.
- */
-function elencoAbbandoni(valore: unknown): string[] {
-  return Array.isArray(valore) ? valore.filter((v): v is string => typeof v === 'string') : []
-}
+// `elencoAbbandoni` era definita qui: e' passata in `utils/statoLega.ts` quando
+// e' servita anche alla riga di stato. Il corpo e' identico, spostato e non
+// riscritto.
+import { elencoAbbandoni } from '@/utils/statoLega'
 
 export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: string | null, isAdmin?: boolean }) {
   const supabase = createClient()

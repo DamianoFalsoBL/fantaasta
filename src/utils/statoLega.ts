@@ -34,6 +34,18 @@ export type TonoStato =
   /** È appena successo qualcosa. */
   | 'fatto'
 
+/**
+ * `aste.abbandoni` è una colonna jsonb, quindi arriva tipizzata come Json.
+ * Qui contiene sempre un array di id squadra, ma va ristretto esplicitamente.
+ *
+ * Stava dentro `TabelloneAsta`; è qui perché ora serve anche alla riga di
+ * stato, e due copie della stessa guardia sul tipo sono due posti dove
+ * correggere lo stesso difetto.
+ */
+export function elencoAbbandoni(valore: unknown): string[] {
+  return Array.isArray(valore) ? valore.filter((v): v is string => typeof v === 'string') : []
+}
+
 /** L'asta aperta in questo momento: solo CHIAMATA o IN_CORSO. */
 export type AstaCorrente = {
   stato: 'CHIAMATA' | 'IN_CORSO'
@@ -43,6 +55,10 @@ export type AstaCorrente = {
   squadraInTesta: string | null
   /** ISO, come arriva da Postgres. `null` finché l'admin non avvia il timer. */
   scadenza: string | null
+  /** Gli id delle squadre che hanno il giocatore in `liste_aste`: chi è in gara. */
+  contendenti: string[]
+  /** Gli id di chi si è ritirato, da `aste.abbandoni`. */
+  abbandoni: string[]
 }
 
 /**
@@ -91,6 +107,15 @@ export type FotoLega = {
 }
 
 export type RigaStato = {
+  /**
+   * La fase, in una parola sola e maiuscola: «TURNO», «IN ASTA», «BUSTE».
+   *
+   * Sta qui e non nel componente perche' e' un'informazione, non una
+   * decorazione: e' la parola che si legge con la coda dell'occhio da
+   * un'altra pagina, e deve corrispondere al ramo che l'ha prodotta. Decisa
+   * nel componente si scollerebbe dal testo al primo ramo aggiunto.
+   */
+  etichetta: string
   testo: string
   tono: TonoStato
   href: string
@@ -124,7 +149,7 @@ export function descriviStato(foto: FotoLega): RigaStato {
   if (annuncio) {
     if (annuncio.tipo === 'sorteggio') {
       return {
-        testo: 'Ordine di chiamata sorteggiato',
+        etichetta: 'SORTEGGIO', testo: 'Ordine di chiamata sorteggiato',
         tono: 'fatto',
         href: '/asta',
         dettaglio: ordineChiamata.map((id) => nome(id) ?? '—'),
@@ -133,7 +158,7 @@ export function descriviStato(foto: FotoLega): RigaStato {
     }
     if (annuncio.tipo === 'non-assegnato') {
       return {
-        testo: `${annuncio.giocatore}: asta chiusa senza assegnazione`,
+        etichetta: 'CHIUSA', testo: `${annuncio.giocatore}: asta chiusa senza assegnazione`,
         tono: 'fatto',
         href: '/asta',
         dettaglio: [],
@@ -142,6 +167,7 @@ export function descriviStato(foto: FotoLega): RigaStato {
     }
     const cr = `${annuncio.prezzo} ${plurale(annuncio.prezzo, 'credito', 'crediti')}`
     return {
+      etichetta: 'AGGIUDICATO',
       testo: annuncio.squadra
         ? `${annuncio.squadra} si aggiudica ${annuncio.giocatore} per ${cr}`
         : `${annuncio.giocatore} aggiudicato per ${cr}`,
@@ -157,16 +183,17 @@ export function descriviStato(foto: FotoLega): RigaStato {
   // nessuno, quindi qualunque cosa dicessimo sui turni sarebbe fuori tempo.
   if (faseBusteAperta) {
     if (miaSquadraId === null) {
-      return { testo: 'Fase buste aperta', tono: 'neutro', href: '/buste', dettaglio: [], scadenza: null }
+      return { etichetta: 'BUSTE', testo: 'Fase buste aperta', tono: 'neutro', href: '/buste', dettaglio: [], scadenza: null }
     }
     if (slotLiberi !== null && slotLiberi <= 0) {
-      return { testo: 'Buste aperte · la tua rosa è completa', tono: 'neutro', href: '/buste', dettaglio: [], scadenza: null }
+      return { etichetta: 'BUSTE', testo: 'Buste aperte · la tua rosa è completa', tono: 'neutro', href: '/buste', dettaglio: [], scadenza: null }
     }
     if (bustaConsegnata) {
-      return { testo: 'Buste aperte · hai consegnato · si attendono gli altri', tono: 'attesa', href: '/buste', dettaglio: [], scadenza: null }
+      return { etichetta: 'BUSTE', testo: 'Buste aperte · hai consegnato · si attendono gli altri', tono: 'attesa', href: '/buste', dettaglio: [], scadenza: null }
     }
     const quanti = slotLiberi ?? 0
     return {
+      etichetta: 'BUSTE',
       testo: quanti > 0
         ? `Buste aperte · devi consegnare ${quanti} ${plurale(quanti, 'giocatore', 'giocatori')}`
         : 'Buste aperte · devi consegnare la tua busta',
@@ -185,6 +212,7 @@ export function descriviStato(foto: FotoLega): RigaStato {
     if (asta.stato === 'CHIAMATA') {
       const chi = suo ? 'Hai' : inTesta ? `${inTesta} ha` : 'Qualcuno ha'
       return {
+        etichetta: 'PRENOTATA',
         testo: `${chi} prenotato ${asta.giocatore} · si attende l'avvio dell'admin`,
         tono: 'attesa',
         href: '/asta',
@@ -197,8 +225,24 @@ export function descriviStato(foto: FotoLega): RigaStato {
     // admin non preme «Chiudi asta e assegna». È uno stato che dura, e senza
     // questo ramo la barra continuerebbe a mostrare un timer fermo a zero.
     const scaduta = asta.scadenza !== null && new Date(asta.scadenza).getTime() <= adesso
-    if (scaduta) {
+
+    /*
+     * L'altro modo in cui un'asta finisce prima del tempo: **sono rimasti in
+     * uno**. Criterio ripreso alla lettera da `isSoloLeft` in
+     * `TabelloneAsta.tsx` — chi non ha abbandonato è al massimo uno, e in gara
+     * c'era più di una squadra.
+     *
+     * Serviva davvero: in un'asta a due, appena uno si ritirava la fascia
+     * continuava a contare i secondi mentre il tabellone diceva già «asta
+     * finita». Il `> 1` non è pignoleria: con un solo contendente il conto
+     * darebbe sempre «finita» dall'istante zero.
+     */
+    const attivi = asta.contendenti.filter((id) => !asta.abbandoni.includes(id)).length
+    const soloRimasto = attivi <= 1 && asta.contendenti.length > 1
+
+    if (scaduta || soloRimasto) {
       return {
+        etichetta: 'FINITA',
         testo: inTesta
           ? `Asta finita: ${asta.giocatore} a ${inTesta} per ${asta.prezzo} cr · l'admin deve assegnare`
           : `Asta finita: ${asta.giocatore} · l'admin deve assegnare`,
@@ -210,6 +254,7 @@ export function descriviStato(foto: FotoLega): RigaStato {
     }
 
     return {
+      etichetta: 'IN ASTA',
       testo: inTesta
         ? `${asta.giocatore} in asta · ${asta.prezzo} cr · ${inTesta}`
         : `${asta.giocatore} in asta · ${asta.prezzo} cr`,
@@ -224,14 +269,14 @@ export function descriviStato(foto: FotoLega): RigaStato {
 
   // ------------------------------------------------------ TURNI DI CHIAMATA
   if (ordineChiamata.length === 0) {
-    return { testo: 'Ordine di chiamata da sorteggiare', tono: 'attesa', href: '/asta', dettaglio: [], scadenza: null }
+    return { etichetta: 'ORDINE', testo: 'Ordine di chiamata da sorteggiare', tono: 'attesa', href: '/asta', dettaglio: [], scadenza: null }
   }
 
   // Nessuno ha più giocatori liberi da chiamare: l'asta a chiamata è finita.
   // `avanza_turno_chiamata()` non svuota l'ordine, quindi senza questo la barra
   // continuerebbe a indicare il turno di qualcuno per sempre.
   if (squadreAttive !== null && squadreAttive.size === 0) {
-    return { testo: 'Aste a chiamata concluse', tono: 'neutro', href: '/aste', dettaglio: [], scadenza: null }
+    return { etichetta: 'FINE', testo: 'Aste a chiamata concluse', tono: 'neutro', href: '/aste', dettaglio: [], scadenza: null }
   }
 
   // L'indice è 1-based a database. Fuori scala non è un caso teorico: basta
@@ -241,11 +286,11 @@ export function descriviStato(foto: FotoLega): RigaStato {
   const dettaglio = ordineChiamata.map((id) => nome(id) ?? '—')
 
   if (!idTurno) {
-    return { testo: 'Aste a chiamata in corso', tono: 'neutro', href: '/asta', dettaglio, scadenza: null }
+    return { etichetta: 'ASTE', testo: 'Aste a chiamata in corso', tono: 'neutro', href: '/asta', dettaglio, scadenza: null }
   }
 
   if (idTurno === miaSquadraId) {
-    return { testo: 'Tocca a te: scegli chi chiamare', tono: 'azione', href: '/asta', dettaglio, scadenza: null }
+    return { etichetta: 'TOCCA A TE', testo: 'Tocca a te: scegli chi chiamare', tono: 'azione', href: '/asta', dettaglio, scadenza: null }
   }
 
   const testoTurno = nomeTurno ? `Tocca a ${nomeTurno}` : "Tocca a un'altra squadra"
@@ -253,6 +298,7 @@ export function descriviStato(foto: FotoLega): RigaStato {
   const nomeDopo = dopo !== null ? nome(dopo) : null
 
   return {
+    etichetta: 'TURNO',
     testo: nomeDopo ? `${testoTurno} · poi ${nomeDopo}` : testoTurno,
     tono: 'neutro',
     href: '/asta',

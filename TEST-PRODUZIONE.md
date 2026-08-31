@@ -1458,6 +1458,14 @@ la funzione non serve a niente e il test è fallito.
   **Atteso:** prezzo e nome in testa cambiano **subito**, e il timer riparte.
 - [ ] Lascia scadere il tempo senza chiudere.
   **Atteso:** «Asta finita: … · l'admin deve assegnare», ambra, timer sparito.
+- [ ] **In un'asta a due, fai ritirare uno dei due** con il tempo ancora
+  abbondante. *(Difetto trovato in collaudo il 31 agosto: la fascia diceva già
+  «asta finita» ma continuava a contare i secondi.)*
+  **Atteso:** l'etichetta passa a **FINITA** e **la pastiglia dei secondi
+  sparisce**, senza ricaricare.
+- [ ] In un'asta **a tre**, fanne ritirare **uno solo**.
+  **Atteso:** l'asta continua, etichetta **IN ASTA** e secondi che scorrono. È
+  il caso che distingue «ne resta uno» da «qualcuno si è ritirato».
 - [ ] L'admin chiude e assegna.
   **Atteso:** per una ventina di secondi «*squadra* si aggiudica *giocatore*
   per *N* crediti», ciano; poi la riga torna da sé a «Tocca a …» con il turno

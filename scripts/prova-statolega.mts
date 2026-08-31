@@ -53,16 +53,16 @@ const casi: [string, Partial<FotoLega>, string][] = [
 
   // --- asta
   ['prenotata da altri',
-    { asta: { stato: 'CHIAMATA', giocatore: 'Bijlow', prezzo: 8, squadraInTesta: INTER, scadenza: null } },
+    { asta: { stato: 'CHIAMATA', giocatore: 'Bijlow', prezzo: 8, squadraInTesta: INTER, scadenza: null, contendenti: [INTER, AMS], abbandoni: [] } },
     "FC Internazionale ha prenotato Bijlow · si attende l'avvio dell'admin"],
   ['prenotata da me',
-    { asta: { stato: 'CHIAMATA', giocatore: 'Bijlow', prezzo: 8, squadraInTesta: AMS, scadenza: null } },
+    { asta: { stato: 'CHIAMATA', giocatore: 'Bijlow', prezzo: 8, squadraInTesta: AMS, scadenza: null, contendenti: [INTER, AMS], abbandoni: [] } },
     "Hai prenotato Bijlow · si attende l'avvio dell'admin"],
   ['in corso',
-    { asta: { stato: 'IN_CORSO', giocatore: 'Bijlow', prezzo: 12, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString() } },
+    { asta: { stato: 'IN_CORSO', giocatore: 'Bijlow', prezzo: 12, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString(), contendenti: [INTER, AMS], abbandoni: [] } },
     'Bijlow in asta · 12 cr · FC Internazionale'],
   ['scaduta, da assegnare',
-    { asta: { stato: 'IN_CORSO', giocatore: 'Bijlow', prezzo: 12, squadraInTesta: INTER, scadenza: new Date(T0 - 1000).toISOString() } },
+    { asta: { stato: 'IN_CORSO', giocatore: 'Bijlow', prezzo: 12, squadraInTesta: INTER, scadenza: new Date(T0 - 1000).toISOString(), contendenti: [INTER, AMS], abbandoni: [] } },
     "Asta finita: Bijlow a FC Internazionale per 12 cr · l'admin deve assegnare"],
 
   // --- turni
@@ -76,6 +76,26 @@ const casi: [string, Partial<FotoLega>, string][] = [
   ['il poi torna in cima', { indiceChiamata: 3, squadreAttive: new Set([INTER, JUVE]) }, 'Tocca a Juventus · poi FC Internazionale'],
   ['nessuno ha più da chiamare', { squadreAttive: new Set() }, 'Aste a chiamata concluse'],
 
+  // --- il ritiro chiude l'asta prima del tempo (asta a due)
+  ["a due, uno si ritira: finita anche col tempo ancora dentro",
+    { asta: { stato: 'IN_CORSO', giocatore: 'Couto', prezzo: 8, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString(), contendenti: [INTER, AMS], abbandoni: [AMS] } },
+    "Asta finita: Couto a FC Internazionale per 8 cr · l'admin deve assegnare"],
+  ['a tre, uno si ritira: si continua',
+    { asta: { stato: 'IN_CORSO', giocatore: 'Couto', prezzo: 8, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString(), contendenti: [INTER, AMS, JUVE], abbandoni: [AMS] } },
+    'Couto in asta · 8 cr · FC Internazionale'],
+  ['a tre, due si ritirano: finita',
+    { asta: { stato: 'IN_CORSO', giocatore: 'Couto', prezzo: 8, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString(), contendenti: [INTER, AMS, JUVE], abbandoni: [AMS, JUVE] } },
+    "Asta finita: Couto a FC Internazionale per 8 cr · l'admin deve assegnare"],
+  ['un solo contendente: mai finita dallo scatto iniziale',
+    { asta: { stato: 'IN_CORSO', giocatore: 'Couto', prezzo: 8, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString(), contendenti: [INTER], abbandoni: [] } },
+    'Couto in asta · 8 cr · FC Internazionale'],
+  ['un abbandono di chi non era in gara non conta',
+    { asta: { stato: 'IN_CORSO', giocatore: 'Couto', prezzo: 8, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString(), contendenti: [INTER, AMS], abbandoni: [JUVE] } },
+    'Couto in asta · 8 cr · FC Internazionale'],
+  ['prenotata: il ritiro non la chiude',
+    { asta: { stato: 'CHIAMATA', giocatore: 'Couto', prezzo: 8, squadraInTesta: INTER, scadenza: null, contendenti: [INTER, AMS], abbandoni: [AMS] } },
+    "FC Internazionale ha prenotato Couto · si attende l'avvio dell'admin"],
+
   // --- casi limite: nessuno deve produrre "undefined"
   ['indice fuori scala', { indiceChiamata: 9 }, 'Aste a chiamata in corso'],
   ['indice zero', { indiceChiamata: 0 }, 'Aste a chiamata in corso'],
@@ -83,7 +103,7 @@ const casi: [string, Partial<FotoLega>, string][] = [
     { nomiSquadre: { [AMS]: 'Amsterdamsche FCA' }, squadreAttive: null },
     "Tocca a un'altra squadra"],
   ['squadra in testa senza nome in mappa',
-    { nomiSquadre: {}, asta: { stato: 'IN_CORSO', giocatore: 'Bijlow', prezzo: 12, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString() } },
+    { nomiSquadre: {}, asta: { stato: 'IN_CORSO', giocatore: 'Bijlow', prezzo: 12, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString(), contendenti: [INTER, AMS], abbandoni: [] } },
     'Bijlow in asta · 12 cr'],
   ['ordine con una sola squadra: niente poi', { ordineChiamata: [INTER] }, 'Tocca a FC Internazionale'],
 ]
@@ -107,12 +127,28 @@ if (sospetti.length > 0) {
   for (const [t, r] of sospetti) console.log(`  ${t}: ${r.testo} | ${r.dettaglio.join(', ')}`)
 }
 
+// Ogni ramo deve avere un'etichetta di fase: e' la parola che si legge con la
+// coda dell'occhio, e una vuota lascerebbe un riquadro vuoto in barra.
+const senzaEtichetta = casi
+  .map(([t, m]) => [t, descriviStato({ ...base, ...m })] as const)
+  .filter(([, r]) => !r.etichetta || r.etichetta.trim() === '' || r.etichetta.length > 12)
+if (senzaEtichetta.length > 0) {
+  falliti += senzaEtichetta.length
+  console.log('\nETICHETTE MANCANTI O TROPPO LUNGHE:')
+  for (const [t, r] of senzaEtichetta) console.log(`  ${t}: "${r.etichetta}"`)
+}
+console.log('\netichette in uso: ' + [...new Set(casi.map(([, m]) => descriviStato({ ...base, ...m }).etichetta))].join(', '))
+
 // Il countdown va appeso solo con l'asta viva.
-const viva = descriviStato({ ...base, asta: { stato: 'IN_CORSO', giocatore: 'B', prezzo: 1, squadraInTesta: INTER, scadenza: new Date(T0 + 5000).toISOString() } })
-const ferma = descriviStato({ ...base, asta: { stato: 'CHIAMATA', giocatore: 'B', prezzo: 1, squadraInTesta: INTER, scadenza: null } })
-const scaduta = descriviStato({ ...base, asta: { stato: 'IN_CORSO', giocatore: 'B', prezzo: 1, squadraInTesta: INTER, scadenza: new Date(T0 - 1).toISOString() } })
-console.log(`\nscadenza esposta: viva=${viva.scadenza !== null} prenotata=${ferma.scadenza !== null} scaduta=${scaduta.scadenza !== null}  (atteso true/false/false)`)
-if (viva.scadenza === null || ferma.scadenza !== null || scaduta.scadenza !== null) falliti++
+const viva = descriviStato({ ...base, asta: { stato: 'IN_CORSO', giocatore: 'B', prezzo: 1, squadraInTesta: INTER, scadenza: new Date(T0 + 5000).toISOString(), contendenti: [INTER, AMS], abbandoni: [] } })
+const ferma = descriviStato({ ...base, asta: { stato: 'CHIAMATA', giocatore: 'B', prezzo: 1, squadraInTesta: INTER, scadenza: null, contendenti: [INTER, AMS], abbandoni: [] } })
+const scaduta = descriviStato({ ...base, asta: { stato: 'IN_CORSO', giocatore: 'B', prezzo: 1, squadraInTesta: INTER, scadenza: new Date(T0 - 1).toISOString(), contendenti: [INTER, AMS], abbandoni: [] } })
+// Il caso segnalato dall'utente: a due, uno si ritira. Il testo dice già «asta
+// finita», ma se `scadenza` restasse valorizzata il componente continuerebbe ad
+// appendere i secondi sotto quella frase — che è esattamente il difetto visto.
+const ritirato = descriviStato({ ...base, asta: { stato: 'IN_CORSO', giocatore: 'B', prezzo: 1, squadraInTesta: INTER, scadenza: new Date(T0 + 60000).toISOString(), contendenti: [INTER, AMS], abbandoni: [AMS] } })
+console.log(`\nscadenza esposta: viva=${viva.scadenza !== null} prenotata=${ferma.scadenza !== null} scaduta=${scaduta.scadenza !== null} ritirati=${ritirato.scadenza !== null}  (atteso true/false/false/false)`)
+if (viva.scadenza === null || ferma.scadenza !== null || scaduta.scadenza !== null || ritirato.scadenza !== null) falliti++
 
 console.log(`\n${casi.length} casi, ${falliti} falliti`)
 process.exit(falliti > 0 ? 1 : 0)

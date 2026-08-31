@@ -262,21 +262,22 @@ che si porta dietro un difetto proprio dove costa di più.
 Se un giorno si accorpa: `descriviStato()` andrebbe estesa con una modalità
 "estesa", non copiata.
 
-### La barra non sa che si sono ritirati tutti
+### La barra sa dei ritiri, ma non li vede tutti allo stesso modo
 
-`descriviStato()` decide che l'asta è finita solo guardando l'orologio. Il caso
-«si sono ritirati tutti gli altri» — in `TabelloneAsta.tsx` è `isSoloLeft`,
-righe 254-258 — richiede l'elenco dei partecipanti e dei loro abbandoni, cioè
-due query in più a ogni evento su **ogni pagina del sito**.
+**Risolto il 31 agosto, e piu' a buon mercato del previsto.** La voce diceva che
+`isSoloLeft` costava due query a ogni evento su ogni pagina. Non era vero: gli
+abbandoni stanno gia' in `aste.abbandoni`, che **viaggia nel payload realtime**,
+e i contendenti si leggono una volta sola quando cambia il giocatore in asta,
+non a ogni rilancio. Il criterio in `descriviStato()` e' copiato alla lettera da
+`TabelloneAsta.isSoloLeft`.
 
-Conseguenza: con un ritiro totale la barra continua a dire «in asta» fino allo
-scadere del timer, mentre `/asta` dice già «asta finita». Non è una bugia — il
-timer sta davvero ancora correndo — ma è meno informativo.
+Quel che resta scoperto: se qualcuno si ritira **mentre il tempo reale non
+consegna**, la fascia se ne accorge al giro del salvagente (30 secondi) invece
+che subito. Non e' un caso da inseguire: e' lo stesso ritardo di tutto il resto.
 
-**Scorciatoia sbagliata:** aggiungere le due query dentro `RigaStato.leggi()`.
-Girerebbero a ogni rilancio per ogni manager collegato. Se un giorno serve, il
-posto giusto è far scrivere a `abbandona_asta` un contatore sulla riga di
-`aste`, che viaggia già nel payload realtime.
+**Scorciatoia sbagliata:** rileggere i contendenti nella callback dei rilanci.
+`liste_aste` per quel giocatore non cambia durante l'asta, e ci si ritroverebbe
+una query per ogni offerta moltiplicata per i manager collegati.
 
 ### L'annuncio non sopravvive a un ricaricamento
 
@@ -295,6 +296,7 @@ soppesata e scartata il 31 agosto: non valeva quel rischio per un annuncio.
 
 | Quando | Cosa |
 |---|---|
+| 31 ago 2026 | La fascia non conta piu' i secondi dopo un ritiro, e ha un'etichetta di fase |
 | 31 ago 2026 | La riga di stato: una fascia sotto la barra dice sempre a che punto siamo |
 | 29 ago 2026 | La busta deve contenere i portieri che mancano, e non lo controllava nessuno |
 | 29 ago 2026 | La colonna *Buste* dice sì o no, e le intestazioni seguono le colonne |
