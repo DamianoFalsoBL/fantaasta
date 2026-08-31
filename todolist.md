@@ -281,7 +281,7 @@ una query per ogni offerta moltiplicata per i manager collegati.
 
 ### L'annuncio non sopravvive a un ricaricamento
 
-Voluto: «X si aggiudica Y per N crediti» vive venti secondi in memoria del
+Voluto: «X si aggiudica Y per N crediti» vive dieci secondi in memoria del
 browser, non a database. Chi ricarica proprio in quell'istante non lo vede, e
 lo storico sta già in `/aste`.
 

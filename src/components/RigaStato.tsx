@@ -11,7 +11,7 @@ import { descriviStato, elencoAbbandoni, type AstaCorrente, type Annuncio } from
  *
  * Le frasi le compone `descriviStato()` in `utils/statoLega.ts`, che è pura e
  * provata: qui dentro c'è solo il mestiere sporco — leggere, stare in ascolto,
- * e tenere acceso l'annuncio per una ventina di secondi.
+ * e tenere acceso l'annuncio per una decina di secondi.
  *
  * **Canale proprio, non quello della NavBar.** Il piano era di appendersi al
  * canale `navbar-…`, ma condividerlo significa che un binding sbagliato
@@ -23,8 +23,17 @@ import { descriviStato, elencoAbbandoni, type AstaCorrente, type Annuncio } from
  * comunque su una sola connessione WebSocket, quindi non se ne paga una in più.
  */
 
-/** Quanto resta acceso un annuncio prima di lasciare il posto allo stato. */
-const DURATA_ANNUNCIO = 20_000
+/**
+ * Quanto resta acceso un annuncio prima di lasciare il posto allo stato.
+ *
+ * Dieci secondi e non venti: `chiudi_asta` assegna il giocatore e fa avanzare
+ * il turno nello stesso istante, quindi **finché l'annuncio è acceso la fascia
+ * non dice di chi è il turno**. Ogni secondo in più qui è un secondo in cui
+ * chi deve chiamare legge chi ha vinto l'asta precedente invece di «Tocca a
+ * te», e l'attesa fra una chiamata e l'altra è il motivo per cui questa riga
+ * esiste. Dieci bastano a leggere una frase; venti si sentivano.
+ */
+const DURATA_ANNUNCIO = 10_000
 
 type Props = {
   /** `null` per il super admin, che non ha squadra. */

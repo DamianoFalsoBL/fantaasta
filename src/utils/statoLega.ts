@@ -62,8 +62,8 @@ export type AstaCorrente = {
 }
 
 /**
- * Un fatto appena avvenuto, che il componente tiene acceso una ventina di
- * secondi.
+ * Un fatto appena avvenuto, che il componente tiene acceso per pochi secondi
+ * (`DURATA_ANNUNCIO` in `RigaStato.tsx`).
  *
  * Serve perché **l'aggiudicazione non è uno stato**: `chiudi_asta` assegna il
  * giocatore e nello stesso istante fa avanzare il turno, quindi una riga che

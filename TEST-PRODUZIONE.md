@@ -1435,7 +1435,7 @@ la funzione non serve a niente e il test è fallito.
 - [ ] Da admin, in *Regia Aste*, con l'ordine non ancora sorteggiato.
   **Atteso:** «Ordine di chiamata da sorteggiare».
 - [ ] Sorteggia l'ordine, **guardando la fascia da un'altra scheda già aperta**.
-  **Atteso:** per una ventina di secondi «Ordine di chiamata sorteggiato», poi
+  **Atteso:** per una decina di secondi «Ordine di chiamata sorteggiato», poi
   da sé passa a «Tocca a …». Nessun ricaricamento.
 - [ ] Tocca la freccia a destra della riga.
   **Atteso:** si apre l'ordine completo, numerato, con quello di turno
@@ -1467,7 +1467,7 @@ la funzione non serve a niente e il test è fallito.
   **Atteso:** l'asta continua, etichetta **IN ASTA** e secondi che scorrono. È
   il caso che distingue «ne resta uno» da «qualcuno si è ritirato».
 - [ ] L'admin chiude e assegna.
-  **Atteso:** per una ventina di secondi «*squadra* si aggiudica *giocatore*
+  **Atteso:** per una decina di secondi «*squadra* si aggiudica *giocatore*
   per *N* crediti», ciano; poi la riga torna da sé a «Tocca a …» con il turno
   già avanzato.
 
