@@ -30,5 +30,6 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "//exclude": "Gli script di prova si lanciano a mano con `node --experimental-strip-types`, che pretende l'estensione .ts negli import relativi mentre il build la rifiuta (TS5097). Restano fuori dal typecheck dell'app: non finiscono nel bundle e non ne condizionano le regole.",
+  "exclude": ["node_modules", "scripts/prova-*.mts"]
 }

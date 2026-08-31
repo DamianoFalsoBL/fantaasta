@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import type { RealtimeChannel, User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import Marchio from '@/components/Marchio'
+import RigaStato from '@/components/RigaStato'
 import { isAdminRole, isSuperAdminRole } from '@/utils/auth-shared'
 import { trasferimentiAttivi } from '@/utils/trasferimenti'
 
@@ -380,20 +381,33 @@ export default function NavBar() {
         </div>
       </div>
 
-      {/* ---------- Striscia metriche, sempre visibile su mobile ----------
-          Prima era `hidden sm:flex`: il budget residuo spariva proprio sul
-          dispositivo con cui si segue l'asta. */}
-      {metriche && (
-        <div className="flex items-center justify-around gap-2 border-t border-line bg-panel px-3 py-1.5 md:hidden">
-          {metriche}
-        </div>
-      )}
+      {/* ---------- «A che punto siamo» ----------
+          Prende il posto che fino alla v1.24 era della striscia metriche.
+
+          Quella striscia era nata perché il budget residuo spariva proprio sul
+          dispositivo con cui si segue l'asta, e la ragione resta valida: le
+          metriche non sono state buttate via, sono passate in cima al pannello
+          ☰ qui sotto. A pesarle sullo stesso spazio, però, «tocca a te» e «X in
+          asta a 12 cr» servono più spesso di tre numeri che cambiano solo
+          quando si vince qualcosa — e sono l'unica risposta alla domanda che
+          all'asta gira a voce, «a che punto siamo?». */}
+      <RigaStato squadraId={squadraId} slotLiberi={budgetInfo?.slotLiberi ?? null} />
 
       {/* ---------- Pannello mobile ----------
           In flusso e non sovrapposto: la nav non è sticky, quindi non servono
           z-index, blocco dello scroll né trappola del focus. */}
       {menuAperto && (
         <div id="menu-mobile" className="border-t border-line-hi bg-panel md:hidden">
+          {/* Le metriche aprono il pannello invece di stare sempre in vista:
+              sotto la barra ora c'è la riga di stato, e due strisce fisse
+              mangerebbero un terzo dello schermo di un telefono prima ancora
+              del contenuto. */}
+          {metriche && (
+            <div className="flex items-center justify-around gap-2 border-b border-line bg-panel-hi px-3 py-2">
+              {metriche}
+            </div>
+          )}
+
           {vociUtente.map(voceMobile)}
 
           {vociAdmin.length > 0 && (

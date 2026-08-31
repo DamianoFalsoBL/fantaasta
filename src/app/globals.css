@@ -510,6 +510,62 @@
   .fm-alert-warn   { background: #2e2405; border-color: #6b530b; color: var(--color-ambra); }
   .fm-alert-danger { background: #2e0e11; border-color: #7a2830; color: var(--color-rosso); }
 
+  /* ------------------------------------------------------------ RIGA STATO
+     La fascia sotto la barra che dice «a che punto siamo».
+
+     Una riga sola e mai a capo: su mobile prende il posto della striscia di
+     budget/extra/slot, e se andasse a capo la navigazione crescerebbe sotto il
+     dito proprio mentre l'asta corre. Il troncamento con i puntini lo fa la
+     utility `truncate` sul link, che ha bisogno del `min-width: 0` accanto.
+
+     Il tono non è decorativo: distingue «devi fare qualcosa» da «stai
+     guardando», che è la sola cosa che si legge davvero con la coda
+     dell'occhio mentre si sta su un'altra pagina. */
+  .fm-stato {
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-panel);
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    color: var(--color-ink-mid);
+  }
+  /* Il contenuto della riga: l'altezza la fissa il padding, non un'altezza
+     esplicita, così l'elenco dell'ordine può aprirsi sotto senza forzature. */
+  .fm-stato > div:first-child { min-height: 2rem; }
+
+  /* Il pallino a sinistra. Porta il colore del tono, e il colore non è mai
+     l'unico segnale: il testo dice già tutto da sé, questo serve solo a
+     ritrovare la riga con lo sguardo. */
+  .fm-stato-punto {
+    flex: none;
+    width: .4rem;
+    height: .4rem;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: .8;
+  }
+
+  .fm-stato-neutro { color: var(--color-ink-mid); }
+  .fm-stato-attesa { color: var(--color-ambra);  background: #241c05; border-color: #5a460a; }
+  .fm-stato-azione { color: var(--color-neon);   background: var(--color-neon-deep); border-color: #0a6b3c; }
+  .fm-stato-fatto  { color: var(--color-ciano);  background: #06232c; border-color: #0b5c73; }
+  /* L'asta viva pulsa piano: è l'unico stato in cui il tempo scorre e in cui
+     restare fermi costa qualcosa. `animate-battito` esiste già ma è molto più
+     marcato — lì serve a far alzare gli occhi negli ultimi 5 secondi, qui
+     darebbe fastidio per minuti interi su ogni pagina del sito. */
+  .fm-stato-vivo   { color: var(--color-rosso);  background: #2a0d10; border-color: #7a2830; }
+  .fm-stato-vivo .fm-stato-punto { animation: fm-pulsa 1.6s ease-in-out infinite; }
+
+  @keyframes fm-pulsa {
+    0%, 100% { opacity: .35; }
+    50%      { opacity: 1; }
+  }
+  /* Chi ha chiesto meno animazioni non deve vedere un pallino che lampeggia
+     per tutta la durata di un'asta. */
+  @media (prefers-reduced-motion: reduce) {
+    .fm-stato-vivo .fm-stato-punto { animation: none; opacity: 1; }
+  }
+
 
   /* =========================================================================
      TABELLE

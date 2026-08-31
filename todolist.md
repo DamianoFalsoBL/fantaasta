@@ -243,10 +243,59 @@ tornata.
 
 ---
 
+## La riga di stato
+
+### Il tabellone e la regia ricalcolano le stesse frasi della barra
+
+`src/utils/statoLega.ts` (v1.25) compone in un posto solo le frasi che dicono
+«a che punto siamo». `src/components/TabelloneAsta.tsx` e
+`src/app/admin/asta/page.tsx` continuano a ricalcolare le proprie, sparse in
+una decina di punti e già oggi duplicate fra loro: «Tocca a X», «Prenotato»,
+«In attesa che l'admin avvii il timer», «Asta finita: il tempo è scaduto».
+
+**Non è stato accorpato subito di proposito**, ed è la ragione da non
+dimenticare: la barra *riassume* e il tabellone *dettaglia*, quindi i testi
+sono legittimamente diversi. Finché restano diversi la duplicazione non mente,
+e riscrivere due componenti vivi durante un'asta in corso è il tipo di lavoro
+che si porta dietro un difetto proprio dove costa di più.
+
+Se un giorno si accorpa: `descriviStato()` andrebbe estesa con una modalità
+"estesa", non copiata.
+
+### La barra non sa che si sono ritirati tutti
+
+`descriviStato()` decide che l'asta è finita solo guardando l'orologio. Il caso
+«si sono ritirati tutti gli altri» — in `TabelloneAsta.tsx` è `isSoloLeft`,
+righe 254-258 — richiede l'elenco dei partecipanti e dei loro abbandoni, cioè
+due query in più a ogni evento su **ogni pagina del sito**.
+
+Conseguenza: con un ritiro totale la barra continua a dire «in asta» fino allo
+scadere del timer, mentre `/asta` dice già «asta finita». Non è una bugia — il
+timer sta davvero ancora correndo — ma è meno informativo.
+
+**Scorciatoia sbagliata:** aggiungere le due query dentro `RigaStato.leggi()`.
+Girerebbero a ogni rilancio per ogni manager collegato. Se un giorno serve, il
+posto giusto è far scrivere a `abbandona_asta` un contatore sulla riga di
+`aste`, che viaggia già nel payload realtime.
+
+### L'annuncio non sopravvive a un ricaricamento
+
+Voluto: «X si aggiudica Y per N crediti» vive venti secondi in memoria del
+browser, non a database. Chi ricarica proprio in quell'istante non lo vede, e
+lo storico sta già in `/aste`.
+
+Se un giorno lo si vuole persistente, la strada è una tabella `eventi_asta`
+scritta dalle funzioni SQL — costo: una migration, RLS, GRANT, e cinque o sei
+`SECURITY DEFINER` da ritoccare **ricopiandone il corpo alla lettera**. È stata
+soppesata e scartata il 31 agosto: non valeva quel rischio per un annuncio.
+
+---
+
 ## Fatto di recente
 
 | Quando | Cosa |
 |---|---|
+| 31 ago 2026 | La riga di stato: una fascia sotto la barra dice sempre a che punto siamo |
 | 29 ago 2026 | La busta deve contenere i portieri che mancano, e non lo controllava nessuno |
 | 29 ago 2026 | La colonna *Buste* dice sì o no, e le intestazioni seguono le colonne |
 | 29 ago 2026 | La bozza non si rileggeva: la cancellava l'effetto che la salva |

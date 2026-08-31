@@ -1411,6 +1411,94 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 
 ---
 
+## Blocco L — La riga di stato
+
+La fascia sotto la barra, introdotta in v1.25. Le frasi le compone
+`descriviStato()` in `src/utils/statoLega.ts`, che è già provata a parte su 27
+casi: **qui si verifica che il dato arrivi e si aggiorni da sé**, non che le
+frasi siano scritte bene.
+
+Il modo giusto di provarla è **da un'altra pagina**: tieni aperta
+`/svincolati` e non ricaricarla mai. Se devi ricaricare per vedere il cambio,
+la funzione non serve a niente e il test è fallito.
+
+### L1 · Si vede dappertutto
+- [ ] Entra come manager e passa da `/asta`, `/svincolati`, `/rose`,
+  `/mia-rosa`, `/buste`.
+  **Atteso:** la fascia è sotto la barra su ogni pagina, sempre alta uguale,
+  una riga sola.
+- [ ] Da telefono, guarda la barra.
+  **Atteso:** budget/extra/slot **non** sono più sotto la barra; si trovano in
+  cima al menu ☰. Al loro posto c'è la riga di stato.
+
+### L2 · I turni di chiamata
+- [ ] Da admin, in *Regia Aste*, con l'ordine non ancora sorteggiato.
+  **Atteso:** «Ordine di chiamata da sorteggiare».
+- [ ] Sorteggia l'ordine, **guardando la fascia da un'altra scheda già aperta**.
+  **Atteso:** per una ventina di secondi «Ordine di chiamata sorteggiato», poi
+  da sé passa a «Tocca a …». Nessun ricaricamento.
+- [ ] Tocca la freccia a destra della riga.
+  **Atteso:** si apre l'ordine completo, numerato, con quello di turno
+  evidenziato.
+- [ ] Guarda la riga dal manager **di turno** e da uno che non lo è.
+  **Atteso:** al primo «Tocca a te: scegli chi chiamare» (verde), al secondo
+  «Tocca a *nome* · poi *nome*».
+- [ ] **Il «poi» dice il vero.** Confronta con l'ordine aperto: il nome dopo
+  «poi» deve **saltare** chi ha la rosa piena o non ha più giocatori liberi in
+  lista, esattamente come fa il turno quando avanza davvero.
+
+### L3 · Il giro di un'asta, senza mai ricaricare
+- [ ] Il manager di turno prenota un giocatore.
+  **Atteso:** «*nome squadra* ha prenotato *giocatore* · si attende l'avvio
+  dell'admin», ambra. Chi ha prenotato legge «Hai prenotato…».
+- [ ] L'admin avvia il timer.
+  **Atteso:** la riga diventa rossa, «*giocatore* in asta · *N* cr · *squadra*»
+  e **compaiono i secondi che scorrono**.
+- [ ] Un altro manager rilancia.
+  **Atteso:** prezzo e nome in testa cambiano **subito**, e il timer riparte.
+- [ ] Lascia scadere il tempo senza chiudere.
+  **Atteso:** «Asta finita: … · l'admin deve assegnare», ambra, timer sparito.
+- [ ] L'admin chiude e assegna.
+  **Atteso:** per una ventina di secondi «*squadra* si aggiudica *giocatore*
+  per *N* crediti», ciano; poi la riga torna da sé a «Tocca a …» con il turno
+  già avanzato.
+
+### L4 · La fase buste
+- [ ] L'admin apre le buste.
+  **Atteso:** «Buste aperte · devi consegnare *N* giocatori», verde, e la riga
+  porta a `/buste`. Il numero deve combaciare con gli slot liberi.
+- [ ] Consegna la busta.
+  **Atteso:** «Buste aperte · hai consegnato · si attendono gli altri», ambra.
+- [ ] Da una squadra con la rosa piena.
+  **Atteso:** «Buste aperte · la tua rosa è completa», e nessun invito a fare
+  qualcosa che non si può fare.
+
+### L5 · I casi in cui potrebbe mentire
+- [ ] Entra come **super admin** (che non ha squadra) e guarda la riga in ogni
+  fase.
+  **Atteso:** non compare **mai** un «Tocca a te» né un «devi consegnare»: chi
+  non gioca non deve leggere frasi in seconda persona.
+- [ ] Chiudi un'asta su un giocatore per una squadra che nel frattempo ha
+  **la rosa o il ruolo pieni**, se capita.
+  **Atteso:** «*giocatore*: asta chiusa senza assegnazione». **Mai** un
+  vincitore inventato: `chiudi_asta` in quel caso chiude senza assegnare.
+- [ ] Quando nessuno ha più giocatori liberi in lista.
+  **Atteso:** «Aste a chiamata concluse», non un turno che gira a vuoto.
+- [ ] In nessuna condizione la riga deve contenere «undefined», «null» o un
+  nome vuoto.
+
+### L6 · Se il tempo reale cade
+- [ ] Spegni la rete per una decina di secondi, poi riaccendila, senza
+  ricaricare.
+  **Atteso:** entro mezzo minuto la riga si riallinea da sé (c'è un salvagente
+  ogni 30 secondi).
+- [ ] Con la fascia in funzione, controlla che **budget ed extra continuino ad
+  aggiornarsi** vincendo un'asta.
+  **Atteso:** sì. La riga ha un canale suo proprio: se si rompesse quello, la
+  barra deve restare viva.
+
+---
+
 ## Cose già note, da non segnalare come nuove
 
 | Cosa | Stato |
