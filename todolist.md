@@ -290,12 +290,34 @@ scritta dalle funzioni SQL — costo: una migration, RLS, GRANT, e cinque o sei
 `SECURITY DEFINER` da ritoccare **ricopiandone il corpo alla lettera**. È stata
 soppesata e scartata il 31 agosto: non valeva quel rischio per un annuncio.
 
+### «Collegata» vuol dire scheda aperta, non manager presente
+
+Il pallino in *Budget e Fasi* (v1.26) usa Supabase Presence: dice che quel
+browser ha il sito aperto. Una scheda dimenticata aperta sul telefono in tasca
+risulta collegata, e chi ha chiuso il portatile senza uscire sparisce solo dopo
+qualche secondo.
+
+Va bene per la domanda a cui serve — «chi manca all'appello prima di aprire o
+chiudere una fase» — e **non va bene** per dedurre chi sta compilando la busta.
+Il titolo del pallino lo scrive per esteso proprio per questo.
+
+**Trappola nota, misurata il 2 settembre:** `supabase.channel(topic)` chiamato
+due volte **restituisce lo stesso oggetto**, e Realtime rifiuta ascoltatori dopo
+`subscribe()`. Per questo il canale sta in `utils/presenza.ts` e non nei
+componenti: il primo disegno — un canale nella NavBar che annuncia e uno nella
+pagina admin che ascolta — non funziona, ed e' morto in prova.
+
+**Non misurato:** quanti messaggi realtime consuma Presence. Il margine e'
+enorme (4.832 su 2.000.000 nel ciclo scorso) ma va guardato dopo la prima
+serata d'asta vera, insieme agli altri consumi.
+
 ---
 
 ## Fatto di recente
 
 | Quando | Cosa |
 |---|---|
+| 2 set 2026 | In Budget e Fasi si vede chi e' collegato in questo momento |
 | 31 ago 2026 | La fascia non conta piu' i secondi dopo un ritiro, e ha un'etichetta di fase |
 | 31 ago 2026 | La riga di stato: una fascia sotto la barra dice sempre a che punto siamo |
 | 29 ago 2026 | La busta deve contenere i portieri che mancano, e non lo controllava nessuno |

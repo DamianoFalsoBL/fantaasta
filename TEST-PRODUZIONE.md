@@ -1507,6 +1507,40 @@ la funzione non serve a niente e il test è fallito.
 
 ---
 
+## Blocco M — Chi è collegato
+
+Il pallino accanto al nome in *Budget e Fasi* (v1.26). Il meccanismo è già
+provato contro il database — otto controlli in
+`scripts/prova-presenza.mts` — ma **con due client finti, non con due persone
+vere su due dispositivi veri**: è quello che resta da fare qui.
+
+### M1 · Il pallino dice il vero
+- [ ] Con solo il tuo browser aperto, apri *Budget e Fasi*.
+      **Atteso:** verde pieno solo accanto alla tua squadra, cerchio vuoto per
+      tutte le altre.
+- [ ] Fai entrare un manager da un altro dispositivo, **senza ricaricare la tua
+      pagina**.
+      **Atteso:** entro pochi secondi il suo pallino si accende da solo.
+- [ ] Fagli chiudere la scheda.
+      **Atteso:** entro una decina di secondi il pallino si spegne da sé.
+- [ ] Fagli aprire **due schede** e poi chiuderne una.
+      **Atteso:** resta collegato. Si spegne solo quando chiude anche l'altra.
+
+### M2 · Quello che il pallino non dice
+- [ ] Lascia una scheda aperta su un telefono in tasca e non toccarla.
+      **Atteso:** risulta collegata. **È corretto ed è il limite da conoscere:**
+      dice «ha il sito aperto», non «è davanti allo schermo». Non usarlo per
+      dedurre chi sta compilando la busta.
+- [ ] Passa il mouse sul pallino.
+      **Atteso:** il titolo lo scrive per esteso, invece di lasciarlo intendere.
+
+### M3 · Il super admin
+- [ ] Entra come super admin (che non ha squadra) e apri *Budget e Fasi*.
+      **Atteso:** nessuna riga si accende per lui — non ha una squadra a cui
+      corrispondere — e la pagina non si rompe.
+
+---
+
 ## Cose già note, da non segnalare come nuove
 
 | Cosa | Stato |

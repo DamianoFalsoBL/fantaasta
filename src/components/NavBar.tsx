@@ -7,6 +7,7 @@ import type { RealtimeChannel, User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import Marchio from '@/components/Marchio'
 import RigaStato from '@/components/RigaStato'
+import { annunciaPresenza } from '@/utils/presenza'
 import { isAdminRole, isSuperAdminRole } from '@/utils/auth-shared'
 import { trasferimentiAttivi } from '@/utils/trasferimenti'
 
@@ -213,6 +214,17 @@ export default function NavBar() {
 
     return () => { supabase.removeChannel(canale) }
   }, [utente?.id, squadraId, caricaDati, supabase])
+
+  // Annuncia che questo browser è collegato, così l'admin vede in «Budget e
+  // Fasi» chi manca all'appello prima di aprire o chiudere una fase.
+  //
+  // Sta nella NavBar perché è l'unico componente montato su ogni pagina: legato
+  // a una pagina sola, un manager fermo sulla propria rosa risulterebbe assente.
+  useEffect(() => {
+    const idUtente = utente?.id
+    if (!idUtente) return
+    return annunciaPresenza(supabase, idUtente, squadraId)
+  }, [utente?.id, squadraId, supabase])
 
   // Next non smonta la navbar cambiando rotta: senza questo il pannello mobile
   // resterebbe aperto dopo ogni tocco su una voce.

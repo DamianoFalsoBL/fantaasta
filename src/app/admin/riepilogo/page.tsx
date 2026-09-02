@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import Conferma from '@/components/Conferma'
 import { resetPasswordSquadra } from '../actions'
+import { ascoltaPresenza } from '@/utils/presenza'
 
 function BudgetAdjuster({ onApply }: { onApply: (delta: number) => void }) {
   const [amount, setAmount] = useState<number>(5)
@@ -103,6 +104,35 @@ function CredenzialiGenerate({ squadra, email, password }: { squadra: string; em
  * intermedio — una riga scritta a mano, una funzione cambiata — si vede invece
  * di sparire dietro una crocetta.
  */
+/**
+ * Il pallino di «collegato adesso».
+ *
+ * Verde pieno quando c'e', cerchio vuoto quando non c'e': **la forma cambia
+ * insieme al colore**, cosi' si distingue anche senza percepire il verde.
+ *
+ * Dice «ha il sito aperto», non «lo sta guardando»: una scheda dimenticata
+ * aperta risulta collegata. Il titolo lo scrive per esteso invece di lasciarlo
+ * intendere.
+ *
+ * Niente «collegata da N minuti»: per calcolarlo servirebbe leggere l'orologio
+ * durante il disegno, e quel numero resterebbe poi fermo finche' qualcos'altro
+ * non fa ridisegnare la riga. Un dettaglio che nessuno usa non vale un dato
+ * che mente.
+ */
+function Collegata({ collegata }: { collegata: boolean }) {
+  return (
+    <span
+      title={collegata
+        ? 'Collegata: ha il sito aperto, il che non vuol dire che lo stia guardando'
+        : 'Non collegata'}
+      aria-label={collegata ? 'Collegata' : 'Non collegata'}
+      className={`mr-2 inline-block h-2 w-2 shrink-0 rounded-full align-middle ${
+        collegata ? 'bg-neon' : 'border border-line-hi'
+      }`}
+    />
+  )
+}
+
 function StatoBuste({ aperta, consegnate, slotLiberi }: { aperta: boolean; consegnate: number; slotLiberi: number }) {
   if (!aperta) return <span className="text-ink-dim">—</span>
   if (slotLiberi <= 0) return <span className="fm-label">rosa piena</span>
@@ -134,11 +164,19 @@ export default function AdminRiepilogoPage() {
   const [acquisti, setAcquisti] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [faseBusteAperta, setFaseBusteAperta] = useState(false)
+  /** Squadra -> da quando e' collegata. Vuota finche' non arriva il primo sync. */
+  const [collegati, setCollegati] = useState<Map<string, number>>(new Map())
   // Serve a mostrare gli slot come "24 / 30". Il solo numero degli occupati
   // non dice se una rosa e' completa, ed era l'unica ragione per cui esisteva
   // la pagina /debug, ora assorbita qui.
   const [slotTotali, setSlotTotali] = useState(30)
   const [azione, setAzione] = useState<AzioneInAttesa | null>(null)
+
+  // Chi e' collegato adesso. Il canale lo tiene la NavBar (unico componente su
+  // ogni pagina): qui ci si limita ad ascoltarlo, perche' due canali sullo
+  // stesso topic dallo stesso browser non esistono - `channel()` restituisce
+  // sempre lo stesso oggetto e rifiuta ascoltatori dopo `subscribe()`.
+  useEffect(() => ascoltaPresenza(setCollegati), [])
   // Al posto di `alert()`: un avviso in pagina, che il tema può raggiungere.
   const [esito, setEsito] = useState<{ tipo: 'ok' | 'errore'; testo: string } | null>(null)
   // La password appena generata. Vive solo qui, finche' la finestra resta
@@ -400,7 +438,10 @@ export default function AdminRiepilogoPage() {
                   <tr><td colSpan={7} className="p-8 text-center text-ink-dim">Caricamento in corso…</td></tr>
                 ) : squadre.map(s => (
                   <tr key={s.id}>
-                    <td className="fm-nome">{s.nome}</td>
+                    <td className="fm-nome">
+                      <Collegata collegata={collegati.has(s.id)} />
+                      {s.nome}
+                    </td>
                     <td className="fm-num text-ink-mid">{s.budget_iniziale}</td>
                     <td className="fm-num">
                       <span className="text-lg font-bold text-neon">{s.crediti_residui}</span>
