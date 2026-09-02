@@ -313,6 +313,95 @@ serata d'asta vera, insieme agli altri consumi.
 
 ---
 
+## Da fare, deciso il 2 settembre
+
+Quattro cose chieste per il 3 settembre. Il contesto qui sotto serve a
+ripartire senza rifare la ricerca.
+
+### I loghi delle fantasquadre
+
+Oggi `src/components/LogoSquadra.tsx` disegna gli stemmi delle **squadre di
+Serie A** (la squadra di appartenenza del giocatore), con una mappa esplicita
+`FILE_PER_SQUADRA` dei 20 club verso i file in `public/loghi/`.
+
+Qui si tratta di un'altra cosa: **le fantasquadre**, che in questa lega hanno
+nomi di club esteri — Amsterdamsche FCA, St Mirren, colo colo, Santos Subito,
+Real CET — mentre altre no (Bonometro, Maledetto Fabri, Ti frugo Nel Frigo,
+Campioni du Quore).
+
+**La trappola grossa, da decidere prima di scrivere codice:** i nomi delle
+fantasquadre sono **liberi e modificabili dall'admin**, quindi una mappa
+nome → file si rompe in silenzio appena qualcuno rinomina la squadra. Per gli
+stemmi di Serie A la mappa va bene perche' quei venti nomi arrivano dal listone
+e non cambiano. Qui probabilmente serve una **colonna `logo` su `squadre`**,
+scelta dall'admin, con un ripiego per chi non ce l'ha.
+
+Da chiedere: quali squadre, dove si mostrano (Stato squadre? Tutte le Rose?
+l'ordine di chiamata? la fascia di stato?), e da dove arrivano i file — la
+volta scorsa li ha scaricati l'utente da football-logos.cc.
+
+**Trappola gia' pagata:** `STEMMI_TUTTI_NERI` in `LogoSquadra.tsx` esiste
+perche' lo stemma della Juventus e' tutto nero e su fondo scuro sparisce. La
+luminanza di ogni logo nuovo va **misurata** (l'ultima volta su canvas), non
+guardata a occhio.
+
+### Staccare «Sommario Buste» in una pagina sua
+
+Oggi e' un riquadro in fondo a `src/app/buste/page.tsx` (intorno a riga 880):
+chi si e' preso un giocatore **senza passare dall'asta**.
+
+Va in una pagina propria, con la voce in `VOCI_UTENTE` dentro
+`src/components/NavBar.tsx`.
+
+**Da guardare prima:** quali interrogazioni servono davvero al solo sommario.
+`/buste` e' una pagina pesante che carica lista, filtri, preferiti e bozza;
+staccare il sommario **non deve** portarsi dietro tutto quel carico solo per
+mostrare una tabella. Nome della rotta da decidere: `/buste/sommario` tiene
+insieme le due cose nell'indirizzo, ma nel menu vanno distinte bene — due voci
+che si somigliano costringono a fermarsi a pensare, ed e' gia' successo con
+«Aste a Chiamata» e «Asta Live».
+
+### Ordinare le liste per crediti, dal piu' caro
+
+Vale per tutte le liste con i filtri, non solo `/svincolati`: anche `/buste`,
+`/aste` e `/trasferimenti`.
+
+**Vanno cambiati due punti insieme, e il codice lo dice gia'.**
+`src/app/svincolati/page.tsx:19` ordina `.order('nome')` lato server, e
+`SvincolatiClient.tsx` parte da `colonna='nome'`, `verso='asc'` **proprio per
+combaciare** — c'e' un commento sul posto che spiega perche': se i due
+divergono, l'ordine cambia da solo un istante dopo il caricamento, sotto gli
+occhi di chi guarda.
+
+`src/utils/ordinamento.ts` ha gia' `ordinaGiocatori`, `OPZIONI_ORDINE` e
+`VERSO_INIZIALE`: la colonna dei crediti esiste, si tratta di cambiare il
+valore di partenza in modo coerente nei due posti, per ogni pagina.
+
+### Filtrare per piu' ruoli insieme
+
+Chiesto: scegliendo per esempio **Dc e Ds**, vedere chi ha **almeno uno** dei
+due. Oggi il filtro e' una `<select>` a scelta singola.
+
+Il punto unico dove intervenire e' `passaFiltri(g, query, ruolo)` in
+`src/utils/filtri.ts:31`, che chiama `ruoloCorrisponde`. Le opzioni della
+tendina le costruisce `src/components/OpzioniRuolo.tsx`.
+
+**Trappola 1: la firma e' usata da quattro pagine** — `aste/AsteClient.tsx`,
+`buste/page.tsx`, `svincolati/SvincolatiClient.tsx`,
+`trasferimenti/TrasferimentiClient.tsx`. Cambiare `ruolo: string` in
+`ruoli: string[]` le tocca tutte e quattro in un colpo solo, e il mercato
+chiuso impedisce di vedere `/trasferimenti` funzionare. Meglio una firma che
+accetti anche il caso singolo, e convertire una pagina alla volta.
+
+**Trappola 2: lo spazio.** Su schermo grande i filtri stanno su **una riga
+sola** (griglia a 4 colonne in `/svincolati`, 5 in `/buste`, 3 in `/aste`,
+vedi `PannelloFiltri.tsx`), e sul telefono le tracce sono calibrate al pixel su
+215 righe. Una selezione multipla occupa piu' di una tendina: va decisa la
+forma prima — pastiglie che si accendono? una tendina che resta aperta? — e
+**rimisurata** a 360px, non stimata.
+
+---
+
 ## Fatto di recente
 
 | Quando | Cosa |
