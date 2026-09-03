@@ -319,32 +319,27 @@ Chieste il 2 settembre. **Due sono state fatte lo stesso giorno** — l'ordine
 per crediti e il filtro per piu' ruoli, vedi *Fatto di recente*. Restano queste,
 con il contesto per ripartire senza rifare la ricerca.
 
-### I loghi delle fantasquadre
+### I loghi esteri sono pronti ma dormono
 
-Oggi `src/components/LogoSquadra.tsx` disegna gli stemmi delle **squadre di
-Serie A** (la squadra di appartenenza del giocatore), con una mappa esplicita
-`FILE_PER_SQUADRA` dei 20 club verso i file in `public/loghi/`.
+I 27 stemmi di Premier, Liga, Ligue 1 e Bundesliga sono in `public/loghi/` e
+mappati in `LogoSquadra.tsx`. **Nel listone di oggi non c'e' nessun giocatore di
+quelle squadre**, quindi non si vedranno finche' non si importa un listone che
+le contiene.
 
-Qui si tratta di un'altra cosa: **le fantasquadre**, che in questa lega hanno
-nomi di club esteri — Amsterdamsche FCA, St Mirren, colo colo, Santos Subito,
-Real CET — mentre altre no (Bonometro, Maledetto Fabri, Ti frugo Nel Frigo,
-Campioni du Quore).
+**Cosa controllare quel giorno:** i nomi con cui il listone scrive le squadre.
+`chiave()` normalizza da se' — minuscolo, accenti via, spazi in trattini — e su
+31 nomi plausibili l'abbinamento riesce tutte le volte
+(`scripts/prova-abbinamento-loghi.mjs`). Ma abbreviazioni come «Man City»,
+«PSG» o «Inter Milan» non le indovina nessuno: vanno aggiunte come voci in piu'
+che puntano allo stesso file, come `como: 'como-1907'`.
 
-**La trappola grossa, da decidere prima di scrivere codice:** i nomi delle
-fantasquadre sono **liberi e modificabili dall'admin**, quindi una mappa
-nome → file si rompe in silenzio appena qualcuno rinomina la squadra. Per gli
-stemmi di Serie A la mappa va bene perche' quei venti nomi arrivano dal listone
-e non cambiano. Qui probabilmente serve una **colonna `logo` su `squadre`**,
-scelta dall'admin, con un ripiego per chi non ce l'ha.
+**Un caso noto:** il Tottenham ha luminanza 34 e zero pixel chiari, quindi sul
+fondo scuro si legge male. **Non va messo in `STEMMI_TUTTI_NERI`**: non e' nero
+pieno ma blu notte, e `invert` lo ribalterebbe in un giallino irriconoscibile.
+Se servira', la strada e' un alone chiaro dietro l'immagine.
 
-Da chiedere: quali squadre, dove si mostrano (Stato squadre? Tutte le Rose?
-l'ordine di chiamata? la fascia di stato?), e da dove arrivano i file — la
-volta scorsa li ha scaricati l'utente da football-logos.cc.
-
-**Trappola gia' pagata:** `STEMMI_TUTTI_NERI` in `LogoSquadra.tsx` esiste
-perche' lo stemma della Juventus e' tutto nero e su fondo scuro sparisce. La
-luminanza di ogni logo nuovo va **misurata** (l'ultima volta su canvas), non
-guardata a occhio.
+`scripts/prova-luminanza-loghi.mjs` rimisura tutto senza bisogno del browser:
+legge i PNG con `zlib`, tavolozza compresa.
 
 ### DA SPINGERE SUBITO: `20260902150000_prenota_chiamata_una_sola.sql`
 

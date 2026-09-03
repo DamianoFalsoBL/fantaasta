@@ -41,6 +41,66 @@ const FILE_PER_SQUADRA: Record<string, string> = {
   torino: 'torino',
   udinese: 'udinese',
   venezia: 'venezia',
+
+  // --- Premier League, Liga, Ligue 1, Bundesliga ---
+  // Caricate il 2 settembre. **Nel listone di oggi non c'e' nessun giocatore
+  // di queste squadre**: restano inerti finche' non si importa un listone che
+  // le contiene, e una squadra senza voce qui non disegna nulla.
+  //
+  // Le chiavi sono i nomi dei file, che gia' seguono la forma normalizzata
+  // (minuscolo, trattini). `chiave()` qui sotto trasforma "Real Madrid" in
+  // "real-madrid" e "Bayern München" in "bayern-munchen", quindi i nomi piu'
+  // comuni combaciano da soli. **Quelli che il listone scrivera' diversamente
+  // — "Man City", "PSG", "Inter Milan" — vanno aggiunti come voci in piu' che
+  // puntano allo stesso file**, come `como: 'como-1907'` qui sopra.
+  arsenal: 'arsenal',
+  'aston-villa': 'aston-villa',
+  bournemouth: 'bournemouth',
+  brighton: 'brighton',
+  chelsea: 'chelsea',
+  liverpool: 'liverpool',
+  'manchester-city': 'manchester-city',
+  'manchester-united': 'manchester-united',
+  newcastle: 'newcastle',
+  tottenham: 'tottenham',
+
+  'athletic-club': 'athletic-club',
+  'atletico-madrid': 'atletico-madrid',
+  barcelona: 'barcelona',
+  'real-betis': 'real-betis',
+  'real-madrid': 'real-madrid',
+  villarreal: 'villarreal',
+
+  marseille: 'marseille',
+  monaco: 'monaco',
+  'paris-saint-germain': 'paris-saint-germain',
+  'rc-strasbourg': 'rc-strasbourg',
+  rennes: 'rennes',
+
+  'bayer-leverkusen': 'bayer-leverkusen',
+  'bayern-munchen': 'bayern-munchen',
+  'borussia-dortmund': 'borussia-dortmund',
+  'eintracht-frankfurt': 'eintracht-frankfurt',
+  'rb-leipzig': 'rb-leipzig',
+  'vfb-stuttgart': 'vfb-stuttgart',
+}
+
+/**
+ * Il nome della squadra ridotto alla forma dei file.
+ *
+ * Prima era `squadra.trim().toLowerCase()`, che bastava per i venti nomi del
+ * listone italiano — parole singole senza accenti. Con i club esteri non basta
+ * piu': "Real Madrid" ha uno spazio, "Bayern München" ha una dieresi, e senza
+ * questa riduzione nessuno dei due troverebbe il proprio file.
+ */
+function chiave(squadra: string): string {
+  return squadra
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')  // via gli accenti: münchen -> munchen
+    .replace(/[\s_]+/g, '-')            // spazi e trattini bassi -> trattino
+    .replace(/[^a-z0-9-]/g, '')         // via punteggiatura: "St. Pauli" -> st-pauli
 }
 
 /**
@@ -58,9 +118,22 @@ const FILE_PER_SQUADRA: Record<string, string> = {
  */
 const STEMMI_TUTTI_NERI = new Set(['juventus'])
 
+// Rimisurati tutti e 51 i file il 2 settembre con
+// `scripts/prova-luminanza-loghi.mjs`, che legge i PNG senza browser.
+// La Juventus resta l'unica squadra a luminanza 0 e zero pixel chiari.
+//
+// **Un caso da tenere d'occhio: il Tottenham** — luminanza 34 e nessun pixel
+// chiaro, quindi sul fondo scuro si legge male. Non va pero' in questo elenco:
+// non e' nero pieno ma blu notte, e `invert` lo ribalterebbe in un giallino
+// irriconoscibile. Se un giorno servira' davvero, la strada e' un alone chiaro
+// dietro l'immagine, non l'inversione.
+//
+// (`ligue-1.png` e' a luminanza 0 come la Juventus, ma e' il logo di un
+// campionato e non compare nella mappa: come `serie-a.png`, non si usa.)
+
 export default function LogoSquadra({ squadra }: { squadra: string | null | undefined }) {
   if (!squadra) return null
-  const file = FILE_PER_SQUADRA[squadra.trim().toLowerCase()]
+  const file = FILE_PER_SQUADRA[chiave(squadra)]
   if (!file) return null
 
   return (
