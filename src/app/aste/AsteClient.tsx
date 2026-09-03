@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import RuoliGiocatore from '@/components/RuoliGiocatore'
 import LogoSquadra from '@/components/LogoSquadra'
-import OpzioniRuolo from '@/components/OpzioniRuolo'
+import SceltaRuoli from '@/components/SceltaRuoli'
 import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
 
@@ -41,7 +41,8 @@ export default function AsteClient({
   erroreStorico: string | null
 }) {
   const [nome, setNome] = useState('')
-  const [ruolo, setRuolo] = useState('')
+  // Un elenco: si filtra per piu' ruoli insieme, con la regola «almeno uno».
+  const [ruolo, setRuolo] = useState<string[]>([])
   const [squadraFanta, setSquadraFanta] = useState('')
   const [soloContesi, setSoloContesi] = useState(false)
   const [soloMie, setSoloMie] = useState(false)
@@ -70,10 +71,12 @@ export default function AsteClient({
   // Quanti filtri sono attivi oltre la ricerca: è il numero sul pulsante che
   // apre il pannello sul telefono.
   const filtriAttivi =
-    (ruolo ? 1 : 0) + (squadraFanta ? 1 : 0) + (soloContesi ? 1 : 0) + (soloMie ? 1 : 0)
+    // `ruolo.length` e non `ruolo`: un array vuoto e' truthy, e il contatore
+    // avrebbe detto «1 filtro attivo» anche senza nessun ruolo scelto.
+    (ruolo.length > 0 ? 1 : 0) + (squadraFanta ? 1 : 0) + (soloContesi ? 1 : 0) + (soloMie ? 1 : 0)
 
   const azzeraFiltri = () => {
-    setRuolo('')
+    setRuolo([])
     setSquadraFanta('')
     setSoloContesi(false)
     setSoloMie(false)
@@ -159,14 +162,12 @@ export default function AsteClient({
       >
         <div>
           <label htmlFor="a-ruolo" className="fm-label mb-1 block">Ruolo</label>
-          <select
+          <SceltaRuoli
             id="a-ruolo"
-            className="fm-select"
-            value={ruolo}
-            onChange={(e) => setRuolo(e.target.value)}
-          >
-            <OpzioniRuolo presenti={ruoliMantra} />
-          </select>
+            scelti={ruolo}
+            onCambia={setRuolo}
+            presenti={ruoliMantra}
+          />
         </div>
         <div>
           <label htmlFor="a-fanta" className="fm-label mb-1 block">Fantasquadra</label>

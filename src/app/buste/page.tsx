@@ -7,7 +7,7 @@ import RuoliGiocatore from '@/components/RuoliGiocatore'
 import LogoSquadra from '@/components/LogoSquadra'
 import Conferma from '@/components/Conferma'
 import { leggiPreferiti, scegliDaiPreferiti } from '@/utils/preferiti'
-import OpzioniRuolo from '@/components/OpzioniRuolo'
+import SceltaRuoli from '@/components/SceltaRuoli'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
 import PannelloFiltri from '@/components/PannelloFiltri'
@@ -56,7 +56,8 @@ export default function BustePage() {
 
   // Per fase aperta
   const [ricerca, setRicerca] = useState('')
-  const [filtroRuolo, setFiltroRuolo] = useState('')
+  // Un elenco: si filtra per piu' ruoli insieme, con la regola «almeno uno».
+  const [filtroRuolo, setFiltroRuolo] = useState<string[]>([])
   // Gli stessi filtri di /svincolati: qui si compilano le buste guardando i
   // reparti scoperti e il budget, e mancavano proprio squadra ed eta'.
   const [filtroSquadra, setFiltroSquadra] = useState('')
@@ -324,10 +325,10 @@ export default function BustePage() {
 
   // L'ordinamento non conta fra i filtri attivi: non nasconde nessuna riga.
   const filtriAttivi =
-    (filtroRuolo ? 1 : 0) + (filtroSquadra ? 1 : 0) + (filtroEta ? 1 : 0)
+    (filtroRuolo.length > 0 ? 1 : 0) + (filtroSquadra ? 1 : 0) + (filtroEta ? 1 : 0)
 
   const azzeraFiltri = () => {
-    setFiltroRuolo('')
+    setFiltroRuolo([])
     setFiltroSquadra('')
     setFiltroEta('')
   }
@@ -632,14 +633,12 @@ export default function BustePage() {
                     i reparti scoperti, ed era proprio la pagina in cui servivano
                     di più. */}
                 <label htmlFor="b-ruolo" className="fm-label mb-1 block">Ruolo</label>
-                <select
+                <SceltaRuoli
                   id="b-ruolo"
-                  className="fm-select"
-                  value={filtroRuolo}
-                  onChange={e => setFiltroRuolo(e.target.value)}
-                >
-                  <OpzioniRuolo presenti={ruoliMantra} />
-                </select>
+                  scelti={filtroRuolo}
+                  onCambia={setFiltroRuolo}
+                  presenti={ruoliMantra}
+                />
               </div>
               <div>
                 <label htmlFor="b-squadra" className="fm-label mb-1 block">Squadra</label>

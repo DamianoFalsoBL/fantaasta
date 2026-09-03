@@ -1541,6 +1541,54 @@ vere su due dispositivi veri**: è quello che resta da fare qui.
 
 ---
 
+## Blocco N — Filtri e ordinamento delle liste
+
+Vale per **/svincolati**, **/buste** e **/aste** insieme: le tre usano lo stesso
+componente e lo stesso motore. Se una si comporta diversamente dalle altre,
+e' un difetto.
+
+### N1 · Si parte dal piu' caro
+- [ ] Apri *Svincolati* e guarda la prima riga.
+      **Atteso:** la quotazione piu' alta in cima, non un nome che comincia per A.
+- [ ] **Guarda l'elenco per due secondi senza toccare nulla.**
+      **Atteso:** non si riordina da solo. Server e client devono consegnare lo
+      stesso ordine; se la lista salta un istante dopo il caricamento, il
+      criterio di parita' non sta funzionando.
+- [ ] Lo stesso in *Buste*.
+
+### N2 · Piu' ruoli insieme
+- [ ] In *Svincolati*, apri il filtro **Ruolo** e spunta **Dc** e **Ds**.
+      **Atteso:** compaiono i giocatori che hanno **almeno uno** dei due, non
+      solo chi li ha entrambi. Il pulsante dice «2 ruoli» e il bordo si accende.
+- [ ] Spunta anche **Difensori (D)**, un reparto classico.
+      **Atteso:** si somma agli altri due. Reparti e ruoli Mantra si possono
+      mescolare.
+- [ ] Premi *Togli tutti i ruoli*.
+      **Atteso:** torna «Tutti i ruoli», il bordo si spegne e riappaiono tutti.
+- [ ] Con nessun ruolo scelto, guarda il contatore dei filtri attivi.
+      **Atteso:** non conta il filtro ruolo. *(Difetto trovato in sviluppo: un
+      elenco vuoto in JavaScript vale «vero», e il contatore diceva sempre 1.)*
+
+### N3 · Il pannello si comporta bene
+- [ ] Apri il pannello e guarda il contenuto **sotto** i filtri.
+      **Atteso:** non si sposta. Il pannello si apre sopra, non spinge la pagina.
+- [ ] Con il pannello aperto, tocca da qualche altra parte.
+      **Atteso:** si chiude, e le scelte restano.
+- [ ] **Da telefono**, apri il filtro ruolo.
+      **Atteso:** il pannello sta dentro lo schermo, non esce a destra, e le
+      caselle sono abbastanza grandi da centrarle col dito.
+- [ ] Da tastiera: raggiungi il filtro con Tab e aprilo con Invio.
+      **Atteso:** si apre, e le caselle si raggiungono con Tab.
+
+### N4 · Quello che non e' cambiato
+- [ ] *Lista Trasferimenti* (solo a mercato aperto) ha ancora la tendina a
+      scelta singola.
+      **Atteso:** funziona come prima. **Non e' una dimenticanza:** e' l'unica
+      pagina che non si puo' guardare funzionare a mercato chiuso, e convertirla
+      alla cieca era l'unico modo di romperla senza accorgersene.
+
+---
+
 ## Cose già note, da non segnalare come nuove
 
 | Cosa | Stato |

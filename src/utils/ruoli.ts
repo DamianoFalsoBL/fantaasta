@@ -86,18 +86,30 @@ export function mantraPresenti(giocatori: { ruolo_mantra?: string[] | null }[]):
  *
  * Accetta anche un valore senza prefisso: sono i link o i preferiti salvati
  * prima di questa modifica, che altrimenti smetterebbero di filtrare.
+ *
+ * **Accetta un ruolo solo o un elenco**, e con l'elenco vale «almeno uno»:
+ * scegliendo Dc e Ds si vuole vedere chi puo' giocare in uno dei due, non chi
+ * li ricopre entrambi. Un giocatore ha piu' ruoli Mantra, quindi l'incrocio
+ * sarebbe quasi sempre vuoto e la funzione sembrerebbe rotta.
+ *
+ * La firma tiene tutti e due i casi di proposito: `passaFiltri` e' chiamata da
+ * quattro pagine, e una di queste (/trasferimenti) si vede solo a mercato
+ * aperto. Cambiare il tipo di colpo le avrebbe toccate tutte insieme, senza
+ * poterne guardare una.
  */
 export function ruoloCorrisponde(
-  filtro: string,
+  filtro: string | string[],
   ruolo: string | null | undefined,
   mantra: string[] | null | undefined
 ): boolean {
-  if (!filtro) return true
+  const scelti = (Array.isArray(filtro) ? filtro : [filtro]).filter(Boolean)
+  if (scelti.length === 0) return true
 
   const elencoMantra = (mantra ?? []).map((m) => m.toUpperCase())
 
-  if (filtro.startsWith('cl:')) return ruolo === filtro.slice(3)
-  if (filtro.startsWith('mn:')) return elencoMantra.includes(filtro.slice(3))
-
-  return ruolo === filtro || elencoMantra.includes(filtro.toUpperCase())
+  return scelti.some((f) => {
+    if (f.startsWith('cl:')) return ruolo === f.slice(3)
+    if (f.startsWith('mn:')) return elencoMantra.includes(f.slice(3))
+    return ruolo === f || elencoMantra.includes(f.toUpperCase())
+  })
 }

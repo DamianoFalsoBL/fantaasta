@@ -27,7 +27,12 @@ export function testoCorrisponde(g: GiocatoreFiltrabile, query: string): boolean
   return g.nome.toLowerCase().includes(q) || (g.squadra ?? '').toLowerCase().includes(q)
 }
 
-/** Ricerca libera e filtro ruolo insieme: valgono entrambi, non l'ultimo. */
-export function passaFiltri(g: GiocatoreFiltrabile, query: string, ruolo: string): boolean {
+/**
+ * Ricerca libera e filtro ruolo insieme: valgono entrambi, non l'ultimo.
+ *
+ * `ruolo` accetta un valore solo o un elenco: con l'elenco basta che il
+ * giocatore ricopra **almeno uno** dei ruoli scelti. Vedi `ruoloCorrisponde`.
+ */
+export function passaFiltri(g: GiocatoreFiltrabile, query: string, ruolo: string | string[]): boolean {
   return testoCorrisponde(g, query) && ruoloCorrisponde(ruolo, g.ruolo, g.ruolo_mantra)
 }

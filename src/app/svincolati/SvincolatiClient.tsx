@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react'
 import RuoliGiocatore from '@/components/RuoliGiocatore'
 import StellaPreferito from '@/components/StellaPreferito'
 import LogoSquadra from '@/components/LogoSquadra'
-import OpzioniRuolo from '@/components/OpzioniRuolo'
+import SceltaRuoli from '@/components/SceltaRuoli'
 import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
@@ -41,7 +41,9 @@ export default function SvincolatiClient({
 }) {
   const [searchNome, setSearchNome] = useState('')
   const [searchSquadra, setSearchSquadra] = useState('')
-  const [searchRuolo, setSearchRuolo] = useState('')
+  // Un elenco e non una stringa: si filtra per piu' ruoli insieme, con la
+  // regola «almeno uno» (vedi `ruoloCorrisponde`).
+  const [searchRuolo, setSearchRuolo] = useState<string[]>([])
   const [searchEta, setSearchEta] = useState('')
   // Il valore iniziale non è una scelta libera: **deve combaciare con l'ordine
   // con cui la pagina server consegna i dati**
@@ -74,7 +76,7 @@ export default function SvincolatiClient({
     return Array.from(sq).sort()
   }, [giocatori])
 
-  // Solo i ruoli Mantra: i quattro reparti sono fissi e li elenca OpzioniRuolo.
+  // Solo i ruoli Mantra: i quattro reparti sono fissi e li elenca SceltaRuoli.
   const ruoliMantra = useMemo(() => mantraPresenti(giocatori), [giocatori])
 
   // Filtra i giocatori
@@ -104,11 +106,11 @@ export default function SvincolatiClient({
   // Quanti filtri sono attivi oltre la ricerca: è il numero sul pulsante che
   // apre il pannello. L'ordinamento non conta, perché non nasconde righe.
   const filtriAttivi =
-    (searchSquadra ? 1 : 0) + (searchRuolo ? 1 : 0) + (searchEta ? 1 : 0) + (soloPreferiti ? 1 : 0)
+    (searchSquadra ? 1 : 0) + (searchRuolo.length > 0 ? 1 : 0) + (searchEta ? 1 : 0) + (soloPreferiti ? 1 : 0)
 
   const azzeraFiltri = () => {
     setSearchSquadra('')
-    setSearchRuolo('')
+    setSearchRuolo([])
     setSearchEta('')
     setSoloPreferiti(false)
   }
@@ -152,14 +154,12 @@ export default function SvincolatiClient({
         </div>
         <div>
           <label htmlFor="f-ruolo" className="fm-label mb-1 block">Ruolo</label>
-          <select
+          <SceltaRuoli
             id="f-ruolo"
-            className="fm-select"
-            value={searchRuolo}
-            onChange={(e) => setSearchRuolo(e.target.value)}
-          >
-            <OpzioniRuolo presenti={ruoliMantra} />
-          </select>
+            scelti={searchRuolo}
+            onCambia={setSearchRuolo}
+            presenti={ruoliMantra}
+          />
         </div>
         <div>
           <label htmlFor="f-eta" className="fm-label mb-1 block">Età (under max)</label>

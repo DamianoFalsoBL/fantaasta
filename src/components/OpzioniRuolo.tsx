@@ -8,6 +8,12 @@ import { RUOLI_CLASSICI, opzioniMantra } from '@/utils/ruoli'
  * Sta in un componente e non copiata due volte perché i filtri di /svincolati
  * e /aste erano già divergenti prima: stesso scopo, elenchi costruiti in modo
  * leggermente diverso.
+ *
+ * **Rimane solo per /trasferimenti.** Le altre pagine sono passate a
+ * `SceltaRuoli`, che permette di scegliere piu' ruoli insieme; il mercato e'
+ * chiuso, quindi quella pagina non si puo' guardare funzionare e convertirla
+ * alla cieca sarebbe l'unico modo di romperla senza accorgersene. Quando il
+ * mercato riapre, questo file dovrebbe sparire.
  */
 export default function OpzioniRuolo({ presenti }: { presenti: Set<string> }) {
   return (

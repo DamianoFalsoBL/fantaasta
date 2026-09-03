@@ -315,8 +315,9 @@ serata d'asta vera, insieme agli altri consumi.
 
 ## Da fare, deciso il 2 settembre
 
-Quattro cose chieste per il 3 settembre. Il contesto qui sotto serve a
-ripartire senza rifare la ricerca.
+Chieste il 2 settembre. **Due sono state fatte lo stesso giorno** — l'ordine
+per crediti e il filtro per piu' ruoli, vedi *Fatto di recente*. Restano queste,
+con il contesto per ripartire senza rifare la ricerca.
 
 ### I loghi delle fantasquadre
 
@@ -361,44 +362,19 @@ insieme le due cose nell'indirizzo, ma nel menu vanno distinte bene — due voci
 che si somigliano costringono a fermarsi a pensare, ed e' gia' successo con
 «Aste a Chiamata» e «Asta Live».
 
-### Ordinare le liste per crediti, dal piu' caro
+### Convertire anche /trasferimenti alla scelta multipla dei ruoli
 
-Vale per tutte le liste con i filtri, non solo `/svincolati`: anche `/buste`,
-`/aste` e `/trasferimenti`.
+Le altre tre liste usano `SceltaRuoli`; `/trasferimenti` ha ancora la tendina a
+scelta singola e `OpzioniRuolo.tsx` esiste solo per lei.
 
-**Vanno cambiati due punti insieme, e il codice lo dice gia'.**
-`src/app/svincolati/page.tsx:19` ordina `.order('nome')` lato server, e
-`SvincolatiClient.tsx` parte da `colonna='nome'`, `verso='asc'` **proprio per
-combaciare** — c'e' un commento sul posto che spiega perche': se i due
-divergono, l'ordine cambia da solo un istante dopo il caricamento, sotto gli
-occhi di chi guarda.
+**Non e' una dimenticanza:** il mercato e' chiuso, quella pagina non si puo'
+guardare funzionare, e convertirla alla cieca sarebbe l'unico modo di romperla
+senza accorgersene. Da fare quando il mercato riapre — allora `OpzioniRuolo.tsx`
+puo' sparire. Stessa ragione per cui e' rimandata la pastiglia del reparto la'
+dentro.
 
-`src/utils/ordinamento.ts` ha gia' `ordinaGiocatori`, `OPZIONI_ORDINE` e
-`VERSO_INIZIALE`: la colonna dei crediti esiste, si tratta di cambiare il
-valore di partenza in modo coerente nei due posti, per ogni pagina.
-
-### Filtrare per piu' ruoli insieme
-
-Chiesto: scegliendo per esempio **Dc e Ds**, vedere chi ha **almeno uno** dei
-due. Oggi il filtro e' una `<select>` a scelta singola.
-
-Il punto unico dove intervenire e' `passaFiltri(g, query, ruolo)` in
-`src/utils/filtri.ts:31`, che chiama `ruoloCorrisponde`. Le opzioni della
-tendina le costruisce `src/components/OpzioniRuolo.tsx`.
-
-**Trappola 1: la firma e' usata da quattro pagine** — `aste/AsteClient.tsx`,
-`buste/page.tsx`, `svincolati/SvincolatiClient.tsx`,
-`trasferimenti/TrasferimentiClient.tsx`. Cambiare `ruolo: string` in
-`ruoli: string[]` le tocca tutte e quattro in un colpo solo, e il mercato
-chiuso impedisce di vedere `/trasferimenti` funzionare. Meglio una firma che
-accetti anche il caso singolo, e convertire una pagina alla volta.
-
-**Trappola 2: lo spazio.** Su schermo grande i filtri stanno su **una riga
-sola** (griglia a 4 colonne in `/svincolati`, 5 in `/buste`, 3 in `/aste`,
-vedi `PannelloFiltri.tsx`), e sul telefono le tracce sono calibrate al pixel su
-215 righe. Una selezione multipla occupa piu' di una tendina: va decisa la
-forma prima — pastiglie che si accendono? una tendina che resta aperta? — e
-**rimisurata** a 360px, non stimata.
+`passaFiltri` e `ruoloCorrisponde` accettano gia' sia una stringa sia un
+elenco, proprio per permettere questa conversione una pagina alla volta.
 
 ---
 
@@ -406,6 +382,8 @@ forma prima — pastiglie che si accendono? una tendina che resta aperta? — e
 
 | Quando | Cosa |
 |---|---|
+| 2 set 2026 | Filtro per piu' ruoli insieme, con la regola «almeno uno» |
+| 2 set 2026 | Svincolati e buste partono dal piu' caro, non dalla A |
 | 2 set 2026 | In Budget e Fasi si vede chi e' collegato in questo momento |
 | 31 ago 2026 | La fascia non conta piu' i secondi dopo un ritiro, e ha un'etichetta di fase |
 | 31 ago 2026 | La riga di stato: una fascia sotto la barra dice sempre a che punto siamo |
