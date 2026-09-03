@@ -1589,6 +1589,46 @@ e' un difetto.
 
 ---
 
+## Blocco O — Sommario Buste e ritocchi
+
+### O1 · La pagina nuova
+- [ ] Apri **Sommario Buste** dal menu.
+      **Atteso:** gli assegnati senza asta, raggruppati per turno dal piu'
+      recente, con squadra, stemma, ruoli e crediti.
+- [ ] Confronta i numeri con quelli che vedevi in fondo a *Buste*.
+      **Atteso:** gli stessi. E' la stessa interrogazione, spostata.
+- [ ] Scorri **Buste** fino in fondo.
+      **Atteso:** il riquadro del sommario **non c'e' piu'**. Non e' una perdita:
+      e' nella sua pagina.
+- [ ] Apri Sommario Buste **prima del primo spoglio** di una stagione nuova,
+      se capita.
+      **Atteso:** un avviso che spiega che compariranno dopo il primo spoglio,
+      non una pagina vuota.
+
+### O2 · Il campo di ricerca
+- [ ] Su schermo grande guarda la riga dei filtri in **Buste**.
+      **Atteso:** il campo di ricerca ha l'etichetta *Ricerca* sopra ed e'
+      allineato con Ruolo, Squadra ed Eta'. Prima era piu' in basso degli altri.
+- [ ] Lo stesso in **Svincolati** e **Sommario Aste**.
+- [ ] Da telefono.
+      **Atteso:** l'etichetta **non** si vede — il segnaposto dice gia' cosa ci
+      va, e quei pixel valgono una riga di lista.
+
+### O3 · L'asta avviata dall'admin
+*(Solo dopo il push della migration.)*
+- [ ] Da **Regia Aste**, avvia un'asta su un giocatore che **nessuno** ha in
+      lista chiamate.
+      **Atteso:** in testa c'e' la squadra di turno, non «nessuna offerta».
+- [ ] Avvia un'asta su un giocatore che **qualcun altro** ha in lista.
+      **Atteso:** in testa va chi ce l'ha in lista, non chi e' di turno. La
+      lista chiamate mantiene la precedenza.
+- [ ] Se capita, avvia un'asta su un giocatore che la squadra di turno non puo'
+      permettersi.
+      **Atteso:** passa alla prima dopo di lei che puo'. Se non puo' nessuno,
+      resta senza assegnatario — ed e' corretto.
+
+---
+
 ## Cose già note, da non segnalare come nuove
 
 | Cosa | Stato |

@@ -346,21 +346,21 @@ perche' lo stemma della Juventus e' tutto nero e su fondo scuro sparisce. La
 luminanza di ogni logo nuovo va **misurata** (l'ultima volta su canvas), non
 guardata a occhio.
 
-### Staccare «Sommario Buste» in una pagina sua
+### Il push della migration `20260902120000_asta_admin_assegna_al_turno.sql`
 
-Oggi e' un riquadro in fondo a `src/app/buste/page.tsx` (intorno a riga 880):
-chi si e' preso un giocatore **senza passare dall'asta**.
+Da fare con `npx supabase db push` — lo fa l'utente. Finche' non e' spinta,
+un'asta avviata dall'admin su un giocatore che nessuno ha in lista chiamate
+parte ancora **senza nessuno in testa**.
 
-Va in una pagina propria, con la voce in `VOCI_UTENTE` dentro
-`src/components/NavBar.tsx`.
+**Come verificare che sia servita a qualcosa**, dopo il push: l'admin avvia
+un'asta su un giocatore che non compare in nessuna `liste_aste`. Prima
+`squadra_in_testa` restava NULL; ora deve essere la squadra di turno — o la
+prima dopo di lei che puo' permetterselo, perche' i controlli su rosa piena,
+ruolo pieno e crediti valgono anche nel ripiego.
 
-**Da guardare prima:** quali interrogazioni servono davvero al solo sommario.
-`/buste` e' una pagina pesante che carica lista, filtri, preferiti e bozza;
-staccare il sommario **non deve** portarsi dietro tutto quel carico solo per
-mostrare una tabella. Nome della rotta da decidere: `/buste/sommario` tiene
-insieme le due cose nell'indirizzo, ma nel menu vanno distinte bene — due voci
-che si somigliano costringono a fermarsi a pensare, ed e' gia' successo con
-«Aste a Chiamata» e «Asta Live».
+**Resta NULL, ed e' corretto,** se nessuna squadra dell'ordine puo' prenderlo:
+in quel caso un assegnatario non esiste, e forzarlo sposterebbe il problema
+dentro `chiudi_asta`.
 
 ### Convertire anche /trasferimenti alla scelta multipla dei ruoli
 
@@ -382,6 +382,8 @@ elenco, proprio per permettere questa conversione una pagina alla volta.
 
 | Quando | Cosa |
 |---|---|
+| 2 set 2026 | Sommario Buste ha una pagina sua, e /buste una query in meno |
+| 2 set 2026 | Il campo di ricerca e' allineato agli altri filtri |
 | 2 set 2026 | Filtro per piu' ruoli insieme, con la regola «almeno uno» |
 | 2 set 2026 | Svincolati e buste partono dal piu' caro, non dalla A |
 | 2 set 2026 | In Budget e Fasi si vede chi e' collegato in questo momento |
