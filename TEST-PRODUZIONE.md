@@ -1620,6 +1620,24 @@ e' un difetto.
       **Atteso:** l'etichetta **non** si vede — il segnaposto dice gia' cosa ci
       va, e quei pixel valgono una riga di lista.
 
+### O4 · Chiamare per un manager assente
+*(Solo dopo il push della migration.)*
+- [ ] Porta il turno sulla squadra del manager assente (tocca il suo nome nella
+      barra dell'ordine), poi apri **Chiama per conto di**.
+      **Atteso:** il riquadro dice che tocca a lui.
+- [ ] Cerca un giocatore che **nessuno** ha in lista chiamate e premi *Chiama*.
+      **Atteso:** l'asta compare in stato prenotato con **la sua squadra in
+      testa**, al **prezzo base** (la quotazione). Non un'altra squadra, non
+      «nessuna offerta».
+- [ ] Avvia il timer e fai rilanciare un altro manager.
+      **Atteso:** funziona come una chiamata qualsiasi. Chi ha chiamato non ha
+      corsie preferenziali: solo il diritto di partire alla base.
+- [ ] Prova a chiamare mentre **non** e' il suo turno.
+      **Atteso:** rifiutato, con «Non è il turno di questa squadra». Non e' una
+      svista: per anticipare qualcuno si sposta prima il turno.
+- [ ] Chiudi l'asta senza che nessuno rilanci.
+      **Atteso:** il giocatore va a lui alla base, e il turno avanza.
+
 ### O3 · L'asta avviata dall'admin
 *(Solo dopo il push della migration.)*
 - [ ] Da **Regia Aste**, avvia un'asta su un giocatore che **nessuno** ha in

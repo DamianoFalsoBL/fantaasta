@@ -346,11 +346,29 @@ perche' lo stemma della Juventus e' tutto nero e su fondo scuro sparisce. La
 luminanza di ogni logo nuovo va **misurata** (l'ultima volta su canvas), non
 guardata a occhio.
 
-### Il push di due migration
+### Il push di tre migration
 
-Da fare con `npx supabase db push` — lo fa l'utente. Sono due:
-`20260902120000_asta_admin_assegna_al_turno.sql` e
-`20260902130000_reset_azzera_turno_buste.sql`.
+Da fare con `npx supabase db push` — lo fa l'utente:
+`20260902120000_asta_admin_assegna_al_turno.sql`,
+`20260902130000_reset_azzera_turno_buste.sql` e
+`20260902140000_chiamata_per_conto.sql`.
+
+#### `20260902140000` — chiamare per un manager assente
+
+Aggiunge `p_squadra_delega` a `prenota_chiamata`, come gia' ce l'hanno
+`piazza_offerta_asta` e `imposta_massimo_asta`. Il pannello *Chiama per conto
+di* in Regia Aste e' gia' in produzione ma **non funziona finche' la migration
+non e' spinta**: la RPC rifiuterebbe il parametro sconosciuto.
+
+**Perche' non bastava `avvia_asta_admin`:** quella cerca chi mettere in testa
+fra chi ha il giocatore in `liste_aste`, e chiamare un giocatore che la squadra
+di turno non ha in lista lo assegnava a un'altra. Misurato il 2 settembre sui
+dati veri: **su sei giocatori chiamabili, quattro sarebbero finiti a una
+squadra diversa da quella di turno**.
+
+**Il turno resta obbligatorio**, di proposito: si chiama solo per chi tocca. Per
+anticipare qualcuno c'e' gia' `admin_imposta_turno`, cioe' toccare il suo nome
+nella barra dell'ordine.
 
 #### `20260902120000` — l'asta dell'admin
 
@@ -404,6 +422,7 @@ elenco, proprio per permettere questa conversione una pagina alla volta.
 
 | Quando | Cosa |
 |---|---|
+| 2 set 2026 | L'admin puo' chiamare per conto di un manager assente |
 | 2 set 2026 | L'hard reset azzera anche il contatore dei turni di buste |
 | 2 set 2026 | Sommario Buste ha una pagina sua, e /buste una query in meno |
 | 2 set 2026 | Il campo di ricerca e' allineato agli altri filtri |

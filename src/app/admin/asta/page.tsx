@@ -25,6 +25,11 @@ export default function AdminAstaPage() {
   // risorteggiare tutto l'ordine.
   const [turnoDaImpostare, setTurnoDaImpostare] = useState<{ id: string; nome: string } | null>(null)
   const [esito, setEsito] = useState<string | null>(null)
+  // Chiamata per conto di un manager assente: la ricerca e l'elenco completo
+  // degli svincolati. Non basta `asteProgrammate`, che contiene solo chi
+  // qualcuno ha in lista — ed e' proprio il caso che questo pannello non copre.
+  const [cercaPerConto, setCercaPerConto] = useState('')
+  const [tuttiLiberi, setTuttiLiberi] = useState<any[]>([])
   // Chi non ha più nulla da chiamare, o ha la rosa piena. Restano nell'ordine
   // e restano cliccabili — l'admin deve poterle comunque selezionare — ma
   // sbiadite, perché a colpo d'occhio si veda chi è ancora in gara.
@@ -52,6 +57,17 @@ export default function AdminAstaPage() {
     }
     const corrente = correnti?.[0] ?? null
     setAstaCorrente(corrente)
+
+    // Tutti gli svincolati, per la chiamata per conto: qui non si filtra per
+    // lista, perche' il giocatore da chiamare puo' non stare in nessuna.
+    const { data: liberi } = await supabase
+      .from('giocatori')
+      .select('id, nome, ruolo, ruolo_mantra, eta, squadra, quotazione')
+      .eq('stato', 'LIBERO')
+      .eq('fuori_lista', false)
+      .order('quotazione', { ascending: false })
+      .order('nome')
+    setTuttiLiberi(liberi ?? [])
 
     // Un'asta chiusa senza nessuno in testa è andata deserta.
     const { data: asteDeserte } = await supabase
@@ -172,6 +188,42 @@ export default function AdminAstaPage() {
     } else {
       loadData()
     }
+  }
+
+  /**
+   * Chiama un giocatore per conto della squadra di turno.
+   *
+   * Usa `prenota_chiamata` con la delega e **non** `avvia_asta_admin`: sono due
+   * azioni diverse. La prima mette in testa chi chiama, la seconda cerca fra
+   * chi ha il giocatore in lista — e con quella, chiamando per una squadra che
+   * il giocatore non ce l'ha in lista, l'asta sarebbe finita a qualcun altro.
+   */
+  // I primi venti che corrispondono: l'elenco sta dentro un riquadro che
+  // scorre, e mostrarne 231 renderebbe la ricerca inutile.
+  const liberiPerConto = (() => {
+    const q = cercaPerConto.trim().toLowerCase()
+    if (q.length < 2) return []
+    return tuttiLiberi
+      .filter((g) => g.nome.toLowerCase().includes(q) || (g.squadra ?? '').toLowerCase().includes(q))
+      .slice(0, 20)
+  })()
+
+  const chiamaPerConto = async (g: any) => {
+    const squadraId = ordineChiamata[indiceChiamata - 1]
+    if (!squadraId) return
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.rpc('prenota_chiamata', {
+      p_giocatore_id: g.id,
+      p_squadra_delega: squadraId,
+    })
+    if (error) setError(error.message)
+    else {
+      setEsito(`${g.nome} chiamato per ${squadreMap[squadraId]} a ${g.quotazione} cr. Ora avvia il timer.`)
+      setCercaPerConto('')
+      await loadData()
+    }
+    setLoading(false)
   }
 
   const chiudiAsta = async (id: string) => {
@@ -341,6 +393,79 @@ export default function AdminAstaPage() {
       ) : (
         <div className="fm-panel p-6 text-center">
           <h2 className="fm-title text-lg text-ink-mid">Nessuna asta in corso</h2>
+        </div>
+      )}
+
+      {/* Chiamata per conto di un manager assente.
+          Sta sopra «Prossime chiamate» e non dentro: quella lista mostra solo i
+          giocatori che qualcuno ha in `liste_aste`, e il caso per cui questo
+          pannello esiste e' proprio il giocatore che non ci sta. */}
+      {!astaCorrente && ordineChiamata.length > 0 && (
+        <div className="fm-panel overflow-hidden">
+          <div className="fm-panel-head">
+            <div>
+              <span>Chiama per conto di</span>
+              <p className="mt-0.5 text-xs font-normal normal-case tracking-normal text-ink-dim">
+                Per un manager assente che ti ha lasciato l&apos;elenco. Il giocatore
+                risulta chiamato da lui, al prezzo base.
+              </p>
+            </div>
+          </div>
+
+          <div className="fm-panel-body space-y-3">
+            <div>
+              <label className="fm-label mb-1 block">Squadra</label>
+              <div className="fm-alert fm-alert-info">
+                Tocca a <strong>{squadreMap[ordineChiamata[indiceChiamata - 1]] ?? '—'}</strong>.
+                Si chiama solo per chi è di turno: per anticipare qualcuno, tocca
+                prima il suo nome nella barra dell&apos;ordine qui sopra.
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="c-cerca" className="fm-label mb-1 block">Giocatore</label>
+              <input
+                id="c-cerca"
+                type="text"
+                className="fm-input"
+                placeholder="Cerca fra tutti gli svincolati…"
+                value={cercaPerConto}
+                onChange={(e) => setCercaPerConto(e.target.value)}
+              />
+            </div>
+
+            {cercaPerConto.trim().length >= 2 && (
+              <div className="max-h-72 overflow-y-auto rounded-md border border-line">
+                {liberiPerConto.length === 0 ? (
+                  <p className="p-3 text-sm text-ink-dim">Nessuno svincolato con questo nome.</p>
+                ) : (
+                  <div className="divide-y divide-line">
+                    {liberiPerConto.map((g) => (
+                      <div key={g.id} className="flex items-center justify-between gap-3 p-2.5">
+                        <div className="min-w-0">
+                          <div className="fm-nome truncate">{g.nome}</div>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
+                            <span>{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
+                            <RuoliGiocatore ruolo={g.ruolo} ruoloMantra={g.ruolo_mantra} />
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <span className="fm-badge fm-badge-good">{g.quotazione} cr</span>
+                          <button
+                            onClick={() => chiamaPerConto(g)}
+                            disabled={loading}
+                            className="fm-btn fm-btn-primary fm-btn-sm"
+                          >
+                            Chiama
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
