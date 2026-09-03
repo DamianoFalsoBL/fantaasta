@@ -1289,6 +1289,12 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
   `/admin/setup` → *Funzioni attive*.
   **Atteso:** risultano **spenti**. Prima restavano accesi: il reset chiudeva la
   fase buste ma non quella del mercato.
+- [ ] Prima del reset controlla a che **turno di buste** sei arrivato (compare
+  in *Sommario Buste*); dopo il reset, apri e chiudi una fase buste nella lega
+  nuova.
+  **Atteso:** la prima tornata si chiama **Turno 1**, non Turno 10. Prima il
+  contatore sopravviveva al reset, e il numero mostrato non corrispondeva a
+  nessuna tornata realmente giocata da quella lega.
 
 ### J6 · La prova del nove
 - [ ] Dopo il reset, esci e rientra come super admin.

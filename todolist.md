@@ -346,7 +346,13 @@ perche' lo stemma della Juventus e' tutto nero e su fondo scuro sparisce. La
 luminanza di ogni logo nuovo va **misurata** (l'ultima volta su canvas), non
 guardata a occhio.
 
-### Il push della migration `20260902120000_asta_admin_assegna_al_turno.sql`
+### Il push di due migration
+
+Da fare con `npx supabase db push` — lo fa l'utente. Sono due:
+`20260902120000_asta_admin_assegna_al_turno.sql` e
+`20260902130000_reset_azzera_turno_buste.sql`.
+
+#### `20260902120000` — l'asta dell'admin
 
 Da fare con `npx supabase db push` — lo fa l'utente. Finche' non e' spinta,
 un'asta avviata dall'admin su un giocatore che nessuno ha in lista chiamate
@@ -361,6 +367,22 @@ ruolo pieno e crediti valgono anche nel ripiego.
 **Resta NULL, ed e' corretto,** se nessuna squadra dell'ordine puo' prenderlo:
 in quel caso un assegnatario non esiste, e forzarlo sposterebbe il problema
 dentro `chiudi_asta`.
+
+#### `20260902130000` — il contatore dei turni dopo l'hard reset
+
+`hard_reset_sistema` non azzerava `turno_buste`: le buste sparivano ma il
+contatore restava, e la lega nuova sarebbe ripartita da «Turno 10».
+
+**Come verificare:** guarda il turno prima del reset, resetta, apri e chiudi una
+fase buste. La prima tornata deve chiamarsi Turno 1.
+
+**Nota per il futuro:** e' il terzo caso della stessa famiglia — una colonna di
+stato aggiunta a `regole_lega` dopo il consolidamento, e l'UPDATE finale
+dell'hard reset non aggiornato (era gia' successo con `fase_mercato_aperta`).
+**Chi aggiunge una colonna di stato a `regole_lega` deve aggiungerla anche
+li'.** Le colonne di configurazione — budget, timer, slot, email del super
+admin — invece non vanno toccate: chi resetta vuole ripartire con le stesse
+regole.
 
 ### Convertire anche /trasferimenti alla scelta multipla dei ruoli
 
@@ -382,6 +404,7 @@ elenco, proprio per permettere questa conversione una pagina alla volta.
 
 | Quando | Cosa |
 |---|---|
+| 2 set 2026 | L'hard reset azzera anche il contatore dei turni di buste |
 | 2 set 2026 | Sommario Buste ha una pagina sua, e /buste una query in meno |
 | 2 set 2026 | Il campo di ricerca e' allineato agli altri filtri |
 | 2 set 2026 | Filtro per piu' ruoli insieme, con la regola «almeno uno» |
