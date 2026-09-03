@@ -41,6 +41,11 @@ const VOCI_UTENTE: Voce[] = [
   { href: '/trasferimenti', label: 'Lista Trasferimenti', soloSeTrasferimenti: true },
   // "Storico Aste" non c'e' piu': e' una scheda dentro Sommario Aste.
   { href: '/buste', label: 'Buste' },
+  // Subito sotto "Buste" e non accanto a "Sommario Aste": messe vicine, due
+  // voci che cominciano per "Sommario" si distinguerebbero solo dall'ultima
+  // parola, e ci si dovrebbe fermare a leggere. Qui il vicino e' "Buste", che
+  // e' il contesto giusto.
+  { href: '/sommario-buste', label: 'Sommario Buste' },
 ]
 
 // Senza emoji: erano un segnaposto in attesa di un'identita' visiva, e
