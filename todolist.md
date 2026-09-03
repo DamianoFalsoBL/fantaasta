@@ -345,6 +345,29 @@ invertibile — `invert` vale solo sul nero pieno — quindi ha un alone chiaro
 (`STEMMI_SCURI` + `.fm-logo-alone`). Il Liverpool, secondo piu' scuro in uso, e'
 a 71 (4,2:1) e non serve.
 
+### La lega nuova: stato al 2 settembre, pomeriggio
+
+Hard reset fatto, poi i tre import. **Il terzo era una prova con due sole
+righe**, per verificare la catena: nel pomeriggio arriva il file completo delle
+liste chiamate.
+
+Com'e' messa adesso: 14 fantasquadre da 100 crediti, 992 giocatori a listone
+(37 squadre, tutte con lo stemma), 289 rose ricostruite dall'import, turno
+buste ripartito da **1**, ordine di chiamata non ancora sorteggiato.
+
+**Prima di sorteggiare l'ordine, il controllo che conta:** `genera_ordine_chiamata`
+include solo le squadre con almeno un giocatore libero in lista. Con le due
+righe di prova entravano **6 squadre su 14**, e le altre otto non avrebbero mai
+avuto un turno. Dopo l'import completo va riverificato che ci siano tutte:
+sorteggiato l'ordine, per farne rientrare una bisogna risorteggiare.
+
+Reimportare le liste e' sicuro: sostituisce quelle esistenti e non tocca ne'
+rose ne' listone.
+
+Da rilanciare dopo l'import completo:
+
+    node scripts/prova-abbinamento-loghi.mjs   # stemmi, se il listone cambia
+
 ### DA SPINGERE SUBITO: `20260902150000_prenota_chiamata_una_sola.sql`
 
 **Finche' non e' spinta, nessun manager riesce a chiamare un giocatore.**
