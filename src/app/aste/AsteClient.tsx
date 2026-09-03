@@ -148,7 +148,7 @@ export default function AsteClient({
             {/* Sul telefono l'etichetta resta solo per i lettori di schermo: il
                 segnaposto dice gia' cosa ci va, e ventiquattro pixel in cima
                 sono una riga di lista in fondo. */}
-            <label htmlFor="a-nome" className="fm-label mb-1 block max-md:sr-only">Cerca per nome</label>
+            <label htmlFor="a-nome" className="fm-label mb-1 block max-md:sr-only">Ricerca</label>
             <input
               id="a-nome"
               type="text"

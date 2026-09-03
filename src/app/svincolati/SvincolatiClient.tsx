@@ -126,7 +126,7 @@ export default function SvincolatiClient({
             {/* Sul telefono l'etichetta resta solo per i lettori di schermo: il
                 segnaposto dice gia' cosa ci va, e ventiquattro pixel in cima
                 sono una riga di lista in fondo. */}
-            <label htmlFor="f-nome" className="fm-label mb-1 block max-md:sr-only">Cerca per nome</label>
+            <label htmlFor="f-nome" className="fm-label mb-1 block max-md:sr-only">Ricerca</label>
             <input
               id="f-nome"
               type="text"
