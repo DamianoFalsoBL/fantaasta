@@ -319,6 +319,56 @@ Chieste il 2 settembre. **Due sono state fatte lo stesso giorno** — l'ordine
 per crediti e il filtro per piu' ruoli, vedi *Fatto di recente*. Restano queste,
 con il contesto per ripartire senza rifare la ricerca.
 
+### Scegliere quali preferiti entrano in busta
+
+Il pulsante *Aggiungi i preferiti* in `/buste` deve aprire una finestra con
+l'elenco dei preferiti e una casella per ciascuno, invece di decidere da se'.
+
+**Perche'.** Con piu' preferiti che slot liberi oggi entrano i primi che sono
+stati stellati: `scegliDaiPreferiti` (`src/utils/preferiti.ts:80`) li prende in
+ordine di `created_at` e taglia con `.slice(0, posti)`. **Non e' casuale, ma
+tanto vale**: si stella scorrendo gli svincolati, quindi quell'ordine e' quello
+della lista, non del gradimento. Chi ha quindici preferiti per otto slot si
+ritrova otto nomi che non ha scelto.
+
+**Cosa deve mostrare la finestra**, oltre alle caselle:
+
+- **costo di quel che si sta scegliendo e budget residuo**, aggiornati mentre si
+  spunta. Oggi `scegliDaiPreferiti` non guarda i crediti: si riempie la busta e
+  si scopre solo al salvataggio di aver sforato;
+- **i portieri**, per lo stesso motivo: `submit_buste` ne pretende esattamente
+  quanti ne mancano (`20260829180000_buste_portieri_esatti.sql`), e una busta
+  senza il portiere richiesto viene rifiutata a compilazione finita;
+- **quanti slot restano**, che e' il numero che dice quando fermarsi;
+- **chi non e' piu' disponibile**, che la pagina gia' conta come
+  `nonDisponibili`: un preferito stellato una settimana fa puo' essere stato
+  preso da un altro, e sparire in silenzio e' cio' che fa credere di averne
+  dieci quando sono otto.
+
+**Ordine dell'elenco:** per quotazione decrescente, come tutte le liste da fine
+agosto. L'ordine di stellatura non serve piu' a niente appena si sceglie a mano.
+
+**Trappola da non ripetere.** La prima versione del riempimento *sostituiva* la
+selezione in corso e chiedeva conferma prima di farlo: era il comportamento
+sbagliato con un cerotto sopra, ed e' stato cambiato il 29 agosto. La finestra
+deve **aggiungere** a quel che c'e' gia', e le caselle dei giocatori gia'
+selezionati vanno mostrate spuntate e bloccate, non nascoste: chi le cerca deve
+trovarle.
+
+**Cosa riusare.** `src/components/Conferma.tsx` ha gia' la meccanica giusta —
+Esc, clic sullo sfondo, focus all'apertura, `aria-modal` — e accetta
+`messaggio: React.ReactNode`. Ma e' larga `max-w-md` ed e' fatta per due
+pulsanti: per un elenco scorrevole conviene un componente a parte che
+**riprenda quella meccanica** invece di forzarla, come Conferma stessa fece con
+la modale dell'hard reset.
+
+`scegliDaiPreferiti` non va buttata: diventa il calcolo che prepara le voci
+della finestra — chi e' disponibile, chi gia' dentro, quanti slot restano —
+invece di decidere il taglio.
+
+**Da misurare a 360px:** quindici righe, caselle da centrare col dito, e il
+riepilogo del costo che non deve finire sotto la piega.
+
 ### Gli stemmi esteri sono in uso: come tenerli in piedi
 
 Dal listone del 2 settembre le squadre sono **37** e hanno tutte lo stemma
