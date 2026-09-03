@@ -1625,10 +1625,17 @@ e' un difetto.
 - [ ] Porta il turno sulla squadra del manager assente (tocca il suo nome nella
       barra dell'ordine), poi apri **Chiama per conto di**.
       **Atteso:** il riquadro dice che tocca a lui.
-- [ ] Cerca un giocatore che **nessuno** ha in lista chiamate e premi *Chiama*.
+- [ ] Guarda l'elenco dentro il pannello.
+      **Atteso:** ci sono i giocatori della **sua** lista chiamate ancora
+      liberi, non tutti gli svincolati. Sono quelli che chiamerebbe lei.
+- [ ] Premi *Chiama* su uno di loro.
       **Atteso:** l'asta compare in stato prenotato con **la sua squadra in
       testa**, al **prezzo base** (la quotazione). Non un'altra squadra, non
       «nessuna offerta».
+- [ ] Guarda il tag **PRENOTATO** da telefono.
+      **Atteso:** sta su una riga sua sopra il nome, non in linea con i dati.
+      Prima rubava larghezza al nome del giocatore, che e' la scritta piu'
+      grande del riquadro.
 - [ ] Avvia il timer e fai rilanciare un altro manager.
       **Atteso:** funziona come una chiamata qualsiasi. Chi ha chiamato non ha
       corsie preferenziali: solo il diritto di partire alla base.

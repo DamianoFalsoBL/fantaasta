@@ -25,11 +25,10 @@ export default function AdminAstaPage() {
   // risorteggiare tutto l'ordine.
   const [turnoDaImpostare, setTurnoDaImpostare] = useState<{ id: string; nome: string } | null>(null)
   const [esito, setEsito] = useState<string | null>(null)
-  // Chiamata per conto di un manager assente: la ricerca e l'elenco completo
-  // degli svincolati. Non basta `asteProgrammate`, che contiene solo chi
-  // qualcuno ha in lista — ed e' proprio il caso che questo pannello non copre.
-  const [cercaPerConto, setCercaPerConto] = useState('')
-  const [tuttiLiberi, setTuttiLiberi] = useState<any[]>([])
+  // Chiamata per conto di un manager assente: la sua lista chiamate.
+  // `asteProgrammate` non basta — e' tagliata ai primi dieci e porta i nomi
+  // delle squadre, non gli id — quindi qui si tiene l'elenco intero.
+  const [inListaCompleta, setInListaCompleta] = useState<any[]>([])
   // Chi non ha più nulla da chiamare, o ha la rosa piena. Restano nell'ordine
   // e restano cliccabili — l'admin deve poterle comunque selezionare — ma
   // sbiadite, perché a colpo d'occhio si veda chi è ancora in gara.
@@ -57,17 +56,6 @@ export default function AdminAstaPage() {
     }
     const corrente = correnti?.[0] ?? null
     setAstaCorrente(corrente)
-
-    // Tutti gli svincolati, per la chiamata per conto: qui non si filtra per
-    // lista, perche' il giocatore da chiamare puo' non stare in nessuna.
-    const { data: liberi } = await supabase
-      .from('giocatori')
-      .select('id, nome, ruolo, ruolo_mantra, eta, squadra, quotazione')
-      .eq('stato', 'LIBERO')
-      .eq('fuori_lista', false)
-      .order('quotazione', { ascending: false })
-      .order('nome')
-    setTuttiLiberi(liberi ?? [])
 
     // Un'asta chiusa senza nessuno in testa è andata deserta.
     const { data: asteDeserte } = await supabase
@@ -110,8 +98,11 @@ export default function AdminAstaPage() {
       liste.forEach((r: any) => {
         if (r.giocatori) {
           if (r.giocatori.stato === 'LIBERO') {
-            const player = map.get(r.giocatore_id) || { ...r.giocatori, contendenti: [] }
+            // `contendentiId` accanto ai nomi: la chiamata per conto deve
+            // filtrare per squadra, e i nomi non sono chiavi.
+            const player = map.get(r.giocatore_id) || { ...r.giocatori, contendenti: [], contendentiId: [] }
             if (r.squadre) player.contendenti.push(r.squadre.nome)
+            if (r.squadra_id) player.contendentiId.push(r.squadra_id)
             map.set(r.giocatore_id, player)
             if (r.squadra_id) conQualcunoDaChiamare.add(r.squadra_id)
           } else {
@@ -124,6 +115,9 @@ export default function AdminAstaPage() {
          map.delete(corrente.giocatore_id)
       }
       
+      // Intero per la chiamata per conto, tagliato ai primi dieci per l'elenco
+      // delle prossime chiamate, che serve solo a dare un'idea.
+      setInListaCompleta(Array.from(map.values()))
       setAsteProgrammate(Array.from(map.values()).slice(0, 10))
 
       // Le righe di liste_aste dei giocatori già assegnati restano apposta:
@@ -198,14 +192,13 @@ export default function AdminAstaPage() {
    * chi ha il giocatore in lista — e con quella, chiamando per una squadra che
    * il giocatore non ce l'ha in lista, l'asta sarebbe finita a qualcun altro.
    */
-  // I primi venti che corrispondono: l'elenco sta dentro un riquadro che
-  // scorre, e mostrarne 231 renderebbe la ricerca inutile.
-  const liberiPerConto = (() => {
-    const q = cercaPerConto.trim().toLowerCase()
-    if (q.length < 2) return []
-    return tuttiLiberi
-      .filter((g) => g.nome.toLowerCase().includes(q) || (g.squadra ?? '').toLowerCase().includes(q))
-      .slice(0, 20)
+  // I giocatori che la squadra di turno ha in lista chiamate e sono ancora
+  // liberi: sono quelli che chiamerebbe lei, ed e' l'elenco che il manager
+  // assente ha lasciato all'admin.
+  const listaDelTurno = (() => {
+    const squadraId = ordineChiamata[indiceChiamata - 1]
+    if (!squadraId) return []
+    return inListaCompleta.filter((g) => g.contendentiId?.includes(squadraId))
   })()
 
   const chiamaPerConto = async (g: any) => {
@@ -220,7 +213,6 @@ export default function AdminAstaPage() {
     if (error) setError(error.message)
     else {
       setEsito(`${g.nome} chiamato per ${squadreMap[squadraId]} a ${g.quotazione} cr. Ora avvia il timer.`)
-      setCercaPerConto('')
       await loadData()
     }
     setLoading(false)
@@ -406,8 +398,9 @@ export default function AdminAstaPage() {
             <div>
               <span>Chiama per conto di</span>
               <p className="mt-0.5 text-xs font-normal normal-case tracking-normal text-ink-dim">
-                Per un manager assente che ti ha lasciato l&apos;elenco. Il giocatore
-                risulta chiamato da lui, al prezzo base.
+                Per un manager assente. Qui ci sono i giocatori della <b>sua</b>
+                lista chiamate: chiamandone uno risulta chiamato da lui, al
+                prezzo base.
               </p>
             </div>
           </div>
@@ -422,47 +415,35 @@ export default function AdminAstaPage() {
               </div>
             </div>
 
-            <div>
-              <label htmlFor="c-cerca" className="fm-label mb-1 block">Giocatore</label>
-              <input
-                id="c-cerca"
-                type="text"
-                className="fm-input"
-                placeholder="Cerca fra tutti gli svincolati…"
-                value={cercaPerConto}
-                onChange={(e) => setCercaPerConto(e.target.value)}
-              />
-            </div>
-
-            {cercaPerConto.trim().length >= 2 && (
-              <div className="max-h-72 overflow-y-auto rounded-md border border-line">
-                {liberiPerConto.length === 0 ? (
-                  <p className="p-3 text-sm text-ink-dim">Nessuno svincolato con questo nome.</p>
-                ) : (
-                  <div className="divide-y divide-line">
-                    {liberiPerConto.map((g) => (
-                      <div key={g.id} className="flex items-center justify-between gap-3 p-2.5">
-                        <div className="min-w-0">
-                          <div className="fm-nome truncate">{g.nome}</div>
-                          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
-                            <span>{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
-                            <RuoliGiocatore ruolo={g.ruolo} ruoloMantra={g.ruolo_mantra} />
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                          <span className="fm-badge fm-badge-good">{g.quotazione} cr</span>
-                          <button
-                            onClick={() => chiamaPerConto(g)}
-                            disabled={loading}
-                            className="fm-btn fm-btn-primary fm-btn-sm"
-                          >
-                            Chiama
-                          </button>
+            {listaDelTurno.length === 0 ? (
+              <p className="text-sm text-ink-dim">
+                Questa squadra non ha piu' giocatori liberi nella sua lista chiamate.
+              </p>
+            ) : (
+              <div className="max-h-80 overflow-y-auto rounded-md border border-line">
+                <div className="divide-y divide-line">
+                  {listaDelTurno.map((g) => (
+                    <div key={g.id} className="flex items-center justify-between gap-3 p-2.5">
+                      <div className="min-w-0">
+                        <div className="fm-nome truncate">{g.nome}</div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-mid">
+                          <span>{g.squadra}{g.eta ? ` · ${g.eta}` : ''}</span>
+                          <RuoliGiocatore ruolo={g.ruolo} ruoloMantra={g.ruolo_mantra} />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="fm-badge fm-badge-good">{g.quotazione} cr</span>
+                        <button
+                          onClick={() => chiamaPerConto(g)}
+                          disabled={loading}
+                          className="fm-btn fm-btn-primary fm-btn-sm"
+                        >
+                          Chiama
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

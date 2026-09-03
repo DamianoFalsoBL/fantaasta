@@ -703,6 +703,15 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
             83px, insieme 45. Da sm in su tornano incolonnati, dove lo spazio
             non manca. */}
         <div className="relative flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1 border-b border-line-hi bg-panel-hi px-3 py-2 text-center sm:block sm:px-4 sm:py-4">
+          {/* Il tag su una riga sua, sopra tutto, invece che in alto a destra:
+              posizionato in assoluto finiva in linea con il nome e i dati, e
+              sul telefono rubava larghezza proprio al nome del giocatore, che
+              è la cosa più grande del riquadro. */}
+          {isChiamata && (
+            <div className="w-full basis-full sm:mb-1.5">
+              <span className="fm-chip fm-chip-ambra uppercase">Prenotato</span>
+            </div>
+          )}
           <h2 className="fm-title text-xl sm:text-3xl">{asta.giocatori.nome}</h2>
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-sm text-ink-mid sm:mt-1.5">
             <span>{asta.giocatori.squadra}</span>
@@ -717,11 +726,6 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
             <span className="text-ink-dim">&bull;</span>
             <RuoliGiocatore ruolo={asta.giocatori.ruolo} ruoloMantra={asta.giocatori.ruolo_mantra} />
           </div>
-          {isChiamata && (
-            <div className="fm-chip fm-chip-ambra absolute right-3 top-3 uppercase">
-              Prenotato
-            </div>
-          )}
         </div>
 
         <div className="p-3 sm:p-6">
