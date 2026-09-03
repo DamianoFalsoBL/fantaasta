@@ -1616,6 +1616,10 @@ e' un difetto.
       **Atteso:** il campo di ricerca ha l'etichetta *Ricerca* sopra ed e'
       allineato con Ruolo, Squadra ed Eta'. Prima era piu' in basso degli altri.
 - [ ] Lo stesso in **Svincolati** e **Sommario Aste**.
+- [ ] In **Sommario Aste**, scheda *Da assegnare*: guarda l'ordine e la tendina
+      *Ordina per*.
+      **Atteso:** dal piu' caro, e la tendina offre gli stessi ordinamenti delle
+      altre liste.
 - [ ] Da telefono.
       **Atteso:** l'etichetta **non** si vede — il segnaposto dice gia' cosa ci
       va, e quei pixel valgono una riga di lista.

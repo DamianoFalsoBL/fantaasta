@@ -6,6 +6,7 @@ import LogoSquadra from '@/components/LogoSquadra'
 import SceltaRuoli from '@/components/SceltaRuoli'
 import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
+import { ordinaGiocatori, OPZIONI_ORDINE, type ColonnaOrdine, type Verso } from '@/utils/ordinamento'
 
 export type RigaAsta = {
   id: number
@@ -43,6 +44,13 @@ export default function AsteClient({
   const [nome, setNome] = useState('')
   // Un elenco: si filtra per piu' ruoli insieme, con la regola «almeno uno».
   const [ruolo, setRuolo] = useState<string[]>([])
+  // Dal piu' caro, come in /svincolati e /buste: qui si guarda chi resta da
+  // assegnare, e la domanda e' quanto costa, non che lettera comincia.
+  // Nessun rischio di riordino visibile sotto gli occhi: la pagina server passa
+  // le righe grezze e a ordinarle e' sempre questo componente, gia' al primo
+  // disegno. E' il motivo per cui qui non serve un `.order()` accordato.
+  const [colonna, setColonna] = useState<ColonnaOrdine>('quotazione')
+  const [verso, setVerso] = useState<Verso>('desc')
   const [squadraFanta, setSquadraFanta] = useState('')
   const [soloContesi, setSoloContesi] = useState(false)
   const [soloMie, setSoloMie] = useState(false)
@@ -58,7 +66,7 @@ export default function AsteClient({
   }, [righe])
 
   const filtrate = useMemo(() => {
-    return righe.filter((r) => {
+    const scelte = righe.filter((r) => {
       if (nome && !r.nome.toLowerCase().includes(nome.toLowerCase())) return false
       if (!ruoloCorrisponde(ruolo, r.ruolo, r.ruolo_mantra)) return false
       if (squadraFanta && !r.contendenti.includes(squadraFanta)) return false
@@ -66,7 +74,8 @@ export default function AsteClient({
       if (soloMie && !r.inMiaLista) return false
       return true
     })
-  }, [righe, nome, ruolo, squadraFanta, soloContesi, soloMie])
+    return ordinaGiocatori(scelte, colonna, verso)
+  }, [righe, nome, ruolo, squadraFanta, soloContesi, soloMie, colonna, verso])
 
   // Quanti filtri sono attivi oltre la ricerca: è il numero sul pulsante che
   // apre il pannello sul telefono.
@@ -143,6 +152,7 @@ export default function AsteClient({
       <PannelloFiltri
         attivi={filtriAttivi}
         onAzzera={azzeraFiltri}
+        griglia="md:grid-cols-4"
         ricerca={
           <>
             {/* Sul telefono l'etichetta resta solo per i lettori di schermo: il
@@ -181,7 +191,27 @@ export default function AsteClient({
             {squadreFanta.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-        <div className="flex flex-wrap gap-4 md:col-span-3">
+        <div>
+          <label htmlFor="a-ordine" className="fm-label mb-1 block">Ordina per</label>
+          <select
+            id="a-ordine"
+            className="fm-select"
+            value={`${colonna}:${verso}`}
+            onChange={(e) => {
+              const [c, v] = e.target.value.split(':')
+              setColonna(c as ColonnaOrdine)
+              setVerso(v as Verso)
+            }}
+          >
+            {OPZIONI_ORDINE.map((o) => (
+              <option key={o.valore} value={o.valore}>{o.etichetta}</option>
+            ))}
+          </select>
+        </div>
+        {/* `md:col-span-4` e non 3: con la tendina dell'ordinamento le colonne
+            della griglia sono passate da tre a quattro, e le due caselle
+            devono continuare a prendere tutta la riga sotto. */}
+        <div className="flex flex-wrap gap-4 md:col-span-4">
           <label className="flex items-center gap-2 text-sm font-medium text-ink-mid">
             <input type="checkbox" className="rounded" checked={soloContesi} onChange={(e) => setSoloContesi(e.target.checked)} />
             Solo giocatori contesi
