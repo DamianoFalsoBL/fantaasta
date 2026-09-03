@@ -319,27 +319,31 @@ Chieste il 2 settembre. **Due sono state fatte lo stesso giorno** — l'ordine
 per crediti e il filtro per piu' ruoli, vedi *Fatto di recente*. Restano queste,
 con il contesto per ripartire senza rifare la ricerca.
 
-### I loghi esteri sono pronti ma dormono
+### Gli stemmi esteri sono in uso: come tenerli in piedi
 
-I 27 stemmi di Premier, Liga, Ligue 1 e Bundesliga sono in `public/loghi/` e
-mappati in `LogoSquadra.tsx`. **Nel listone di oggi non c'e' nessun giocatore di
-quelle squadre**, quindi non si vedranno finche' non si importa un listone che
-le contiene.
+Dal listone del 2 settembre le squadre sono **37** e hanno tutte lo stemma
+(`scripts/prova-abbinamento-loghi.mjs`, che legge i nomi **dal database** e non
+da un elenco scritto a mano).
 
-**Cosa controllare quel giorno:** i nomi con cui il listone scrive le squadre.
-`chiave()` normalizza da se' — minuscolo, accenti via, spazi in trattini — e su
-31 nomi plausibili l'abbinamento riesce tutte le volte
-(`scripts/prova-abbinamento-loghi.mjs`). Ma abbreviazioni come «Man City»,
-«PSG» o «Inter Milan» non le indovina nessuno: vanno aggiunte come voci in piu'
-che puntano allo stesso file, come `como: 'como-1907'`.
+**La lezione:** la chiave non e' il nome ufficiale del club, e' **come lo scrive
+il listone**. Quello italiano traduce — «Bayern Monaco», «Lipsia», «Stoccarda»,
+«Barcellona», «Olympique Marsiglia», «Racing Strasburgo», «Athletic Bilbao»,
+«Betis», «Eintracht» — e con le sole chiavi inglesi nove squadre su trentasette
+restavano senza. Dove i due nomi divergono ci sono due voci verso lo stesso
+file, cosi' regge anche un listone in inglese.
 
-**Un caso noto:** il Tottenham ha luminanza 34 e zero pixel chiari, quindi sul
-fondo scuro si legge male. **Non va messo in `STEMMI_TUTTI_NERI`**: non e' nero
-pieno ma blu notte, e `invert` lo ribalterebbe in un giallino irriconoscibile.
-Se servira', la strada e' un alone chiaro dietro l'immagine.
+**Al prossimo listone si rilancia quello script prima di guardare le pagine:**
+uno stemma mancante non somiglia a un guasto, la riga si disegna lo stesso
+senza immagine.
 
-`scripts/prova-luminanza-loghi.mjs` rimisura tutto senza bisogno del browser:
-legge i PNG con `zlib`, tavolozza compresa.
+**Se rinomini un file** in `public/loghi/`, la voce di mappa che lo cita va
+aggiornata: lo script segnala anche le voci che puntano a file inesistenti, ed
+e' cosi' che sono state trovate le sei rinominate a mano.
+
+**Tottenham:** blu notte, luminanza 34 su un fondo a 13, cioe' 2,2:1. Non e'
+invertibile — `invert` vale solo sul nero pieno — quindi ha un alone chiaro
+(`STEMMI_SCURI` + `.fm-logo-alone`). Il Liverpool, secondo piu' scuro in uso, e'
+a 71 (4,2:1) e non serve.
 
 ### DA SPINGERE SUBITO: `20260902150000_prenota_chiamata_una_sola.sql`
 

@@ -363,6 +363,19 @@
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-neon) 20%, transparent);
   }
 
+  /* L'alone per gli stemmi scuri ma colorati (vedi STEMMI_SCURI in
+     LogoSquadra.tsx). Due ombre sottili invece di una sola piu' larga: a
+     18 pixel una sfocatura grande impasta il disegno, mentre due contorni
+     stretti lo staccano dal fondo lasciandolo nitido.
+
+     `drop-shadow` e non un fondo pieno: segue la sagoma, quindi non disegna
+     un quadrato bianco attorno a uno stemma che quadrato non e'. */
+  .fm-logo-alone {
+    filter:
+      drop-shadow(0 0 .5px rgba(255, 255, 255, .95))
+      drop-shadow(0 0 1.5px rgba(255, 255, 255, .55));
+  }
+
   /* ------------------------------------------------------- SCELTA RUOLI
      Il filtro dei ruoli a scelta multipla, costruito su <details>.
 

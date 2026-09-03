@@ -47,12 +47,16 @@ const FILE_PER_SQUADRA: Record<string, string> = {
   // di queste squadre**: restano inerti finche' non si importa un listone che
   // le contiene, e una squadra senza voce qui non disegna nulla.
   //
-  // Le chiavi sono i nomi dei file, che gia' seguono la forma normalizzata
-  // (minuscolo, trattini). `chiave()` qui sotto trasforma "Real Madrid" in
-  // "real-madrid" e "Bayern München" in "bayern-munchen", quindi i nomi piu'
-  // comuni combaciano da soli. **Quelli che il listone scrivera' diversamente
-  // — "Man City", "PSG", "Inter Milan" — vanno aggiunti come voci in piu' che
-  // puntano allo stesso file**, come `como: 'como-1907'` qui sopra.
+  // **La chiave e' il nome che sta nel listone, non quello ufficiale.** Il
+  // listone italiano traduce: «Bayern Monaco», «Lipsia», «Stoccarda»,
+  // «Barcellona», «Olympique Marsiglia». Verificato sul listone importato il
+  // 2 settembre, dove nove squadre su trentasette non trovavano lo stemma
+  // proprio per questo.
+  //
+  // Dove il nome italiano e quello del file divergono ci sono **due voci verso
+  // lo stesso file**: la seconda copre il caso di un listone scritto in
+  // inglese, e costa una riga. Stesso motivo per cui esiste `como: 'como-1907'`.
+  // Premier League
   arsenal: 'arsenal',
   'aston-villa': 'aston-villa',
   bournemouth: 'bournemouth',
@@ -64,25 +68,40 @@ const FILE_PER_SQUADRA: Record<string, string> = {
   newcastle: 'newcastle',
   tottenham: 'tottenham',
 
+  // Liga. Il listone italiano traduce, e la chiave e' il nome che sta nel
+  // listone: la colonna «squadra» dei giocatori, non il nome ufficiale.
+  'athletic-bilbao': 'athletic-club',
   'athletic-club': 'athletic-club',
   'atletico-madrid': 'atletico-madrid',
+  barcellona: 'barcelona',
   barcelona: 'barcelona',
-  'real-betis': 'real-betis',
+  betis: 'betis',
+  'real-betis': 'betis',
   'real-madrid': 'real-madrid',
   villarreal: 'villarreal',
 
+  // Ligue 1
   marseille: 'marseille',
+  'olympique-marsiglia': 'marseille',
   monaco: 'monaco',
   'paris-saint-germain': 'paris-saint-germain',
-  'rc-strasbourg': 'rc-strasbourg',
+  'racing-strasburgo': 'strasbourg',
+  strasbourg: 'strasbourg',
   rennes: 'rennes',
 
+  // Bundesliga
   'bayer-leverkusen': 'bayer-leverkusen',
-  'bayern-munchen': 'bayern-munchen',
+  'bayern-monaco': 'bayern-monaco',
+  'bayern-munchen': 'bayern-monaco',
   'borussia-dortmund': 'borussia-dortmund',
-  'eintracht-frankfurt': 'eintracht-frankfurt',
-  'rb-leipzig': 'rb-leipzig',
-  'vfb-stuttgart': 'vfb-stuttgart',
+  eintracht: 'eintracht',
+  'eintracht-frankfurt': 'eintracht',
+  lipsia: 'leipzig',
+  leipzig: 'leipzig',
+  'rb-leipzig': 'leipzig',
+  stoccarda: 'stuttgart',
+  stuttgart: 'stuttgart',
+  'vfb-stuttgart': 'stuttgart',
 }
 
 /**
@@ -118,6 +137,21 @@ function chiave(squadra: string): string {
  */
 const STEMMI_TUTTI_NERI = new Set(['juventus'])
 
+/**
+ * Stemmi scuri ma **colorati**, che su fondo scuro si leggono male e che
+ * `invert` rovinerebbe invece di salvare.
+ *
+ * Il Tottenham e' blu notte: luminanza 34 su un fondo a 13, cioe' circa 2,2:1.
+ * Invertirlo darebbe un giallino irriconoscibile — `invert` funziona solo sul
+ * nero pieno. Qui si aggiunge un alone chiaro attorno alla sagoma, che stacca
+ * il disegno dal fondo **senza toccarne i colori**.
+ *
+ * La soglia e' la luminanza sotto 50 misurata da
+ * `scripts/prova-luminanza-loghi.mjs`. Il Liverpool, secondo piu' scuro fra
+ * quelli in uso, sta a 71 (circa 4,2:1) e non ne ha bisogno.
+ */
+const STEMMI_SCURI = new Set(['tottenham'])
+
 // Rimisurati tutti e 51 i file il 2 settembre con
 // `scripts/prova-luminanza-loghi.mjs`, che legge i PNG senza browser.
 // La Juventus resta l'unica squadra a luminanza 0 e zero pixel chiari.
@@ -152,7 +186,7 @@ export default function LogoSquadra({ squadra }: { squadra: string | null | unde
       decoding="async"
       className={`inline-block h-[18px] w-[18px] shrink-0 object-contain align-text-bottom ${
         STEMMI_TUTTI_NERI.has(file) ? 'invert' : ''
-      }`}
+      } ${STEMMI_SCURI.has(file) ? 'fm-logo-alone' : ''}`}
     />
   )
 }
