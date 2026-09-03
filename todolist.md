@@ -346,6 +346,25 @@ perche' lo stemma della Juventus e' tutto nero e su fondo scuro sparisce. La
 luminanza di ogni logo nuovo va **misurata** (l'ultima volta su canvas), non
 guardata a occhio.
 
+### DA SPINGERE SUBITO: `20260902150000_prenota_chiamata_una_sola.sql`
+
+**Finche' non e' spinta, nessun manager riesce a chiamare un giocatore.**
+
+`CREATE OR REPLACE FUNCTION` con un parametro in piu' **non sostituisce** la
+funzione: ne crea una seconda. Dopo il push del 2 settembre a database ce n'erano
+due — `prenota_chiamata(integer)` e `prenota_chiamata(integer, uuid)` — e
+PostgREST, ricevendo la chiamata con il solo `p_giocatore_id`, risponde «Could
+not choose the best candidate function». La migration fa il DROP della vecchia.
+
+**Trappola da ricordare:** aggiungere un parametro a una funzione esistente non
+e' mai una sostituzione. O si tiene la stessa firma, o si fa il DROP esplicito
+**nella stessa migration**. Non e' bastato copiare il corpo alla lettera: era la
+firma il problema, e nessuna delle regole che ci eravamo dati la copriva.
+
+Controllate le altre funzioni toccate di recente — `avvia_asta_admin`,
+`chiudi_asta`, `avvia_timer_chiamata`, `genera_ordine_chiamata`,
+`admin_imposta_turno`: nessuna e' sdoppiata, perche' nessuna ha cambiato firma.
+
 ### Il push di tre migration
 
 Da fare con `npx supabase db push` — lo fa l'utente:
