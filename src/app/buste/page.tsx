@@ -61,8 +61,10 @@ export default function BustePage() {
   // reparti scoperti e il budget, e mancavano proprio squadra ed eta'.
   const [filtroSquadra, setFiltroSquadra] = useState('')
   const [filtroEta, setFiltroEta] = useState('')
-  const [colonna, setColonna] = useState<ColonnaOrdine>('nome')
-  const [verso, setVerso] = useState<Verso>('asc')
+  // Combacia con l'`.order()` del caricamento: divergendo, la lista si
+  // riordinerebbe da sé appena arrivano i dati.
+  const [colonna, setColonna] = useState<ColonnaOrdine>('quotazione')
+  const [verso, setVerso] = useState<Verso>('desc')
   const [giocatoriLiberi, setGiocatoriLiberi] = useState<Giocatore[]>([])
   const [selezionati, setSelezionati] = useState<Giocatore[]>([])
   // Gli id che il server ha registrato, non quelli che si vedono a schermo:
@@ -180,6 +182,14 @@ export default function BustePage() {
         .select('*')
         .eq('stato', 'LIBERO')
         .eq('fuori_lista', false)
+        // Dal piu' caro, come in /svincolati: compilando la busta si guarda
+        // prima chi vale. Da tenere d'accordo con `colonna`/`verso` qui sotto.
+        .order('quotazione', { ascending: false })
+        // Il nome come secondo criterio, e non e' un dettaglio: le quotazioni
+        // pareggiano moltissimo (decine di giocatori a 1) e Postgres non
+        // risolve i pari, mentre `ordinaGiocatori` li risolve sul nome. Senza
+        // questa riga l'elenco si riordinerebbe da se' appena il client
+        // ridisegna, che e' proprio cio' che si vuole evitare.
         .order('nome')
 
       // Via anche chi è già in coda per l'asta. Qui non è una questione di

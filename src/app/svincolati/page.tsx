@@ -16,6 +16,16 @@ export default async function SvincolatiPage() {
     .select('*')
     .eq('stato', 'LIBERO')
     .eq('fuori_lista', false)
+    // Dal piu' caro e non in ordine alfabetico: chi apre gli svincolati cerca
+    // chi vale, non una lettera. **Va tenuto d'accordo con lo stato iniziale
+    // in SvincolatiClient**: se i due divergono, l'elenco si riordina da solo
+    // un istante dopo il caricamento, sotto gli occhi di chi guarda.
+    .order('quotazione', { ascending: false })
+    // Il nome come secondo criterio, e non e' un dettaglio: le quotazioni
+    // pareggiano moltissimo (decine di giocatori a 1) e Postgres non
+    // risolve i pari, mentre `ordinaGiocatori` li risolve sul nome. Senza
+    // questa riga l'elenco si riordinerebbe da se' appena il client
+    // ridisegna, che e' proprio cio' che si vuole evitare.
     .order('nome')
 
   // Lo stato 'LIBERO' non basta a dire "prendibile": un conteso resta libero

@@ -43,10 +43,12 @@ export default function SvincolatiClient({
   const [searchSquadra, setSearchSquadra] = useState('')
   const [searchRuolo, setSearchRuolo] = useState('')
   const [searchEta, setSearchEta] = useState('')
-  // Il valore iniziale non è una scelta: è l'ordine con cui la pagina server
-  // consegna già i dati (`.order('nome')`), così l'aspetto non cambia da solo.
-  const [colonna, setColonna] = useState<Colonna>('nome')
-  const [verso, setVerso] = useState<Verso>('asc')
+  // Il valore iniziale non è una scelta libera: **deve combaciare con l'ordine
+  // con cui la pagina server consegna i dati**
+  // (`.order('quotazione', { ascending: false })`), altrimenti l'elenco si
+  // riordina da sé un istante dopo il caricamento.
+  const [colonna, setColonna] = useState<Colonna>('quotazione')
+  const [verso, setVerso] = useState<Verso>('desc')
   // Un Set e non un array: la stella si disegna 215 volte e ogni riga chiede
   // "ci sono dentro?".
   const [preferiti, setPreferiti] = useState<Set<number>>(new Set(preferitiIniziali))
