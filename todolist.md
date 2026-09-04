@@ -319,6 +319,26 @@ Chieste il 2 settembre. **Due sono state fatte lo stesso giorno** — l'ordine
 per crediti e il filtro per piu' ruoli, vedi *Fatto di recente*. Restano queste,
 con il contesto per ripartire senza rifare la ricerca.
 
+### Filtro per campionato in /svincolati, /buste, /aste
+
+Chiesto il 4 settembre confrontando il sito con un concorrente. Con 5 leghe nel
+listone (Serie A, Premier, Liga, Ligue 1, Bundesliga) scorrere una tendina
+squadra da 37 voci per trovare "solo i francesi" e' scomodo quanto cercare un
+nome nella lista intera prima dei filtri.
+
+**Il pezzo mancante non e' il dato, e' l'estrazione.** Il database non ha una
+colonna "campionato" — solo `squadra` (il club) — ma la mappa club-lega esiste
+gia' **implicitamente** in `src/components/LogoSquadra.tsx`, organizzata a
+sezioni commentate (`// Premier League`, `// Liga`, `// Ligue 1`,
+`// Bundesliga`). Va estratta in una mappa a parte, riusabile dal filtro.
+
+I quattro loghi dei campionati sono **gia' caricati e inutilizzati**:
+`public/loghi/{bundesliga,la-liga,ligue-1,serie-a}.png` (verificato con
+`scripts/prova-abbinamento-loghi.mjs`, sezione "file presenti e mai usati").
+
+Si aggancia a `PannelloFiltri` come un filtro in piu', sul modello di quello
+squadra gia' presente in tutte e tre le pagine.
+
 ### Scegliere quali preferiti entrano in busta
 
 Il pulsante *Aggiungi i preferiti* in `/buste` deve aprire una finestra con
