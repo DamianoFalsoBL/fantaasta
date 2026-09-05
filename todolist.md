@@ -529,6 +529,73 @@ elenco, proprio per permettere questa conversione una pagina alla volta.
 
 ---
 
+## Da fare, deciso il 4 settembre
+
+Proposte confrontando il sito con un concorrente, discusse e filtrate insieme:
+tre accettate, due lasciate fuori (statistiche e upload logo fantasquadra — non
+scartate per sempre, solo non prioritarie oggi).
+
+### Il sito installabile come app
+
+Oggi non c'e' ne' `manifest.json` ne' service worker: si parte da zero. Serve
+un manifest (nome, icone 192/512px — `public/icon.svg` gia' esiste come base,
+va esportato in PNG alle taglie giuste — colori, `display: standalone`,
+`start_url`) collegato dai metadata di Next in `src/app/layout.tsx`.
+
+**Da tenere fuori, di proposito: nessun service worker che mette in cache
+pagine o dati.** Il sito vive di realtime Supabase, e una pagina servita dalla
+cache durante un'asta mostrerebbe prezzi vecchi — e' lo stesso genere di rischio
+gia' evitato per la riga di stato (mai leggere l'orologio durante il render, mai
+fidarsi di un dato non appena arrivato). Qui si punta solo
+all'installabilita': icona in home, apertura a schermo intero senza barra del
+browser. Se un giorno servira' anche l'offline, e' un progetto a parte con la
+sua cautela sulla invalidazione della cache.
+
+### Occhiolino nel cambio password
+
+`src/components/CambiaPassword.tsx` ha tre campi password senza modo di
+vederli in chiaro. Non e' da inventare: il pattern (👁️/🙈, stato
+`showPassword`) **esiste gia'** in `src/components/LoginForm.tsx:92` — qui
+manca solo la stessa cosa applicata ai tre campi (attuale, nuova, conferma).
+
+### Pagina profilo, per ora solo il cambio password
+
+Spostare `<CambiaPassword />` da `/mia-rosa` (`src/app/mia-rosa/page.tsx:245`)
+a una pagina `/profilo` propria, raggiungibile dal menu utente nella NavBar.
+
+**Scope volutamente ridotto.** La richiesta originale accoppiava questa pagina
+all'upload del logo della fantasquadra, che e' rimasto fuori: e' la prima
+funzione di caricamento immagini del sito (oggi tutto passa da import
+CSV/XLSX), servirebbe uno storage con le sue policy, la scelta di chi puo'
+caricare, un limite di formato/dimensione, e un componente da mostrare ovunque
+compare il nome della fantasquadra. Roba da progettare a parte, non da
+accodare a uno spostamento di componente. Se si riprende, la pagina profilo e'
+gia' il posto giusto dove metterla.
+
+### L'ordine di chiamata durante un'asta viva, solo per l'admin
+
+**Verificato nel codice, non un'impressione:** in
+`src/components/TabelloneAsta.tsx:415-421` la barra dell'ordine (chi tocca,
+quanti turni mancano) sta dentro `if (!asta)` — appena un'asta e' viva il
+componente passa alla vista di rilancio e quella barra sparisce del tutto, per
+i manager. L'admin invece non la perde mai: il suo pannello in
+`src/app/admin/asta/page.tsx:253` non ha quella condizione, resta sempre
+visibile.
+
+Il calcolo (chi manca da chiamare, la propria posizione, quanti turni
+mancano — righe 421-435 dello stesso file) e' gia' scritto per il ramo
+`!asta`: va reso disponibile anche durante l'asta viva, in forma compatta,
+non riscritto da capo.
+
+**Nota di contesto:** `RigaStato` (la fascia sotto la barra, `descriviStato` in
+`src/utils/statoLega.ts`) omette di proposito il "poi tocca a…" quando un'asta
+e' aperta, per risparmiare una query — commento sul posto: "non c'e' nessuno a
+cui interessi il turno successivo adesso". Questa richiesta lo smentisce: puo'
+valer la pena rivedere anche quella scelta insieme a questa, non solo il
+tabellone.
+
+---
+
 ## Fatto di recente
 
 | Quando | Cosa |
