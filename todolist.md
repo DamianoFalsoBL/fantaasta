@@ -575,6 +575,26 @@ compilare, e la rigenerazione e' l'unica cosa che dice se combaciano davvero.
 
 ---
 
+### `prova-presenza.mts` fallisce se c'e' qualcuno collegato davvero
+
+Notato il 5 settembre rilanciando tutte le prove: due casi su otto falliscono —
+«due schede dello stesso manager restano una voce sola» e «chi non ha squadra
+non compare nella mappa».
+
+**Non e' un difetto di `presenza.ts`**, che non si tocca dal 2 settembre. La
+prova si collega al canale vero `presenza-lega`, che ha un nome fisso e non per
+sessione: qualunque browser aperto sul sito in quel momento e' una presenza in
+piu' nella mappa, e i due casi che contano le voci trovano un numero diverso da
+quello atteso. Con la lega collegata l'id estraneo si vede nell'output.
+
+**La scorciatoia sbagliata sarebbe rilassare gli attesi** fino a farli passare:
+i due casi che falliscono sono proprio quelli che verificano il comportamento
+interessante. La strada e' dare alla prova un topic suo — parametrizzando il
+nome del canale in `annuncia Presenza`/`ascoltaPresenza`, oggi costante — cosi'
+gira isolata da chi sta usando il sito.
+
+---
+
 ## Fatto di recente
 
 | Quando | Cosa |
