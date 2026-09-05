@@ -46,6 +46,11 @@ const VOCI_UTENTE: Voce[] = [
   // parola, e ci si dovrebbe fermare a leggere. Qui il vicino e' "Buste", che
   // e' il contesto giusto.
   { href: '/sommario-buste', label: 'Sommario Buste' },
+  // In fondo di proposito: e' l'unica voce che non serve a fare qualcosa
+  // durante l'asta: si guarda dopo, a bocce ferme. Messa accanto a "Tutte le
+  // Rose", dove pure starebbe per argomento, avrebbe spezzato la coppia
+  // "Tutte le Rose" / "La mia Rosa".
+  { href: '/statistiche', label: 'Statistiche' },
 ]
 
 // Senza emoji: erano un segnaposto in attesa di un'identita' visiva, e

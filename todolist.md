@@ -540,8 +540,10 @@ elenco, proprio per permettere questa conversione una pagina alla volta.
 
 Proposte confrontando il sito con un concorrente, discusse e filtrate insieme.
 **Tre delle quattro sono state fatte il 5 settembre** — occhiolino, pagina
-profilo e sito installabile, vedi *Fatto di recente*. Restano fuori, non
-scartate per sempre: le statistiche e l'upload del logo fantasquadra.
+profilo e sito installabile, vedi *Fatto di recente*. **Le statistiche sono
+arrivate lo stesso giorno**, nate da tre domande fatte a voce (media eta',
+media crediti, media quotazioni) e diventate `/statistiche`. Resta fuori, non
+scartato per sempre, l'upload del logo fantasquadra.
 
 ### L'ordine di chiamata durante un'asta viva, solo per l'admin
 
@@ -635,6 +637,7 @@ messo subito dopo la guardia `is_admin()`, prima di leggere l'ordine.
 
 | Quando | Cosa |
 |---|---|
+| 5 set 2026 | Pagina Statistiche: eta', quotazioni e spesa d'asta di ogni squadra |
 | 5 set 2026 | Il sito si installa sul telefono, con icone proprie |
 | 5 set 2026 | Il profilo ha una pagina sua, dal chip col proprio nome |
 | 5 set 2026 | L'occhiolino anche nel cambio password |
