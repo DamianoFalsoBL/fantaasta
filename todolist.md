@@ -146,6 +146,12 @@ così si vede il risultato invece di indovinarlo.
 
 ### Modalita' di lega: asta libera oppure a buste
 
+> I riferimenti qui sotto citano **nomi di funzione e di variabile**, non numeri
+> di riga: le righe si spostano a ogni lavoro — quelle di `TabelloneAsta.tsx` e
+> `statoLega.ts` si sono gia' spostate il 5 settembre — e un numero sbagliato
+> manda a leggere il pezzo di codice accanto convinti che sia quello giusto.
+
+
 Chiesto il 5 settembre. Un interruttore nella dashboard super admin sceglie fra
 la lega di oggi (liste chiamate importate + buste) e un'**asta libera**: rose
 vuote, budget uguale, chi e' di turno chiama qualunque giocatore del listone.
@@ -171,7 +177,12 @@ funzione il 5 settembre:
 - `calcola_massimo_offribile` (`20260801220200_rpc_consolidate.sql:60-111`) a
   lista vuota **degrada esattamente nella formula dell'asta classica**,
   `crediti − (slot_liberi − 1) × costo_minimo`. Non va toccata;
-- `prenota_chiamata` non consulta mai le liste: funziona gia' cosi' com'e';
+- `prenota_chiamata` non consulta mai le liste: funziona gia' cosi' com'e'.
+  Dal 5 settembre ha anche il blocco di fine giro, che in asta libera **non
+  scatta mai**: `avanza_turno_chiamata` esce subito con l'ordine vuoto, quindi
+  il flag non si alza. Non e' un problema in piu', ma va saputo — sistemato il
+  punto 1 qui sotto, l'ordine non sara' piu' vuoto e il blocco comincera' a
+  contare anche li';
 - `idsInCodaAsta` e l'extra budget in NavBar degradano entrambi nel modo giusto.
 
 **Cosa si rompe, in ordine di gravita':**
@@ -182,21 +193,19 @@ funzione il 5 settembre:
    **salta il controllo del turno quando l'ordine e' vuoto** — chiunque
    potrebbe chiamare in qualsiasi momento. Va sganciato dal join, con criterio
    «rosa non completa». Stessa cosa per `avanza_turno_chiamata` (`:376-423`).
-2. **I rilanci disabilitati per tutti.** `TabelloneAsta.tsx:589`
-   (`isParticipant`) legge le righe grezze di `liste_aste` **senza il fallback
-   "vuoto vuol dire tutti"** che il server ha in `squadra_in_gara`. Righe 629 e
-   638: pulsanti bloccati con «Non sei fra i contendenti», mentre il server
+2. **I rilanci disabilitati per tutti.** `isParticipant` in `TabelloneAsta.tsx` legge le righe grezze di `liste_aste` **senza il fallback
+   "vuoto vuol dire tutti"** che il server ha in `squadra_in_gara`. I pulsanti di rilancio e ritiro restano bloccati con «Non sei fra i contendenti», mentre il server
    accetterebbe l'offerta. E' il punto singolo che oggi rende impossibile
    l'asta libera.
 3. **Manca un modo per chiamare.** Il pulsante «Chiama» sta solo dentro la
-   propria lista (`TabelloneAsta.tsx:558-572`), e «Prossime chiamate» in regia
+   propria lista (il pulsante «Chiama» dentro la propria lista in `TabelloneAsta.tsx`), e «Prossime chiamate» in regia
    pesca solo da `liste_aste` (`admin/asta/page.tsx:80-131`). Serve una ricerca
    sul listone intero — anche «Chiama per conto di» ne ha bisogno.
 4. **La fascia di stato direbbe il falso in cima a ogni pagina:** con
-   `squadreAttive` vuoto, `statoLega.ts:278-280` risponde **sempre** «Aste a
+   `squadreAttive` vuoto, il ramo «Aste a chiamata concluse» di `statoLega.ts` risponde **sempre** «Aste a
    chiamata concluse».
 5. **La chiusura anticipata per ritiri sparisce:** `isSoloLeft`
-   (`TabelloneAsta.tsx:250-254`, gemello in `statoLega.ts:240-241`) conta i
+   (`isSoloLeft` in `TabelloneAsta.tsx`, gemello in `statoLega.ts`) conta i
    contendenti dichiarati, a lista vuota e' sempre falso.
 
 **Trappola isolata da non dimenticare:** `admin_annulla_acquisto`
@@ -284,6 +293,14 @@ tornata.
   il super admin. **Scorciatoia sbagliata:** togliere il controllo dall'azione
   perché "tanto il pulsante non si vede" — quello è l'unico che protegge
   davvero.
+- **La Regia ha ancora la sua copia della fila dei turni.** Il 5 settembre la
+  barra dell'ordine e' diventata `src/components/BarraOrdine.tsx`, condivisa fra
+  le due viste di `TabelloneAsta`. `src/app/admin/asta/page.tsx` continua pero'
+  a disegnarsi le proprie pastiglie, e le sue **fanno una cosa in piu'**: sono
+  cliccabili e spostano il turno. Non e' quindi una copia da cancellare ma da
+  fondere, aggiungendo a `BarraOrdine` un modo di reagire al clic. **Scorciatoia
+  sbagliata:** rendere cliccabili le pastiglie anche per i manager, che non
+  hanno quel potere e riceverebbero un rifiuto dal database.
 - **Le intestazioni di tabella e la specificità.** `.fm-table thead th` vale
   0,1,2 e `.fm-num` 0,1,0: nella stessa `@layer` vince la prima, quindi
   un'intestazione marcata `fm-num` restava allineata a sinistra mentre i suoi
@@ -343,6 +360,12 @@ che si porta dietro un difetto proprio dove costa di più.
 Se un giorno si accorpa: `descriviStato()` andrebbe estesa con una modalità
 "estesa", non copiata.
 
+**Un pezzo si e' gia' unito il 5 settembre**, e vale come esempio del come: la
+fila dei turni e' diventata `src/components/BarraOrdine.tsx` con il conto in
+`src/utils/ordineChiamata.ts`, e le due viste di `TabelloneAsta` la
+condividono. La Regia no — vedi *Notato di sfuggita* — perche' le sue pastiglie
+fanno una cosa in piu'.
+
 ### La barra sa dei ritiri, ma non li vede tutti allo stesso modo
 
 **Risolto il 31 agosto, e piu' a buon mercato del previsto.** La voce diceva che
@@ -396,20 +419,14 @@ serata d'asta vera, insieme agli altri consumi.
 
 ## Da fare, deciso il 2 settembre
 
-Chieste il 2 settembre. **Due sono state fatte lo stesso giorno** — l'ordine
-per crediti e il filtro per piu' ruoli, vedi *Fatto di recente*. Restano queste,
-con il contesto per ripartire senza rifare la ricerca.
+Chieste il 2 settembre. **Quasi tutte sono state fatte**: l'ordine per crediti e
+il filtro per piu' ruoli lo stesso giorno, il filtro per campionato il 5
+settembre.
 
-### Manca il logo della Premier League
-
-Notato il 5 settembre facendo il filtro per campionato. In `public/loghi/` ci
-sono **quattro** loghi di campionato — `bundesliga`, `la-liga`, `ligue-1`,
-`serie-a` — e manca `premier-league.png`. Per questo il filtro nuovo e' fatto
-di sole scritte: una tendina con l'icona su quattro voci su cinque si legge
-come un errore, non come una scelta.
-
-Scaricato quel file, la tendina puo' diventare illustrata in tutte e tre le
-pagine. La mappa e i nomi stanno gia' in `src/utils/campionati.ts`.
+Restano **due cose da fare** — scegliere i preferiti che entrano in busta, e
+convertire `/trasferimenti` — piu' **due note da leggere prima di toccare**
+stemmi e funzioni del database, che stanno qui perche' e' qui che sono state
+imparate.
 
 ### Scegliere quali preferiti entrano in busta
 
@@ -482,12 +499,28 @@ senza immagine.
 aggiornata: lo script segnala anche le voci che puntano a file inesistenti, ed
 e' cosi' che sono state trovate le sei rinominate a mano.
 
+**Dal 5 settembre i posti da toccare sono due**, e non e' una svista: la
+riduzione del nome (`chiaveClub`) e la mappa club-campionato stanno in
+`src/utils/campionati.ts`, la mappa club-file resta in `LogoSquadra.tsx`. Sono
+due domande diverse — in che campionato gioca / che file disegno — e un club
+puo' avere risposta all'una e non all'altra: una neopromossa di Serie A entra
+subito nella prima, e nella seconda solo quando lo stemma e' stato scaricato.
+
 **Tottenham:** blu notte, luminanza 34 su un fondo a 13, cioe' 2,2:1. Non e'
 invertibile — `invert` vale solo sul nero pieno — quindi ha un alone chiaro
 (`STEMMI_SCURI` + `.fm-logo-alone`). Il Liverpool, secondo piu' scuro in uso, e'
 a 71 (4,2:1) e non serve.
 
 ### Trappola permanente: aggiungere un parametro non sostituisce la funzione
+
+> **Abitudine presa il 5 settembre:** dopo ogni `db push` si sondano le funzioni
+> toccate con la loro firma esatta. L'errore atteso e' quello di dominio
+> («Accesso negato», «Squadra non trovata»), che dimostra che la funzione
+> esiste, e' **una sola** ed e' entrata nel corpo. Un «Could not choose the best
+> candidate» e' il doppione; un «Could not find the function» e' la migration
+> che non e' passata. Costa dieci secondi e ha gia' evitato di scoprire il
+> doppione in asta.
+
 
 Pagata il 2 settembre, e va ricordata perche' **nessuna delle regole che ci
 eravamo dati la copriva**.
@@ -530,33 +563,27 @@ elenco, proprio per permettere questa conversione una pagina alla volta.
 ## Da fare, deciso il 4 settembre
 
 Proposte confrontando il sito con un concorrente, discusse e filtrate insieme.
-**Tre delle quattro sono state fatte il 5 settembre** — occhiolino, pagina
-profilo e sito installabile, vedi *Fatto di recente*. **Le statistiche sono
-arrivate lo stesso giorno**, nate da tre domande fatte a voce (media eta',
-media crediti, media quotazioni) e diventate `/statistiche`. Resta fuori, non
-scartato per sempre, l'upload del logo fantasquadra.
+**Sono state fatte tutte il 5 settembre** — occhiolino, pagina profilo, sito
+installabile e ordine di chiamata visibile anche a asta viva; le statistiche
+sono arrivate lo stesso giorno da tre domande fatte a voce e sono diventate
+`/statistiche`. Vedi *Fatto di recente*.
 
-### L'ordine di chiamata durante un'asta viva, solo per l'admin
+Resta fuori, non scartato per sempre, **l'upload del logo fantasquadra**.
 
-**Verificato nel codice, non un'impressione:** in
-`src/components/TabelloneAsta.tsx:415-421` la barra dell'ordine (chi tocca,
-quanti turni mancano) sta dentro `if (!asta)` — appena un'asta e' viva il
-componente passa alla vista di rilancio e quella barra sparisce del tutto, per
-i manager. L'admin invece non la perde mai: il suo pannello in
-`src/app/admin/asta/page.tsx:253` non ha quella condizione, resta sempre
-visibile.
+### Coda dell'ordine di chiamata: la fascia tace ancora, ad asta viva
 
-Il calcolo (chi manca da chiamare, la propria posizione, quanti turni
-mancano — righe 421-435 dello stesso file) e' gia' scritto per il ramo
-`!asta`: va reso disponibile anche durante l'asta viva, in forma compatta,
-non riscritto da capo.
+Rimasta aperta dopo il lavoro del 5 settembre, ed e' piu' piccola di quella
+chiusa. `descriviStato` (`src/utils/statoLega.ts`) omette di proposito il «poi
+tocca a…» quando un'asta e' aperta, per risparmiare una query — commento sul
+posto: «non c'e' nessuno a cui interessi il turno successivo adesso».
 
-**Nota di contesto:** `RigaStato` (la fascia sotto la barra, `descriviStato` in
-`src/utils/statoLega.ts`) omette di proposito il "poi tocca a…" quando un'asta
-e' aperta, per risparmiare una query — commento sul posto: "non c'e' nessuno a
-cui interessi il turno successivo adesso". Questa richiesta lo smentisce: puo'
-valer la pena rivedere anche quella scelta insieme a questa, non solo il
-tabellone.
+Su `/asta` la cosa non si sente piu': la barra compatta di `BarraOrdine` dice
+«Turno di X · poi Y» in fondo alla pagina. **Ma la fascia si vede da ogni
+pagina**, e chi durante un'asta sta guardando gli svincolati continua a non
+sapere quando tocchera' a lui.
+
+Va deciso se vale la query in piu'. Se si fa, il conto non va riscritto:
+`descriviTurno` in `src/utils/ordineChiamata.ts` lo fa gia', ed e' provato.
 
 ---
 
@@ -587,6 +614,21 @@ parte apposta.
 
 ---
 
+## Piccole, quando capita
+
+### Manca il logo della Premier League
+
+Notato il 5 settembre facendo il filtro per campionato. In `public/loghi/` ci
+sono **quattro** loghi di campionato — `bundesliga`, `la-liga`, `ligue-1`,
+`serie-a` — e manca `premier-league.png`. Per questo il filtro nuovo e' fatto
+di sole scritte: una tendina con l'icona su quattro voci su cinque si legge
+come un errore, non come una scelta.
+
+Scaricato quel file, la tendina puo' diventare illustrata in tutte e tre le
+pagine. La mappa e i nomi stanno gia' in `src/utils/campionati.ts`.
+
+---
+
 ## Prove che non si possono fidare
 
 ### `prova-presenza.mts` fallisce se c'e' qualcuno collegato davvero
@@ -614,12 +656,14 @@ gira isolata da chi sta usando il sito.
 
 | Quando | Cosa |
 |---|---|
+| 5 set 2026 | Spinte e verificate a database le tre migration del 5 settembre |
 | 5 set 2026 | I tetti automatici si combattono fra loro, e il pareggio si spiega |
 | 5 set 2026 | Il filtro campionato accetta piu' campionati insieme |
 | 5 set 2026 | Finito il giro, il turno si ferma e aspetta l'admin |
 | 5 set 2026 | Filtro per campionato in Svincolati, Buste e Sommario Aste |
 | 5 set 2026 | L'ordine di chiamata resta visibile anche con un'asta viva |
 | 5 set 2026 | Pagina Statistiche: eta', quotazioni e spesa d'asta di ogni squadra |
+| 5 set 2026 | Gli elementi della barra in alto hanno tutti la stessa altezza |
 | 5 set 2026 | Il sito si installa sul telefono, con icone proprie |
 | 5 set 2026 | Il profilo ha una pagina sua, dal chip col proprio nome |
 | 5 set 2026 | L'occhiolino anche nel cambio password |
