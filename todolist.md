@@ -144,6 +144,87 @@ così si vede il risultato invece di indovinarlo.
 
 ## Da decidere insieme
 
+### Modalita' di lega: asta libera oppure a buste
+
+Chiesto il 5 settembre. Un interruttore nella dashboard super admin sceglie fra
+la lega di oggi (liste chiamate importate + buste) e un'**asta libera**: rose
+vuote, budget uguale, chi e' di turno chiama qualunque giocatore del listone.
+
+**Prima del codice va deciso questo:** 14 squadre x 30 slot fanno **420 aste**.
+A un minuto scarso l'una sono **sette ore**, col timer dimezzato tre e mezza.
+E' esattamente il problema che le buste risolvono — riempiono la rosa in un
+colpo solo e all'asta mandano solo i contesi. Da capire se si accetta di
+spezzare l'asta in piu' serate, se in quella modalita' i timer si accorciano, o
+se la cosa si ferma qui.
+
+Secondo effetto dello stesso tipo: con tutti in gara su ogni giocatore, la
+chiusura anticipata «si sono ritirati tutti tranne uno» pretenderebbe tredici
+*Mi ritiro* per ogni asta. In pratica ogni asta andrebbe sempre a scadenza.
+
+**La buona notizia: il database e' gia' quasi pronto.** Verificato funzione per
+funzione il 5 settembre:
+
+- `squadra_in_gara` (`20260802140000_solo_partecipanti.sql:12-37`) con zero
+  righe in `liste_aste` restituisce **true per tutti** — il commento in testa
+  dice che e' voluto. Da li' passano `piazza_offerta_asta`, `abbandona_asta`,
+  `imposta_massimo_asta` e `risolvi_massimi`: tutte gia' corrette;
+- `calcola_massimo_offribile` (`20260801220200_rpc_consolidate.sql:60-111`) a
+  lista vuota **degrada esattamente nella formula dell'asta classica**,
+  `crediti − (slot_liberi − 1) × costo_minimo`. Non va toccata;
+- `prenota_chiamata` non consulta mai le liste: funziona gia' cosi' com'e';
+- `idsInCodaAsta` e l'extra budget in NavBar degradano entrambi nel modo giusto.
+
+**Cosa si rompe, in ordine di gravita':**
+
+1. **Nessuno sarebbe mai di turno.** `genera_ordine_chiamata`
+   (`20260801220200_rpc_consolidate.sql:426-460`) costruisce l'ordine con un
+   `JOIN liste_aste`: a tabella vuota l'ordine e' `{}`. E `prenota_chiamata`
+   **salta il controllo del turno quando l'ordine e' vuoto** — chiunque
+   potrebbe chiamare in qualsiasi momento. Va sganciato dal join, con criterio
+   «rosa non completa». Stessa cosa per `avanza_turno_chiamata` (`:376-423`).
+2. **I rilanci disabilitati per tutti.** `TabelloneAsta.tsx:589`
+   (`isParticipant`) legge le righe grezze di `liste_aste` **senza il fallback
+   "vuoto vuol dire tutti"** che il server ha in `squadra_in_gara`. Righe 629 e
+   638: pulsanti bloccati con «Non sei fra i contendenti», mentre il server
+   accetterebbe l'offerta. E' il punto singolo che oggi rende impossibile
+   l'asta libera.
+3. **Manca un modo per chiamare.** Il pulsante «Chiama» sta solo dentro la
+   propria lista (`TabelloneAsta.tsx:558-572`), e «Prossime chiamate» in regia
+   pesca solo da `liste_aste` (`admin/asta/page.tsx:80-131`). Serve una ricerca
+   sul listone intero — anche «Chiama per conto di» ne ha bisogno.
+4. **La fascia di stato direbbe il falso in cima a ogni pagina:** con
+   `squadreAttive` vuoto, `statoLega.ts:278-280` risponde **sempre** «Aste a
+   chiamata concluse».
+5. **La chiusura anticipata per ritiri sparisce:** `isSoloLeft`
+   (`TabelloneAsta.tsx:250-254`, gemello in `statoLega.ts:240-241`) conta i
+   contendenti dichiarati, a lista vuota e' sempre falso.
+
+**Trappola isolata da non dimenticare:** `admin_annulla_acquisto`
+(`20260802170000_buste_esito_finale.sql:126-133`) reinserisce l'ex vincitore in
+`liste_aste` se nessun altro ha il giocatore in lista. In asta libera creerebbe
+righe dove non ce n'erano, e da quel momento `squadra_in_gara` diventa
+**esclusiva**: sul giocatore riaperto potrebbe rilanciare solo lui. Va
+condizionato alla modalita'.
+
+**Cosa invece e' facile:** spegnere le buste costa zero — `fase_buste_aperta` e'
+gia' `false` di default e nessuna funzione dell'asta dal vivo dipende dalle
+buste (e' il contrario: `admin_elabora_buste` e' l'unico ponte che alimenta
+`liste_aste`). E gli import passano da tre a due: `importAste`
+(`src/app/admin/actions.ts:383-529`) e' l'unico che popola `liste_aste`.
+
+**Il modello per l'interruttore** e' `fase_mercato_aperta`, non
+`fase_buste_aperta`: colonna in `regole_lega` sullo stampo di
+`20260807100000_trasferimenti.sql:26-30`, RPC con guardia `is_super_admin()`
+sullo stampo di `admin_toggle_mercato`
+(`20260808140000_trasferimenti_funzione.sql:103-121`), helper di lettura
+condiviso come `trasferimentiAttivi` (`src/utils/trasferimenti.ts:23`), e un
+flag `soloSeAstaBuste` nel `type Voce` della NavBar
+(`src/components/NavBar.tsx:20-26`) per far sparire `/buste` e
+`/sommario-buste`, esattamente come si fa oggi con i trasferimenti.
+
+**Da rigenerare** dopo la migration: `src/utils/supabase/database.types.ts`,
+altrimenti il client tipizzato rifiuta la colonna nuova.
+
 ### La busta si consegna tutta o niente: teniamo la regola?
 
 `submit_buste` pretende **esattamente** tanti giocatori quanti sono gli slot
