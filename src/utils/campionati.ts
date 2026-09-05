@@ -97,12 +97,25 @@ export function nomeCampionato(id: Campionato): string {
 }
 
 /**
- * Il filtro. Stringa vuota vuol dire «tutti», come nelle altre tendine.
+ * Il filtro. Elenco vuoto vuol dire «tutti», come per i ruoli.
+ *
+ * Accetta un valore solo o un elenco: con l'elenco basta che il club sia in
+ * **uno** dei campionati scelti. Stessa regola di `ruoloCorrisponde`, ed e' la
+ * ragione per cui la firma e' la stessa — chiedere «Premier e Bundesliga»
+ * significa vederli entrambi, non l'intersezione, che sarebbe sempre vuota.
  *
  * Un club fuori elenco non passa mai un filtro attivo: e' l'unico
  * comportamento onesto, perche' dire di quale campionato sia sarebbe inventare.
  */
-export function campionatoCorrisponde(squadra: string | null | undefined, filtro: string): boolean {
-  if (!filtro) return true
-  return campionatoDi(squadra) === filtro
+export function campionatoCorrisponde(
+  squadra: string | null | undefined,
+  filtro: string | string[],
+): boolean {
+  // `Array.isArray` e non un controllo di verita': un array vuoto e' truthy, ed
+  // e' l'inciampo che il 4 settembre faceva contare «1 filtro attivo» per
+  // sempre nel pannello dei filtri.
+  const scelti = Array.isArray(filtro) ? filtro : filtro ? [filtro] : []
+  if (scelti.length === 0) return true
+  const lega = campionatoDi(squadra)
+  return lega !== null && scelti.includes(lega)
 }

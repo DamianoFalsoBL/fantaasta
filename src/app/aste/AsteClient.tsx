@@ -5,7 +5,8 @@ import RuoliGiocatore from '@/components/RuoliGiocatore'
 import LogoSquadra from '@/components/LogoSquadra'
 import SceltaRuoli from '@/components/SceltaRuoli'
 import PannelloFiltri from '@/components/PannelloFiltri'
-import { CAMPIONATI, campionatoCorrisponde } from '@/utils/campionati'
+import { campionatoCorrisponde } from '@/utils/campionati'
+import SceltaCampionati from '@/components/SceltaCampionati'
 import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
 import { ordinaGiocatori, OPZIONI_ORDINE, type ColonnaOrdine, type Verso } from '@/utils/ordinamento'
 
@@ -52,7 +53,8 @@ export default function AsteClient({
   // disegno. E' il motivo per cui qui non serve un `.order()` accordato.
   const [colonna, setColonna] = useState<ColonnaOrdine>('quotazione')
   const [verso, setVerso] = useState<Verso>('desc')
-  const [campionato, setCampionato] = useState('')
+  // Un elenco, come i ruoli: «almeno uno dei campionati scelti».
+  const [campionato, setCampionato] = useState<string[]>([])
   const [squadraFanta, setSquadraFanta] = useState('')
   const [soloContesi, setSoloContesi] = useState(false)
   const [soloMie, setSoloMie] = useState(false)
@@ -85,12 +87,12 @@ export default function AsteClient({
   const filtriAttivi =
     // `ruolo.length` e non `ruolo`: un array vuoto e' truthy, e il contatore
     // avrebbe detto «1 filtro attivo» anche senza nessun ruolo scelto.
-    (ruolo.length > 0 ? 1 : 0) + (campionato ? 1 : 0) + (squadraFanta ? 1 : 0) +
+    (ruolo.length > 0 ? 1 : 0) + (campionato.length > 0 ? 1 : 0) + (squadraFanta ? 1 : 0) +
     (soloContesi ? 1 : 0) + (soloMie ? 1 : 0)
 
   const azzeraFiltri = () => {
     setRuolo([])
-    setCampionato('')
+    setCampionato([])
     setSquadraFanta('')
     setSoloContesi(false)
     setSoloMie(false)
@@ -188,15 +190,7 @@ export default function AsteClient({
           {/* Qui non c'e' la tendina del club, quindi il campionato non deve
               disfare nessun'altra scelta: filtra da solo. */}
           <label htmlFor="a-campionato" className="fm-label mb-1 block">Campionato</label>
-          <select
-            id="a-campionato"
-            className="fm-select"
-            value={campionato}
-            onChange={(e) => setCampionato(e.target.value)}
-          >
-            <option value="">Tutti i campionati</option>
-            {CAMPIONATI.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-          </select>
+          <SceltaCampionati id="a-campionato" scelti={campionato} onCambia={setCampionato} />
         </div>
         <div>
           <label htmlFor="a-fanta" className="fm-label mb-1 block">Fantasquadra</label>

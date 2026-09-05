@@ -384,6 +384,9 @@ Da rifare su tutte e tre le pagine che lo hanno: `/svincolati`, `/buste` e
 
 - [ ] Scegli **Ligue 1**. **Atteso:** restano solo giocatori di Monaco,
   Olympique Marsiglia, Paris Saint-Germain, Racing Strasburgo e Rennes.
+- [ ] **Due insieme.** Spunta anche **Bundesliga**. **Atteso:** si vedono i
+  giocatori di **entrambi** i campionati — la regola e' «almeno uno», come per
+  i ruoli — e il pulsante chiuso dice «2 campionati».
 - [ ] In `/svincolati` e `/buste`, con un campionato scelto, apri la tendina
   **Squadra**. **Atteso:** contiene solo i club di quel campionato.
 - [ ] Scegli prima una squadra (per esempio *Milan*) e **poi** un campionato

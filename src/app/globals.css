@@ -383,16 +383,20 @@
      filtri stanno su una riga sola su schermo grande, e un elemento più alto
      la spezzerebbe. Il pannello si apre **sopra** il contenuto e non lo
      spinge, altrimenti la lista sotto salterebbe a ogni apertura. */
-  .fm-ruoli { position: relative; }
+  /* ---- Tendina a scelta multipla ----
+     Si chiamavano `fm-ruoli-*`: il nome diceva il contenuto del primo uso, non
+     il meccanismo, e riusarle per i campionati avrebbe lasciato una classe che
+     dice «ruoli» attorno a «Bundesliga». */
+  .fm-scelta { position: relative; }
 
   /* Via il triangolino nativo: ce n'è uno disegnato nel markup, che segue il
      colore del filtro attivo. Su Safari serve la riga -webkit-. */
-  .fm-ruoli-testa { list-style: none; cursor: pointer; user-select: none; }
-  .fm-ruoli-testa::-webkit-details-marker { display: none; }
+  .fm-scelta-testa { list-style: none; cursor: pointer; user-select: none; }
+  .fm-scelta-testa::-webkit-details-marker { display: none; }
 
   /* `.fm-select` porta già fondo, bordo e altezza: qui si aggiunge solo la
      disposizione, perché il riassunto e la freccia stanno ai due capi. */
-  .fm-ruoli-testa {
+  .fm-scelta-testa {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -401,14 +405,14 @@
   /* Quando un filtro è attivo il bordo lo dice: chiuso, il pannello non mostra
      nient'altro, e un filtro dimenticato acceso fa credere che la lista sia
      più corta di quello che è. */
-  .fm-ruoli-attivo {
+  .fm-scelta-attivo {
     border-color: var(--color-neon);
     color: var(--color-neon);
   }
-  .fm-ruoli-freccia { flex: none; font-size: .7rem; opacity: .7; }
-  details[open] .fm-ruoli-freccia { transform: rotate(180deg); }
+  .fm-scelta-freccia { flex: none; font-size: .7rem; opacity: .7; }
+  details[open] .fm-scelta-freccia { transform: rotate(180deg); }
 
-  .fm-ruoli-pannello {
+  .fm-scelta-pannello {
     position: absolute;
     z-index: 40;
     top: calc(100% + .25rem);
@@ -426,12 +430,12 @@
     box-shadow: var(--shadow-lg);
   }
 
-  .fm-ruoli-titolo {
+  .fm-scelta-titolo {
     padding: .35rem .5rem .15rem;
     margin: 0;
   }
 
-  .fm-ruoli-voce {
+  .fm-scelta-voce {
     display: flex;
     align-items: center;
     gap: .5rem;
@@ -445,9 +449,9 @@
     color: var(--color-ink);
     cursor: pointer;
   }
-  .fm-ruoli-voce:hover { background: var(--color-panel-hover); }
+  .fm-scelta-voce:hover { background: var(--color-panel-hover); }
 
-  .fm-ruoli-azzera {
+  .fm-scelta-azzera {
     display: block;
     width: 100%;
     padding: .35rem .5rem;
@@ -459,14 +463,14 @@
     color: var(--color-ink-dim);
     cursor: pointer;
   }
-  .fm-ruoli-azzera:hover { color: var(--color-rosso); }
+  .fm-scelta-azzera:hover { color: var(--color-rosso); }
 
   @media (max-width: 767px) {
     /* Sul telefono il pannello resta ancorato al filtro ma può usare tutta la
        larghezza della scheda: le etichette Mantra sono corte, e stringerlo
        alla sola colonna del filtro sprecherebbe spazio. */
-    .fm-ruoli-pannello { max-height: 15rem; }
-    .fm-ruoli-voce { min-height: 2.5rem; }
+    .fm-scelta-pannello { max-height: 15rem; }
+    .fm-scelta-voce { min-height: 2.5rem; }
   }
 
   .fm-input:disabled,

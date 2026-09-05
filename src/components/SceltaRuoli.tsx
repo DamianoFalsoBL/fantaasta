@@ -74,30 +74,30 @@ export default function SceltaRuoli({
         : `${scelti.length} ruoli`
 
   return (
-    <details ref={contenitore} className="fm-ruoli">
+    <details ref={contenitore} className="fm-scelta">
       <summary
         id={id}
-        className={`fm-select fm-ruoli-testa ${scelti.length > 0 ? 'fm-ruoli-attivo' : ''}`}
+        className={`fm-select fm-scelta-testa ${scelti.length > 0 ? 'fm-scelta-attivo' : ''}`}
       >
         <span className="truncate">{riassunto}</span>
-        <span className="fm-ruoli-freccia" aria-hidden="true">▾</span>
+        <span className="fm-scelta-freccia" aria-hidden="true">▾</span>
       </summary>
 
-      <div className="fm-ruoli-pannello">
+      <div className="fm-scelta-pannello">
         {scelti.length > 0 && (
-          <button type="button" className="fm-ruoli-azzera" onClick={() => onCambia([])}>
+          <button type="button" className="fm-scelta-azzera" onClick={() => onCambia([])}>
             Togli tutti i ruoli
           </button>
         )}
 
-        <p className="fm-label fm-ruoli-titolo">Reparto</p>
+        <p className="fm-label fm-scelta-titolo">Reparto</p>
         {RUOLI_CLASSICI.map((o) => (
           <Voce key={o.valore} opzione={o} scelto={scelti.includes(o.valore)} onCambia={commuta} />
         ))}
 
         {mantra.length > 0 && (
           <>
-            <p className="fm-label fm-ruoli-titolo">Ruolo Mantra</p>
+            <p className="fm-label fm-scelta-titolo">Ruolo Mantra</p>
             {mantra.map((o) => (
               <Voce key={o.valore} opzione={o} scelto={scelti.includes(o.valore)} onCambia={commuta} />
             ))}
@@ -118,7 +118,7 @@ function Voce({
   onCambia: (valore: string) => void
 }) {
   return (
-    <label className="fm-ruoli-voce">
+    <label className="fm-scelta-voce">
       <input
         type="checkbox"
         checked={scelto}

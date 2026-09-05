@@ -11,7 +11,8 @@ import SceltaRuoli from '@/components/SceltaRuoli'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
 import PannelloFiltri from '@/components/PannelloFiltri'
-import { CAMPIONATI, campionatoCorrisponde, campionatoDi } from '@/utils/campionati'
+import { campionatoCorrisponde } from '@/utils/campionati'
+import SceltaCampionati from '@/components/SceltaCampionati'
 import { ordinaGiocatori, OPZIONI_ORDINE, type ColonnaOrdine, type Verso } from '@/utils/ordinamento'
 import { idsInCodaAsta } from '@/utils/giocatori'
 
@@ -59,7 +60,8 @@ export default function BustePage() {
   const [filtroRuolo, setFiltroRuolo] = useState<string[]>([])
   // Gli stessi filtri di /svincolati: qui si compilano le buste guardando i
   // reparti scoperti e il budget, e mancavano proprio squadra ed eta'.
-  const [filtroCampionato, setFiltroCampionato] = useState('')
+  // Un elenco, come i ruoli: «almeno uno dei campionati scelti».
+  const [filtroCampionato, setFiltroCampionato] = useState<string[]>([])
   const [filtroSquadra, setFiltroSquadra] = useState('')
   const [filtroEta, setFiltroEta] = useState('')
   // Combacia con l'`.order()` del caricamento: divergendo, la lista si
@@ -305,12 +307,12 @@ export default function BustePage() {
 
   // L'ordinamento non conta fra i filtri attivi: non nasconde nessuna riga.
   const filtriAttivi =
-    (filtroRuolo.length > 0 ? 1 : 0) + (filtroCampionato ? 1 : 0) + (filtroSquadra ? 1 : 0) +
+    (filtroRuolo.length > 0 ? 1 : 0) + (filtroCampionato.length > 0 ? 1 : 0) + (filtroSquadra ? 1 : 0) +
     (filtroEta ? 1 : 0)
 
   const azzeraFiltri = () => {
     setFiltroRuolo([])
-    setFiltroCampionato('')
+    setFiltroCampionato([])
     setFiltroSquadra('')
     setFiltroEta('')
   }
@@ -632,24 +634,19 @@ export default function BustePage() {
               </div>
               <div>
                 <label htmlFor="b-campionato" className="fm-label mb-1 block">Campionato</label>
-                <select
+                <SceltaCampionati
                   id="b-campionato"
-                  className="fm-select"
-                  value={filtroCampionato}
-                  onChange={(e) => {
-                    const nuovo = e.target.value
-                    setFiltroCampionato(nuovo)
-                    // Cambiando campionato la squadra scelta puo' non
-                    // appartenerci piu': lasciarla vorrebbe dire una lista
-                    // vuota con due filtri che si contraddicono.
-                    if (nuovo && filtroSquadra && campionatoDi(filtroSquadra) !== nuovo) setFiltroSquadra('')
+                  scelti={filtroCampionato}
+                  onCambia={(nuovi) => {
+                    setFiltroCampionato(nuovi)
+                    // La squadra scelta puo' non appartenere piu' a nessuno
+                    // dei campionati rimasti: lasciarla vorrebbe dire una
+                    // lista vuota con due filtri che si contraddicono.
+                    if (nuovi.length > 0 && filtroSquadra && !campionatoCorrisponde(filtroSquadra, nuovi)) {
+                      setFiltroSquadra('')
+                    }
                   }}
-                >
-                  <option value="">Tutti i campionati</option>
-                  {CAMPIONATI.map((c) => (
-                    <option key={c.id} value={c.id}>{c.nome}</option>
-                  ))}
-                </select>
+                />
               </div>
               <div>
                 <label htmlFor="b-squadra" className="fm-label mb-1 block">Squadra</label>
