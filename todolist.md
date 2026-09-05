@@ -496,103 +496,29 @@ invertibile — `invert` vale solo sul nero pieno — quindi ha un alone chiaro
 (`STEMMI_SCURI` + `.fm-logo-alone`). Il Liverpool, secondo piu' scuro in uso, e'
 a 71 (4,2:1) e non serve.
 
-### La lega nuova: stato al 2 settembre, pomeriggio
+### Trappola permanente: aggiungere un parametro non sostituisce la funzione
 
-Hard reset fatto, poi i tre import. **Il terzo era una prova con due sole
-righe**, per verificare la catena: nel pomeriggio arriva il file completo delle
-liste chiamate.
+Pagata il 2 settembre, e va ricordata perche' **nessuna delle regole che ci
+eravamo dati la copriva**.
 
-Com'e' messa adesso: 14 fantasquadre da 100 crediti, 992 giocatori a listone
-(37 squadre, tutte con lo stemma), 289 rose ricostruite dall'import, turno
-buste ripartito da **1**, ordine di chiamata non ancora sorteggiato.
+`CREATE OR REPLACE FUNCTION` con un parametro in piu' non sostituisce la
+funzione: ne crea una **seconda**. Dopo il push a database c'erano
+`prenota_chiamata(integer)` e `prenota_chiamata(integer, uuid)`, e PostgREST —
+ricevendo la chiamata con il solo `p_giocatore_id`, come la fa il sito —
+rispondeva «Could not choose the best candidate function». Cioe' **nessun
+manager riusciva piu' a chiamare**, che e' l'azione centrale dell'asta.
 
-**Prima di sorteggiare l'ordine, il controllo che conta:** `genera_ordine_chiamata`
-include solo le squadre con almeno un giocatore libero in lista. Con le due
-righe di prova entravano **6 squadre su 14**, e le altre otto non avrebbero mai
-avuto un turno. Dopo l'import completo va riverificato che ci siano tutte:
-sorteggiato l'ordine, per farne rientrare una bisogna risorteggiare.
+Trovata provando la firma vecchia subito dopo il push, non da una
+segnalazione: senza quella prova sarebbe uscita in faccia al primo manager di
+turno, dal vivo.
 
-Reimportare le liste e' sicuro: sostituisce quelle esistenti e non tocca ne'
-rose ne' listone.
+**La regola:** o si tiene la stessa firma, o si fa il `DROP FUNCTION` esplicito
+della vecchia **nella stessa migration**. Copiare il corpo alla lettera non
+basta — li' il corpo era giusto, era la firma il problema.
 
-Da rilanciare dopo l'import completo:
-
-    node scripts/prova-abbinamento-loghi.mjs   # stemmi, se il listone cambia
-
-### DA SPINGERE SUBITO: `20260902150000_prenota_chiamata_una_sola.sql`
-
-**Finche' non e' spinta, nessun manager riesce a chiamare un giocatore.**
-
-`CREATE OR REPLACE FUNCTION` con un parametro in piu' **non sostituisce** la
-funzione: ne crea una seconda. Dopo il push del 2 settembre a database ce n'erano
-due — `prenota_chiamata(integer)` e `prenota_chiamata(integer, uuid)` — e
-PostgREST, ricevendo la chiamata con il solo `p_giocatore_id`, risponde «Could
-not choose the best candidate function». La migration fa il DROP della vecchia.
-
-**Trappola da ricordare:** aggiungere un parametro a una funzione esistente non
-e' mai una sostituzione. O si tiene la stessa firma, o si fa il DROP esplicito
-**nella stessa migration**. Non e' bastato copiare il corpo alla lettera: era la
-firma il problema, e nessuna delle regole che ci eravamo dati la copriva.
-
-Controllate le altre funzioni toccate di recente — `avvia_asta_admin`,
-`chiudi_asta`, `avvia_timer_chiamata`, `genera_ordine_chiamata`,
-`admin_imposta_turno`: nessuna e' sdoppiata, perche' nessuna ha cambiato firma.
-
-### Il push di tre migration
-
-Da fare con `npx supabase db push` — lo fa l'utente:
-`20260902120000_asta_admin_assegna_al_turno.sql`,
-`20260902130000_reset_azzera_turno_buste.sql` e
-`20260902140000_chiamata_per_conto.sql`.
-
-#### `20260902140000` — chiamare per un manager assente
-
-Aggiunge `p_squadra_delega` a `prenota_chiamata`, come gia' ce l'hanno
-`piazza_offerta_asta` e `imposta_massimo_asta`. Il pannello *Chiama per conto
-di* in Regia Aste e' gia' in produzione ma **non funziona finche' la migration
-non e' spinta**: la RPC rifiuterebbe il parametro sconosciuto.
-
-**Perche' non bastava `avvia_asta_admin`:** quella cerca chi mettere in testa
-fra chi ha il giocatore in `liste_aste`, e chiamare un giocatore che la squadra
-di turno non ha in lista lo assegnava a un'altra. Misurato il 2 settembre sui
-dati veri: **su sei giocatori chiamabili, quattro sarebbero finiti a una
-squadra diversa da quella di turno**.
-
-**Il turno resta obbligatorio**, di proposito: si chiama solo per chi tocca. Per
-anticipare qualcuno c'e' gia' `admin_imposta_turno`, cioe' toccare il suo nome
-nella barra dell'ordine.
-
-#### `20260902120000` — l'asta dell'admin
-
-Da fare con `npx supabase db push` — lo fa l'utente. Finche' non e' spinta,
-un'asta avviata dall'admin su un giocatore che nessuno ha in lista chiamate
-parte ancora **senza nessuno in testa**.
-
-**Come verificare che sia servita a qualcosa**, dopo il push: l'admin avvia
-un'asta su un giocatore che non compare in nessuna `liste_aste`. Prima
-`squadra_in_testa` restava NULL; ora deve essere la squadra di turno — o la
-prima dopo di lei che puo' permetterselo, perche' i controlli su rosa piena,
-ruolo pieno e crediti valgono anche nel ripiego.
-
-**Resta NULL, ed e' corretto,** se nessuna squadra dell'ordine puo' prenderlo:
-in quel caso un assegnatario non esiste, e forzarlo sposterebbe il problema
-dentro `chiudi_asta`.
-
-#### `20260902130000` — il contatore dei turni dopo l'hard reset
-
-`hard_reset_sistema` non azzerava `turno_buste`: le buste sparivano ma il
-contatore restava, e la lega nuova sarebbe ripartita da «Turno 10».
-
-**Come verificare:** guarda il turno prima del reset, resetta, apri e chiudi una
-fase buste. La prima tornata deve chiamarsi Turno 1.
-
-**Nota per il futuro:** e' il terzo caso della stessa famiglia — una colonna di
-stato aggiunta a `regole_lega` dopo il consolidamento, e l'UPDATE finale
-dell'hard reset non aggiornato (era gia' successo con `fase_mercato_aperta`).
-**Chi aggiunge una colonna di stato a `regole_lega` deve aggiungerla anche
-li'.** Le colonne di configurazione — budget, timer, slot, email del super
-admin — invece non vanno toccate: chi resetta vuole ripartire con le stesse
-regole.
+Come verificarlo senza rischi, dopo ogni push che tocca una funzione: chiamarla
+con la firma vecchia e guardare che l'errore sia di logica e non
+«Could not choose the best candidate».
 
 ### Convertire anche /trasferimenti alla scelta multipla dei ruoli
 
@@ -732,10 +658,12 @@ guasto. Serve un ramo suo: «Giro completato · l'admin deve confermare
 l'ordine», tono attesa. E' il caso tipico per cui quella funzione e' pura e
 provabile: si aggiunge un ramo e un caso nella prova.
 
-**Da decidere quando si fa:** se anche `avvia_asta_admin`
-(`20260902120000_asta_admin_assegna_al_turno.sql`) debba rispettare il blocco.
-E' l'unica via che mette un giocatore all'asta senza passare da
-`prenota_chiamata`, quindi oggi lo scavalcherebbe.
+**Anche `avvia_asta_admin` rispetta il blocco** — deciso il 5 settembre. E'
+l'unica via che mette un giocatore all'asta senza passare da
+`prenota_chiamata` (`20260902120000_asta_admin_assegna_al_turno.sql`), quindi
+senza il controllo lo scavalcherebbe: l'admin metterebbe all'asta d'ufficio
+mentre il giro e' fermo in attesa della sua stessa conferma. Il blocco va
+messo subito dopo la guardia `is_admin()`, prima di leggere l'ordine.
 
 ---
 
@@ -743,6 +671,8 @@ E' l'unica via che mette un giocatore all'asta senza passare da
 
 | Quando | Cosa |
 |---|---|
+| 3 set 2026 | Spinte le migration del 2 settembre e verificate a database |
+| 3 set 2026 | Import completo della lega nuova: 14 squadre, 37 squadre con stemma |
 | 2 set 2026 | L'admin puo' chiamare per conto di un manager assente |
 | 2 set 2026 | L'hard reset azzera anche il contatore dei turni di buste |
 | 2 set 2026 | Sommario Buste ha una pagina sua, e /buste una query in meno |
