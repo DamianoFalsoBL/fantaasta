@@ -53,6 +53,22 @@ const VOCI_UTENTE: Voce[] = [
   { href: '/statistiche', label: 'Statistiche' },
 ]
 
+/**
+ * L'altezza di ogni elemento della barra, da md in su.
+ *
+ * Prima nessuno la dichiarava e usciva dai contenuti: il riquadro budget ha
+ * due righe (etichetta piu' valore) e arrivava a 44px, "Manager" ne faceva 36
+ * senza bordo, "Admin" 38 col bordo, il chip del nome 34 e "Esci" 30. Cinque
+ * misure diverse centrate sulla stessa riga, che e' il modo piu' efficace di
+ * far sembrare storta una barra dritta.
+ *
+ * 2.5rem sta sopra il piu' alto dei cinque, quindi nessuno viene compresso.
+ * Chi tocca questi elementi deve togliere il `py-*`: con un'altezza fissa il
+ * riempimento verticale non serve piu' e, se e' abbastanza grande, torna a
+ * spingere il contenuto fuori dal riquadro.
+ */
+const ALTEZZA_BARRA = 'h-10'
+
 // Senza emoji: erano un segnaposto in attesa di un'identita' visiva, e
 // accanto al marchio facevano rumore. Le voci si distinguono gia' per
 // posizione e per la tinta della tendina che le contiene.
@@ -361,7 +377,7 @@ export default function NavBar() {
                   tastiera. */}
               {vociUtente.length > 0 && (
                 <div className="group relative">
-                  <button className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-ink-mid transition hover:bg-panel-hover hover:text-ink">
+                  <button className={`flex ${ALTEZZA_BARRA} items-center gap-1.5 rounded-md px-3 text-sm font-semibold text-ink-mid transition hover:bg-panel-hover hover:text-ink`}>
                     Manager <span className="text-[10px]">▼</span>
                   </button>
                   <div className="invisible absolute left-0 z-50 mt-1 w-52 overflow-hidden rounded-md border border-line-hi bg-panel opacity-0 shadow-xl transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
@@ -372,7 +388,7 @@ export default function NavBar() {
 
               {vociAdmin.length > 0 && (
                 <div className="group relative ml-2 border-l border-line-hi pl-3">
-                  <button className="flex items-center gap-1.5 rounded-md border border-rosso/40 bg-rosso/10 px-3 py-2 text-sm font-semibold text-rosso transition hover:bg-rosso/20">
+                  <button className={`flex ${ALTEZZA_BARRA} items-center gap-1.5 rounded-md border border-rosso/40 bg-rosso/10 px-3 text-sm font-semibold text-rosso transition hover:bg-rosso/20`}>
                     Admin <span className="text-[10px]">▼</span>
                   </button>
                   <div className="invisible absolute left-3 z-50 mt-1 w-56 overflow-hidden rounded-md border border-line-hi bg-panel opacity-0 shadow-xl transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
@@ -386,7 +402,7 @@ export default function NavBar() {
           {/* ---------- Destra (solo da md in su) ---------- */}
           <div className="hidden items-center gap-3 md:flex">
             {metriche && (
-              <div className="flex items-center gap-3 rounded-md border border-line bg-panel px-3 py-1.5">
+              <div className={`flex ${ALTEZZA_BARRA} items-center gap-3 rounded-md border border-line bg-panel px-3`}>
                 {metriche}
               </div>
             )}
@@ -397,7 +413,7 @@ export default function NavBar() {
                 era stato sfoltito apposta. */}
             <Link
               href="/profilo"
-              className={`flex items-center gap-1.5 rounded-md border bg-panel px-3 py-1.5 text-sm font-semibold transition ${
+              className={`flex ${ALTEZZA_BARRA} items-center gap-1.5 rounded-md border bg-panel px-3 text-sm font-semibold transition ${
                 isActive('/profilo')
                   ? 'border-neon text-neon'
                   : 'border-line text-ink-mid hover:border-line-hi hover:text-ink'
@@ -407,7 +423,7 @@ export default function NavBar() {
               {distintivoRuolo}
             </Link>
 
-            <button onClick={esci} className="fm-btn fm-btn-ghost fm-btn-sm">
+            <button onClick={esci} className={`fm-btn fm-btn-ghost fm-btn-sm ${ALTEZZA_BARRA}`}>
               Esci
             </button>
           </div>
