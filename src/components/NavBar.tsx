@@ -386,10 +386,21 @@ export default function NavBar() {
               </div>
             )}
 
-            <div className="flex items-center gap-1.5 rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-semibold text-ink-mid">
+            {/* Il chip col proprio nome porta al profilo. Prima non portava da
+                nessuna parte, ed e' il posto dove si va a cercare le proprie
+                cose: cosi' /profilo non ha bisogno di una voce di menu, che
+                era stato sfoltito apposta. */}
+            <Link
+              href="/profilo"
+              className={`flex items-center gap-1.5 rounded-md border bg-panel px-3 py-1.5 text-sm font-semibold transition ${
+                isActive('/profilo')
+                  ? 'border-neon text-neon'
+                  : 'border-line text-ink-mid hover:border-line-hi hover:text-ink'
+              }`}
+            >
               <span className="max-w-[14ch] truncate">👤 {username}</span>
               {distintivoRuolo}
-            </div>
+            </Link>
 
             <button onClick={esci} className="fm-btn fm-btn-ghost fm-btn-sm">
               Esci
@@ -437,10 +448,15 @@ export default function NavBar() {
           )}
 
           <div className="flex items-center justify-between gap-3 border-t border-line-hi px-4 py-3">
-            <span className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-ink-mid">
+            <Link
+              href="/profilo"
+              className={`flex min-w-0 items-center gap-1.5 text-sm font-semibold transition ${
+                isActive('/profilo') ? 'text-neon' : 'text-ink-mid'
+              }`}
+            >
               <span className="truncate">👤 {username}</span>
               {distintivoRuolo}
-            </span>
+            </Link>
             <button onClick={esci} className="fm-btn fm-btn-ghost fm-btn-sm shrink-0">
               Esci
             </button>

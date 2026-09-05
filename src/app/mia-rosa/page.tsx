@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import MantraBadge from '@/components/MantraBadge'
 import Conferma from '@/components/Conferma'
-import CambiaPassword from '@/components/CambiaPassword'
 import { ORDINE_RUOLI, trasferimentiAttivi, type GiocatoreMercato } from '@/utils/trasferimenti'
 import { indiceMantra } from '@/utils/ruoli'
 
@@ -240,9 +239,10 @@ export default function MiaRosaPage() {
           </p>
         )}
 
-        {/* Sta qui e non in una voce di menu propria: è la pagina che parla di
-            te, e il menu era stato sfoltito apposta. */}
-        <CambiaPassword />
+        {/* Il cambio password stava qui, in fondo. La ragione era buona — «è
+            la pagina che parla di te» — ma per trovarlo bisognava scorrere
+            tutta la rosa. Ora sta in /profilo, che si apre dal chip col
+            proprio nome nella barra: il menu resta sfoltito lo stesso. */}
       </div>
 
       <Conferma
