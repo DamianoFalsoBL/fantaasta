@@ -11,6 +11,7 @@ import SceltaRuoli from '@/components/SceltaRuoli'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
 import PannelloFiltri from '@/components/PannelloFiltri'
+import { CAMPIONATI, campionatoCorrisponde, campionatoDi } from '@/utils/campionati'
 import { ordinaGiocatori, OPZIONI_ORDINE, type ColonnaOrdine, type Verso } from '@/utils/ordinamento'
 import { idsInCodaAsta } from '@/utils/giocatori'
 
@@ -58,6 +59,7 @@ export default function BustePage() {
   const [filtroRuolo, setFiltroRuolo] = useState<string[]>([])
   // Gli stessi filtri di /svincolati: qui si compilano le buste guardando i
   // reparti scoperti e il budget, e mancavano proprio squadra ed eta'.
+  const [filtroCampionato, setFiltroCampionato] = useState('')
   const [filtroSquadra, setFiltroSquadra] = useState('')
   const [filtroEta, setFiltroEta] = useState('')
   // Combacia con l'`.order()` del caricamento: divergendo, la lista si
@@ -278,27 +280,37 @@ export default function BustePage() {
 
   const ruoliMantra = useMemo(() => mantraPresenti(giocatoriLiberi), [giocatoriLiberi])
 
-  // Le squadre di Serie A presenti fra i liberi: l'elenco si accorcia da solo
-  // man mano che i giocatori vengono assegnati.
+  // I club presenti fra i liberi: l'elenco si accorcia da solo man mano che i
+  // giocatori vengono assegnati, e si restringe al campionato scelto —
+  // lasciarcelo intero vorrebbe dire poter comporre «Liga» + «Milan» e
+  // guardare una lista vuota senza capire quale dei due la sta svuotando.
   const squadreUniche = useMemo(
-    () => [...new Set(giocatoriLiberi.map((g) => g.squadra).filter(Boolean))].sort() as string[],
-    [giocatoriLiberi])
+    () => [...new Set(
+      giocatoriLiberi
+        .filter((g) => campionatoCorrisponde(g.squadra, filtroCampionato))
+        .map((g) => g.squadra)
+        .filter(Boolean)
+    )].sort() as string[],
+    [giocatoriLiberi, filtroCampionato])
 
   const liberiFiltrati = useMemo(() => {
     const filtrati = giocatoriLiberi.filter((g) => {
+      const matchCampionato = campionatoCorrisponde(g.squadra, filtroCampionato)
       const matchSquadra = filtroSquadra === '' || g.squadra === filtroSquadra
       const matchEta = filtroEta === '' || (g.eta !== null && g.eta <= parseInt(filtroEta))
-      return passaFiltri(g, ricerca, filtroRuolo) && matchSquadra && matchEta
+      return passaFiltri(g, ricerca, filtroRuolo) && matchCampionato && matchSquadra && matchEta
     })
     return ordinaGiocatori(filtrati, colonna, verso)
-  }, [giocatoriLiberi, ricerca, filtroRuolo, filtroSquadra, filtroEta, colonna, verso])
+  }, [giocatoriLiberi, ricerca, filtroRuolo, filtroCampionato, filtroSquadra, filtroEta, colonna, verso])
 
   // L'ordinamento non conta fra i filtri attivi: non nasconde nessuna riga.
   const filtriAttivi =
-    (filtroRuolo.length > 0 ? 1 : 0) + (filtroSquadra ? 1 : 0) + (filtroEta ? 1 : 0)
+    (filtroRuolo.length > 0 ? 1 : 0) + (filtroCampionato ? 1 : 0) + (filtroSquadra ? 1 : 0) +
+    (filtroEta ? 1 : 0)
 
   const azzeraFiltri = () => {
     setFiltroRuolo([])
+    setFiltroCampionato('')
     setFiltroSquadra('')
     setFiltroEta('')
   }
@@ -583,7 +595,7 @@ export default function BustePage() {
             <PannelloFiltri
               attivi={filtriAttivi}
               onAzzera={azzeraFiltri}
-              griglia="sm:grid-cols-2 md:grid-cols-5"
+              griglia="sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
               ricerca={
                 <>
                   {/* L'etichetta mancava, e su schermo grande il campo restava
@@ -617,6 +629,27 @@ export default function BustePage() {
                   onCambia={setFiltroRuolo}
                   presenti={ruoliMantra}
                 />
+              </div>
+              <div>
+                <label htmlFor="b-campionato" className="fm-label mb-1 block">Campionato</label>
+                <select
+                  id="b-campionato"
+                  className="fm-select"
+                  value={filtroCampionato}
+                  onChange={(e) => {
+                    const nuovo = e.target.value
+                    setFiltroCampionato(nuovo)
+                    // Cambiando campionato la squadra scelta puo' non
+                    // appartenerci piu': lasciarla vorrebbe dire una lista
+                    // vuota con due filtri che si contraddicono.
+                    if (nuovo && filtroSquadra && campionatoDi(filtroSquadra) !== nuovo) setFiltroSquadra('')
+                  }}
+                >
+                  <option value="">Tutti i campionati</option>
+                  {CAMPIONATI.map((c) => (
+                    <option key={c.id} value={c.id}>{c.nome}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label htmlFor="b-squadra" className="fm-label mb-1 block">Squadra</label>

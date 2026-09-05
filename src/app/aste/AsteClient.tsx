@@ -5,6 +5,7 @@ import RuoliGiocatore from '@/components/RuoliGiocatore'
 import LogoSquadra from '@/components/LogoSquadra'
 import SceltaRuoli from '@/components/SceltaRuoli'
 import PannelloFiltri from '@/components/PannelloFiltri'
+import { CAMPIONATI, campionatoCorrisponde } from '@/utils/campionati'
 import { mantraPresenti, ruoloCorrisponde } from '@/utils/ruoli'
 import { ordinaGiocatori, OPZIONI_ORDINE, type ColonnaOrdine, type Verso } from '@/utils/ordinamento'
 
@@ -51,6 +52,7 @@ export default function AsteClient({
   // disegno. E' il motivo per cui qui non serve un `.order()` accordato.
   const [colonna, setColonna] = useState<ColonnaOrdine>('quotazione')
   const [verso, setVerso] = useState<Verso>('desc')
+  const [campionato, setCampionato] = useState('')
   const [squadraFanta, setSquadraFanta] = useState('')
   const [soloContesi, setSoloContesi] = useState(false)
   const [soloMie, setSoloMie] = useState(false)
@@ -69,6 +71,7 @@ export default function AsteClient({
     const scelte = righe.filter((r) => {
       if (nome && !r.nome.toLowerCase().includes(nome.toLowerCase())) return false
       if (!ruoloCorrisponde(ruolo, r.ruolo, r.ruolo_mantra)) return false
+      if (!campionatoCorrisponde(r.squadra, campionato)) return false
       if (squadraFanta && !r.contendenti.includes(squadraFanta)) return false
       if (soloContesi && r.contendenti.length < 2) return false
       if (soloMie && !r.inMiaLista) return false
@@ -82,10 +85,12 @@ export default function AsteClient({
   const filtriAttivi =
     // `ruolo.length` e non `ruolo`: un array vuoto e' truthy, e il contatore
     // avrebbe detto «1 filtro attivo» anche senza nessun ruolo scelto.
-    (ruolo.length > 0 ? 1 : 0) + (squadraFanta ? 1 : 0) + (soloContesi ? 1 : 0) + (soloMie ? 1 : 0)
+    (ruolo.length > 0 ? 1 : 0) + (campionato ? 1 : 0) + (squadraFanta ? 1 : 0) +
+    (soloContesi ? 1 : 0) + (soloMie ? 1 : 0)
 
   const azzeraFiltri = () => {
     setRuolo([])
+    setCampionato('')
     setSquadraFanta('')
     setSoloContesi(false)
     setSoloMie(false)
@@ -152,7 +157,7 @@ export default function AsteClient({
       <PannelloFiltri
         attivi={filtriAttivi}
         onAzzera={azzeraFiltri}
-        griglia="md:grid-cols-4"
+        griglia="sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
         ricerca={
           <>
             {/* Sul telefono l'etichetta resta solo per i lettori di schermo: il
@@ -178,6 +183,20 @@ export default function AsteClient({
             onCambia={setRuolo}
             presenti={ruoliMantra}
           />
+        </div>
+        <div>
+          {/* Qui non c'e' la tendina del club, quindi il campionato non deve
+              disfare nessun'altra scelta: filtra da solo. */}
+          <label htmlFor="a-campionato" className="fm-label mb-1 block">Campionato</label>
+          <select
+            id="a-campionato"
+            className="fm-select"
+            value={campionato}
+            onChange={(e) => setCampionato(e.target.value)}
+          >
+            <option value="">Tutti i campionati</option>
+            {CAMPIONATI.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+          </select>
         </div>
         <div>
           <label htmlFor="a-fanta" className="fm-label mb-1 block">Fantasquadra</label>
@@ -208,10 +227,11 @@ export default function AsteClient({
             ))}
           </select>
         </div>
-        {/* `md:col-span-4` e non 3: con la tendina dell'ordinamento le colonne
-            della griglia sono passate da tre a quattro, e le due caselle
-            devono continuare a prendere tutta la riga sotto. */}
-        <div className="flex flex-wrap gap-4 md:col-span-4">
+        {/* `col-span-full` e non un numero: le colonne della griglia sono
+            cambiate due volte (tre, poi quattro con l'ordinamento, poi cinque
+            col campionato) e ogni volta questo numero e' rimasto indietro,
+            lasciando le due caselle in mezzo alla riga invece che sotto. */}
+        <div className="flex flex-wrap gap-4 md:col-span-full">
           <label className="flex items-center gap-2 text-sm font-medium text-ink-mid">
             <input type="checkbox" className="rounded" checked={soloContesi} onChange={(e) => setSoloContesi(e.target.checked)} />
             Solo giocatori contesi

@@ -22,14 +22,19 @@ const env = Object.fromEntries(
     .map((r) => [r.slice(0, r.indexOf('=')).trim(), r.slice(r.indexOf('=') + 1).trim()])
 )
 
-// La stessa riduzione di `chiave()` in LogoSquadra.tsx. Se una delle due
-// cambia, questa prova smette di dire il vero: vanno tenute uguali.
+// La stessa riduzione di `chiaveClub()` in src/utils/campionati.ts. Se una
+// delle due cambia, questa prova smette di dire il vero: vanno tenute uguali.
 const chiave = (s) => s.trim().toLowerCase().normalize('NFD')
   .replace(/[̀-ͯ]/g, '').replace(/[\s_]+/g, '-').replace(/[^a-z0-9-]/g, '')
 
 // La mappa si legge dal sorgente invece di duplicarla: una copia diverge.
+// Il confine e' la parentesi che chiude l'oggetto, non il commento che segue:
+// agganciarsi a un commento vuol dire che riscriverlo (fatto il 5 settembre)
+// fa restituire -1 a indexOf, e il blocco diventa il file intero senza che
+// niente lo segnali.
 const src = fs.readFileSync('src/components/LogoSquadra.tsx', 'utf8')
-const blocco = src.slice(src.indexOf('FILE_PER_SQUADRA'), src.indexOf('* Il nome della squadra'))
+const inizio = src.indexOf('FILE_PER_SQUADRA')
+const blocco = src.slice(inizio, src.indexOf('\n}', inizio))
 const mappa = {}
 for (const m of blocco.matchAll(/^\s*'?([a-z0-9-]+)'?:\s*'([a-z0-9-]+)',/gm)) mappa[m[1]] = m[2]
 

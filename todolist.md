@@ -400,25 +400,16 @@ Chieste il 2 settembre. **Due sono state fatte lo stesso giorno** — l'ordine
 per crediti e il filtro per piu' ruoli, vedi *Fatto di recente*. Restano queste,
 con il contesto per ripartire senza rifare la ricerca.
 
-### Filtro per campionato in /svincolati, /buste, /aste
+### Manca il logo della Premier League
 
-Chiesto il 4 settembre confrontando il sito con un concorrente. Con 5 leghe nel
-listone (Serie A, Premier, Liga, Ligue 1, Bundesliga) scorrere una tendina
-squadra da 37 voci per trovare "solo i francesi" e' scomodo quanto cercare un
-nome nella lista intera prima dei filtri.
+Notato il 5 settembre facendo il filtro per campionato. In `public/loghi/` ci
+sono **quattro** loghi di campionato — `bundesliga`, `la-liga`, `ligue-1`,
+`serie-a` — e manca `premier-league.png`. Per questo il filtro nuovo e' fatto
+di sole scritte: una tendina con l'icona su quattro voci su cinque si legge
+come un errore, non come una scelta.
 
-**Il pezzo mancante non e' il dato, e' l'estrazione.** Il database non ha una
-colonna "campionato" — solo `squadra` (il club) — ma la mappa club-lega esiste
-gia' **implicitamente** in `src/components/LogoSquadra.tsx`, organizzata a
-sezioni commentate (`// Premier League`, `// Liga`, `// Ligue 1`,
-`// Bundesliga`). Va estratta in una mappa a parte, riusabile dal filtro.
-
-I quattro loghi dei campionati sono **gia' caricati e inutilizzati**:
-`public/loghi/{bundesliga,la-liga,ligue-1,serie-a}.png` (verificato con
-`scripts/prova-abbinamento-loghi.mjs`, sezione "file presenti e mai usati").
-
-Si aggancia a `PannelloFiltri` come un filtro in piu', sul modello di quello
-squadra gia' presente in tutte e tre le pagine.
+Scaricato quel file, la tendina puo' diventare illustrata in tutte e tre le
+pagine. La mappa e i nomi stanno gia' in `src/utils/campionati.ts`.
 
 ### Scegliere quali preferiti entrano in busta
 
@@ -637,6 +628,8 @@ messo subito dopo la guardia `is_admin()`, prima di leggere l'ordine.
 
 | Quando | Cosa |
 |---|---|
+| 5 set 2026 | Filtro per campionato in Svincolati, Buste e Sommario Aste |
+| 5 set 2026 | L'ordine di chiamata resta visibile anche con un'asta viva |
 | 5 set 2026 | Pagina Statistiche: eta', quotazioni e spesa d'asta di ogni squadra |
 | 5 set 2026 | Il sito si installa sul telefono, con icone proprie |
 | 5 set 2026 | Il profilo ha una pagina sua, dal chip col proprio nome |

@@ -7,6 +7,7 @@ import SceltaRuoli from '@/components/SceltaRuoli'
 import PannelloFiltri from '@/components/PannelloFiltri'
 import { mantraPresenti } from '@/utils/ruoli'
 import { passaFiltri } from '@/utils/filtri'
+import { CAMPIONATI, campionatoCorrisponde, campionatoDi } from '@/utils/campionati'
 import { ordinaGiocatori, OPZIONI_ORDINE, type ColonnaOrdine, type Verso } from '@/utils/ordinamento'
 
 type Colonna = ColonnaOrdine
@@ -40,6 +41,7 @@ export default function SvincolatiClient({
   preferitiNonDisponibili: number
 }) {
   const [searchNome, setSearchNome] = useState('')
+  const [searchCampionato, setSearchCampionato] = useState('')
   const [searchSquadra, setSearchSquadra] = useState('')
   // Un elenco e non una stringa: si filtra per piu' ruoli insieme, con la
   // regola «almeno uno» (vedi `ruoloCorrisponde`).
@@ -70,11 +72,18 @@ export default function SvincolatiClient({
     else { setColonna(c); setVerso(VERSO_INIZIALE[c]) }
   }
 
-  // Estrai tutte le squadre uniche per il filtro
+  // Le squadre della tendina, ristrette al campionato scelto: lasciarcele
+  // tutte vorrebbe dire poter comporre «Liga» + «Milan» e guardare una lista
+  // vuota senza capire quale dei due filtri la sta svuotando.
   const squadreUniche = useMemo(() => {
-    const sq = new Set(giocatori.map(g => g.squadra).filter(Boolean))
+    const sq = new Set(
+      giocatori
+        .filter((g) => campionatoCorrisponde(g.squadra, searchCampionato))
+        .map((g) => g.squadra)
+        .filter(Boolean)
+    )
     return Array.from(sq).sort()
-  }, [giocatori])
+  }, [giocatori, searchCampionato])
 
   // Solo i ruoli Mantra: i quattro reparti sono fissi e li elenca SceltaRuoli.
   const ruoliMantra = useMemo(() => mantraPresenti(giocatori), [giocatori])
@@ -91,13 +100,14 @@ export default function SvincolatiClient({
   // esatta, la casella libera cerca un pezzo di testo. Valgono entrambe.
   const giocatoriFiltrati = useMemo(() => {
     return giocatori.filter(g => {
+      const matchCampionato = campionatoCorrisponde(g.squadra, searchCampionato)
       const matchSquadra = searchSquadra === '' || g.squadra === searchSquadra
       const matchEta = searchEta === '' || (g.eta && g.eta <= parseInt(searchEta))
       const matchPreferiti = !soloPreferiti || preferiti.has(g.id)
 
-      return passaFiltri(g, searchNome, searchRuolo) && matchSquadra && matchEta && matchPreferiti
+      return passaFiltri(g, searchNome, searchRuolo) && matchCampionato && matchSquadra && matchEta && matchPreferiti
     })
-  }, [giocatori, searchNome, searchSquadra, searchRuolo, searchEta, soloPreferiti, preferiti])
+  }, [giocatori, searchNome, searchCampionato, searchSquadra, searchRuolo, searchEta, soloPreferiti, preferiti])
 
   const giocatoriOrdinati = useMemo(
     () => ordinaGiocatori(giocatoriFiltrati, colonna, verso),
@@ -106,9 +116,11 @@ export default function SvincolatiClient({
   // Quanti filtri sono attivi oltre la ricerca: è il numero sul pulsante che
   // apre il pannello. L'ordinamento non conta, perché non nasconde righe.
   const filtriAttivi =
-    (searchSquadra ? 1 : 0) + (searchRuolo.length > 0 ? 1 : 0) + (searchEta ? 1 : 0) + (soloPreferiti ? 1 : 0)
+    (searchCampionato ? 1 : 0) + (searchSquadra ? 1 : 0) + (searchRuolo.length > 0 ? 1 : 0) +
+    (searchEta ? 1 : 0) + (soloPreferiti ? 1 : 0)
 
   const azzeraFiltri = () => {
+    setSearchCampionato('')
     setSearchSquadra('')
     setSearchRuolo([])
     setSearchEta('')
@@ -120,7 +132,7 @@ export default function SvincolatiClient({
       <PannelloFiltri
         attivi={filtriAttivi}
         onAzzera={azzeraFiltri}
-        griglia="sm:grid-cols-2 md:grid-cols-4"
+        griglia="sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
         ricerca={
           <>
             {/* Sul telefono l'etichetta resta solo per i lettori di schermo: il
@@ -138,6 +150,27 @@ export default function SvincolatiClient({
           </>
         }
       >
+        <div>
+          <label htmlFor="f-campionato" className="fm-label mb-1 block">Campionato</label>
+          <select
+            id="f-campionato"
+            className="fm-select"
+            value={searchCampionato}
+            onChange={(e) => {
+              const nuovo = e.target.value
+              setSearchCampionato(nuovo)
+              // Cambiando campionato la squadra scelta puo' non appartenerci
+              // piu': lasciarla vorrebbe dire una lista vuota con due filtri
+              // che si contraddicono, e nessuno dei due sbagliato a vederlo.
+              if (nuovo && searchSquadra && campionatoDi(searchSquadra) !== nuovo) setSearchSquadra('')
+            }}
+          >
+            <option value="">Tutti i campionati</option>
+            {CAMPIONATI.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
+        </div>
         <div>
           <label htmlFor="f-squadra" className="fm-label mb-1 block">Squadra</label>
           <select

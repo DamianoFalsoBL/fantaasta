@@ -1,3 +1,5 @@
+import { chiaveClub } from '@/utils/campionati'
+
 /**
  * Lo stemma della squadra di Serie A accanto al nome del club.
  *
@@ -105,22 +107,10 @@ const FILE_PER_SQUADRA: Record<string, string> = {
 }
 
 /**
- * Il nome della squadra ridotto alla forma dei file.
- *
- * Prima era `squadra.trim().toLowerCase()`, che bastava per i venti nomi del
- * listone italiano — parole singole senza accenti. Con i club esteri non basta
- * piu': "Real Madrid" ha uno spazio, "Bayern München" ha una dieresi, e senza
- * questa riduzione nessuno dei due troverebbe il proprio file.
+ * La riduzione del nome del club sta in `utils/campionati.ts`, dove serve alle
+ * stesse identiche chiavi. Due copie che divergono vorrebbero dire uno stemma
+ * trovato e un campionato no, sullo stesso club, senza che si capisca perche'.
  */
-function chiave(squadra: string): string {
-  return squadra
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')  // via gli accenti: münchen -> munchen
-    .replace(/[\s_]+/g, '-')            // spazi e trattini bassi -> trattino
-    .replace(/[^a-z0-9-]/g, '')         // via punteggiatura: "St. Pauli" -> st-pauli
-}
 
 /**
  * Gli stemmi disegnati **interamente in nero**, che sul fondo scuro del sito
@@ -167,7 +157,7 @@ const STEMMI_SCURI = new Set(['tottenham'])
 
 export default function LogoSquadra({ squadra }: { squadra: string | null | undefined }) {
   if (!squadra) return null
-  const file = FILE_PER_SQUADRA[chiave(squadra)]
+  const file = FILE_PER_SQUADRA[chiaveClub(squadra)]
   if (!file) return null
 
   return (
