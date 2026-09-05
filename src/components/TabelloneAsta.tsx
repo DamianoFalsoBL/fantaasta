@@ -566,6 +566,16 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   // stato che va gridato, non sussurrato: chi si crede protetto e non lo è più
   // deve accorgersene subito.
   const tettoSuperato = massimoAuto !== null && !isWinning && asta !== null && asta.prezzo_corrente >= massimoAuto
+  /**
+   * Tetto dichiarato, ma che non ha ancora fatto niente.
+   *
+   * Prima erano due stati soli — «attivo» o «superato» — e chi aveva un tetto
+   * senza essere in testa leggeva «attivo · rilancio da solo fino a questa
+   * cifra». Su un'asta soltanto prenotata quella frase e' prematura: il tetto
+   * scattera' all'avvio del timer, non adesso. Distinguerlo evita di promettere
+   * qualcosa che sta ancora per succedere.
+   */
+  const tettoInAttesa = massimoAuto !== null && !isWinning && !tettoSuperato
 
   return (
     <div className="flex flex-col gap-6">
@@ -797,9 +807,18 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                         onSubmit={(e) => { e.preventDefault(); void impostaMassimo() }}
                         className="mt-2 flex w-full gap-2"
                       >
+                        {/* `min={1}` e non `min={offertaMinima}`: con il minimo
+                            legato al prezzo, un massimo pari al prezzo corrente
+                            veniva fermato dal BROWSER, col suo fumetto nativo
+                            nella sua lingua («Value must be greater than or
+                            equal to 51»). La richiesta non partiva nemmeno, e
+                            il manager riceveva una risposta che non parla
+                            d'asta — segnalato il 5 settembre come «non capisco
+                            perche' non me lo fa mettere». Il controllo vero e'
+                            del server, che ora spiega la regola. */}
                         <input
                           type="number"
-                          min={offertaMinima}
+                          min={1}
                           value={campoMassimo}
                           onChange={(e) => setCampoMassimo(e.target.value)}
                           placeholder="Fino a…"
@@ -812,18 +831,29 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                           Imposta
                         </button>
                       </form>
+                      {/* La regola non stava scritta da nessuna parte, e senza
+                          di essa il rifiuto di un pareggio sembra un capriccio
+                          del sistema. */}
+                      <p className="mt-1.5 text-center text-[11px] text-ink-dim">
+                        A parità resta in testa chi ha dichiarato per primo:
+                        per passare bisogna superare, non pareggiare.
+                      </p>
                     </details>
                   ) : (
                     <>
                     <p className="fm-label mb-1.5 text-center">Massimo automatico</p>
                     <div className="flex flex-col items-center gap-2">
-                      <span className={`fm-chip ${tettoSuperato ? 'fm-chip-rosso' : 'fm-chip-neon'}`}>
-                        {massimoAuto} cr · {tettoSuperato ? 'superato' : 'attivo'}
+                      <span className={`fm-chip ${
+                        tettoSuperato ? 'fm-chip-rosso' : tettoInAttesa ? 'fm-chip-ambra' : 'fm-chip-neon'
+                      }`}>
+                        {massimoAuto} cr · {tettoSuperato ? 'superato' : tettoInAttesa ? 'in attesa' : 'attivo'}
                       </span>
                       <p className="text-center text-[11px] text-ink-dim">
                         {tettoSuperato
                           ? 'Il prezzo ha raggiunto il tuo massimo: da qui in poi decidi tu.'
-                          : 'Rilancio da solo fino a questa cifra, anche a pagina chiusa.'}
+                          : tettoInAttesa
+                            ? "Scatta appena l'asta si muove, e rilancia per te fino a questa cifra."
+                            : 'Rilancio da solo fino a questa cifra, anche a pagina chiusa.'}
                       </p>
                       <button
                         onClick={() => rimuoviMassimo()}
@@ -955,7 +985,7 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
                       <div className="flex w-full gap-2">
                         <input
                           type="number"
-                          min={offertaMinima}
+                          min={1}
                           value={campoMassimo}
                           onChange={(e) => setCampoMassimo(e.target.value)}
                           placeholder="Fino a…"
