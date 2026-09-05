@@ -416,6 +416,7 @@ export type Database = {
           durata_timer_rilancio: number
           fase_buste_aperta: boolean | null
           fase_mercato_aperta: boolean
+          giro_da_confermare: boolean
           id: string
           indice_chiamata: number | null
           ordine_chiamata: string[] | null
@@ -435,6 +436,7 @@ export type Database = {
           durata_timer_rilancio?: number
           fase_buste_aperta?: boolean | null
           fase_mercato_aperta?: boolean
+          giro_da_confermare?: boolean
           id?: string
           indice_chiamata?: number | null
           ordine_chiamata?: string[] | null
@@ -454,6 +456,7 @@ export type Database = {
           durata_timer_rilancio?: number
           fase_buste_aperta?: boolean | null
           fase_mercato_aperta?: boolean
+          giro_da_confermare?: boolean
           id?: string
           indice_chiamata?: number | null
           ordine_chiamata?: string[] | null
@@ -559,6 +562,7 @@ export type Database = {
         Args: { p_asta_id: string }
         Returns: undefined
       }
+      admin_conferma_ordine: { Args: never; Returns: Json }
       admin_elabora_buste: { Args: never; Returns: Json }
       admin_imposta_max_portieri: { Args: { p_max: number }; Returns: Json }
       admin_imposta_timer: {

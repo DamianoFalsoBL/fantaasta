@@ -14,6 +14,7 @@ const T0 = new Date('2026-08-31T20:00:00Z').getTime()
 const base: FotoLega = {
   ordineChiamata: [INTER, AMS, JUVE],
   indiceChiamata: 1,
+  giroDaConfermare: false,
   faseBusteAperta: false,
   asta: null,
   annuncio: null,
@@ -106,6 +107,24 @@ const casi: [string, Partial<FotoLega>, string][] = [
     { nomiSquadre: {}, asta: { stato: 'IN_CORSO', giocatore: 'Bijlow', prezzo: 12, squadraInTesta: INTER, scadenza: new Date(T0 + 20000).toISOString(), contendenti: [INTER, AMS], abbandoni: [] } },
     'Bijlow in asta · 12 cr'],
   ['ordine con una sola squadra: niente poi', { ordineChiamata: [INTER] }, 'Tocca a FC Internazionale'],
+
+  // --- giro completato: il turno e' fermo e aspetta l'admin
+  //
+  // Senza questo ramo la fascia direbbe «Tocca a X», X proverebbe a chiamare e
+  // riceverebbe un errore dal database: somiglierebbe a un guasto invece che
+  // a un'attesa. I due casi sotto sono quelli che contano — il blocco deve
+  // valere **anche quando toccherebbe a me**, altrimenti l'unica persona che
+  // legge «tocca a te» e' l'unica che non puo' chiamare.
+  ['giro finito', { giroDaConfermare: true }, "Giro completato · l'admin deve confermare l'ordine"],
+  ['giro finito, e toccherebbe a me',
+    { giroDaConfermare: true, indiceChiamata: 2 },
+    "Giro completato · l'admin deve confermare l'ordine"],
+  ["giro finito ma un annuncio in corso: l'annuncio vince",
+    { giroDaConfermare: true, annuncio: { tipo: 'non-assegnato', giocatore: 'Bijlow' } },
+    'Bijlow: asta chiusa senza assegnazione'],
+  ['aste concluse: il giro finito non le smentisce',
+    { giroDaConfermare: true, squadreAttive: new Set<string>() },
+    'Aste a chiamata concluse'],
 ]
 
 let falliti = 0

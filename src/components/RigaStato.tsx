@@ -58,6 +58,7 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
 
   const [ordineChiamata, setOrdineChiamata] = useState<string[]>([])
   const [indiceChiamata, setIndiceChiamata] = useState(1)
+  const [giroDaConfermare, setGiroDaConfermare] = useState(false)
   const [faseBusteAperta, setFaseBusteAperta] = useState(false)
   const [bustaConsegnata, setBustaConsegnata] = useState(false)
   const [nomiSquadre, setNomiSquadre] = useState<Record<string, string>>({})
@@ -94,7 +95,7 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
   const leggi = useCallback(async () => {
     const { data: regole } = await supabase
       .from('regole_lega')
-      .select('ordine_chiamata, indice_chiamata, fase_buste_aperta, turno_buste, slot_totali')
+      .select('ordine_chiamata, indice_chiamata, fase_buste_aperta, turno_buste, slot_totali, giro_da_confermare')
       .limit(1)
       .maybeSingle()
     if (smontato.current) return
@@ -107,6 +108,7 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
     ordineRef.current = ordine
     setOrdineChiamata(ordine)
     setIndiceChiamata(regole?.indice_chiamata ?? 1)
+    setGiroDaConfermare(regole?.giro_da_confermare ?? false)
     setFaseBusteAperta(buste)
 
     const { data: squadre } = await supabase.from('squadre').select('id, nome, slot_occupati')
@@ -297,7 +299,7 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
         void leggi()
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'regole_lega' }, (payload) => {
-        const n = payload.new as { ordine_chiamata?: string[]; indice_chiamata?: number; fase_buste_aperta?: boolean }
+        const n = payload.new as { ordine_chiamata?: string[]; indice_chiamata?: number; fase_buste_aperta?: boolean; giro_da_confermare?: boolean }
         const nuovo = n.ordine_chiamata ?? []
         const prima = ordineRef.current
         // Sorteggio: l'ordine è cambiato davvero, non è solo avanzato il turno.
@@ -306,6 +308,10 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
         ordineRef.current = nuovo
         setOrdineChiamata(nuovo)
         setIndiceChiamata(n.indice_chiamata ?? 1)
+        // Preso dal payload e non solo dalla rilettura: e' il campo che spegne
+        // il «Tocca a X», e finche' non arriva la fascia direbbe a qualcuno di
+        // chiamare mentre il database gli risponderebbe di no.
+        setGiroDaConfermare(n.giro_da_confermare ?? false)
         if (sorteggiato) mostraAnnuncio({ tipo: 'sorteggio' })
         // fase_buste_aperta e i conteggi passano da una rilettura piena.
         void leggi()
@@ -332,6 +338,7 @@ export default function RigaStato({ squadraId, slotLiberi }: Props) {
   const riga = descriviStato({
     ordineChiamata,
     indiceChiamata,
+    giroDaConfermare,
     faseBusteAperta,
     asta,
     annuncio,

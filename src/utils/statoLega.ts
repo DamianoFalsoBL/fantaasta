@@ -81,6 +81,15 @@ export type FotoLega = {
   ordineChiamata: string[]
   /** `regole_lega.indice_chiamata`, **1-based** come a database. */
   indiceChiamata: number
+  /**
+   * `regole_lega.giro_da_confermare`: il giro e' tornato a capo e nessuno puo'
+   * chiamare finche' l'admin non decide.
+   *
+   * Ha un ramo suo per una ragione precisa: senza, la fascia direbbe ancora
+   * «Tocca a X», X proverebbe a chiamare e riceverebbe un errore — cioe' la
+   * cosa somiglierebbe a un guasto invece che a un'attesa.
+   */
+  giroDaConfermare: boolean
   faseBusteAperta: boolean
   asta: AstaCorrente | null
   annuncio: Annuncio | null
@@ -129,7 +138,7 @@ const plurale = (n: number, uno: string, molti: string) => (n === 1 ? uno : molt
 
 export function descriviStato(foto: FotoLega): RigaStato {
   const {
-    ordineChiamata, indiceChiamata, faseBusteAperta, asta, annuncio,
+    ordineChiamata, indiceChiamata, giroDaConfermare, faseBusteAperta, asta, annuncio,
     miaSquadraId, nomiSquadre, slotLiberi, bustaConsegnata, squadreAttive, adesso,
   } = foto
 
@@ -277,6 +286,20 @@ export function descriviStato(foto: FotoLega): RigaStato {
   // continuerebbe a indicare il turno di qualcuno per sempre.
   if (squadreAttive !== null && squadreAttive.size === 0) {
     return { etichetta: 'FINE', testo: 'Aste a chiamata concluse', tono: 'neutro', href: '/aste', dettaglio: [], scadenza: null }
+  }
+
+  // Prima di dire a chi tocca: se il giro e' finito, non tocca a nessuno.
+  // Sta dopo il ramo «aste concluse» perche' quello e' definitivo e questo
+  // no, e prima di tutti gli altri perche' li smentisce tutti.
+  if (giroDaConfermare) {
+    return {
+      etichetta: 'GIRO FINITO',
+      testo: "Giro completato · l'admin deve confermare l'ordine",
+      tono: 'attesa',
+      href: '/asta',
+      dettaglio: ordineChiamata.map((id) => nome(id) ?? '—'),
+      scadenza: null,
+    }
   }
 
   // L'indice è 1-based a database. Fuori scala non è un caso teorico: basta

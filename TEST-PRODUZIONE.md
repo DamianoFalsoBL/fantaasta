@@ -377,6 +377,21 @@ numeri del database.
   tendina *Ordina per* e funziona. Senza quella, sul telefono l'ordinamento non
   esisterebbe, perché le intestazioni sono nascoste.
 
+### C2f · Filtro per campionato (nuovo, 5 settembre)
+
+Da rifare su tutte e tre le pagine che lo hanno: `/svincolati`, `/buste` e
+`/aste`.
+
+- [ ] Scegli **Ligue 1**. **Atteso:** restano solo giocatori di Monaco,
+  Olympique Marsiglia, Paris Saint-Germain, Racing Strasburgo e Rennes.
+- [ ] In `/svincolati` e `/buste`, con un campionato scelto, apri la tendina
+  **Squadra**. **Atteso:** contiene solo i club di quel campionato.
+- [ ] Scegli prima una squadra (per esempio *Milan*) e **poi** un campionato
+  diverso (*Liga*). **Atteso:** la squadra si azzera da sola, invece di
+  lasciare una lista vuota con due filtri che si contraddicono.
+- [ ] Il contatore sul pulsante *Filtri* (telefono) conta anche questo, e
+  *Azzera filtri* lo azzera.
+
 ### C2c · Stemmi delle squadre di Serie A
 
 - [x] `/svincolati`, sul telefono: accanto al nome della squadra c'è lo stemma,
@@ -575,6 +590,34 @@ due finestre separate. Chiamiamoli **M1** e **M2**.
 ### D4 · Chiamata da chi non è di turno
 - [ ] Da M2 (non di turno), prova a chiamare.
   **Atteso:** rifiutato, con un messaggio comprensibile.
+
+### D4b · Giro completato: conferma o risorteggia (nuovo, 5 settembre)
+
+Richiede di arrivare in fondo all'ordine: si puo' anticipare spostando il turno
+sull'ultima squadra della fila dalla Regia, e facendole chiamare.
+
+- [ ] Chiusa l'asta dell'**ultima** squadra dell'ordine, guarda la Regia.
+  **Atteso:** compare la fascia ambra «Giro completato» e, nella testata del
+  riquadro, il pulsante **Conferma l'ordine** accanto a *Sorteggia nuovo ordine*.
+- [ ] Dal lato manager, la fascia sotto la barra dice **«Giro completato ·
+  l'admin deve confermare l'ordine»**, non «Tocca a...».
+- [ ] Da M1, prova a chiamare.
+  **Atteso:** rifiutato con «Il giro e' finito: l'admin deve confermare
+  l'ordine o sorteggiarne uno nuovo». **Non** un rifiuto generico.
+- [ ] Dalla Regia, prova ad **avviare un'asta d'ufficio** su un giocatore
+  libero. **Atteso:** rifiutato allo stesso modo: e' l'unica altra via per
+  mettere un giocatore all'asta, e non deve scavalcare il blocco.
+- [ ] Prova a **chiamare per conto** di un assente. **Atteso:** rifiutato:
+  l'admin non scavalca il proprio stesso blocco.
+- [ ] Premi **Conferma l'ordine**. **Atteso:** la fascia sparisce da entrambi i
+  lati, il turno riparte dal primo dell'ordine e quel manager puo' chiamare.
+- [ ] Rifallo arrivando a fine giro e premendo invece *Sorteggia nuovo ordine*.
+  **Atteso:** stesso sblocco, ma con un ordine diverso.
+- [ ] **Il caso che conta davvero.** Arriva a fine giro **con almeno una
+  squadra gia' a rosa piena**: il ritorno a capo salta le squadre finite e puo'
+  fermarsi sulla 2 o sulla 3 invece che sulla 1. Il blocco deve scattare lo
+  stesso. E' il caso in cui un controllo scritto come «l'indice e' tornato a 1»
+  fallirebbe, cioe' la maggioranza dei giri verso la fine dell'asta.
 
 ### D5 · Avvio del timer
 - [ ] Admin → *Avvia timer*.
@@ -1204,6 +1247,12 @@ computer. Sono cose che si rompono solo su un dispositivo vero.
 - [ ] Se non è il tuo turno, la stessa riga dice **quanti turni mancano** al tuo.
 - [ ] Quando il turno avanza, la pillola di chi tocca **si porta in vista da
   sé**: non devi trascinare la barra per trovarla.
+- [ ] **Con un'asta viva (nuovo, 5 settembre).** Mentre un'asta è in corso,
+  scorri in fondo alla pagina: una riga compatta dice **«Turno di X · poi Y»** e,
+  a destra, quanto manca al tuo. Prima, ad asta aperta, l'ordine spariva del
+  tutto per i manager.
+- [ ] Se **hai già chiamato** in questo giro, la stessa riga lo dice invece di
+  restare muta.
 
 ### I5 · Niente zoom involontario
 - [ ] Tocca il campo dell'offerta libera.

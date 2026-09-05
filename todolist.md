@@ -562,65 +562,16 @@ tabellone.
 
 ## Da fare, deciso il 5 settembre
 
-### Finito il giro, l'ordine si ferma e aspetta l'admin
+### Fatto il 5 settembre — resta da spingere la migration
 
-Chiesto il 5 settembre, da un problema vissuto in asta: quando l'ultimo
-dell'ordine ha chiamato, il turno **torna da solo al primo**, che puo'
-prenotare subito. L'admin deve correre a sorteggiare un ordine nuovo prima che
-qualcuno chiami, e la fretta e' il momento in cui si sbaglia.
+`20260905120000_giro_completato.sql` e' scritta ma **il codice non va in
+produzione prima del `db push`**: la fascia di stato e la Regia leggono
+`regole_lega.giro_da_confermare`, che senza la migration non esiste. La query
+fallirebbe e la fascia direbbe «Ordine di chiamata da sorteggiare» a tutti.
 
-**Cosa deve succedere.** Chiuso il giro, prima che il primo possa prenotare, il
-turno si blocca. Accanto a *Sorteggia nuovo ordine* in
-`src/app/admin/asta/page.tsx:256-263` compare un secondo pulsante,
-**Conferma l'ordine**: se il giro va bene basta un click e si riparte con lo
-stesso ordine, altrimenti si sorteggia come oggi.
-
-**Dove sta il wrap, ed e' il punto che decide tutto.** In
-`avanza_turno_chiamata` (`20260801220200_rpc_consolidate.sql:376-423`), riga
-`IF v_indice > v_len THEN v_indice := 1; END IF;`. Oggi il wrap avviene e non
-lascia traccia da nessuna parte: e' li' che va alzato un flag in `regole_lega`
-(sul modello di `fase_mercato_aperta`, `20260807100000_trasferimenti.sql:26-30`).
-
-**Trappola: «giro finito» non e' «l'indice e' tornato a 1».** Il loop salta le
-squadre che hanno la rosa piena o non hanno piu' giocatori in lista, quindi il
-wrap puo' avvenire **superando** la posizione 1 e fermandosi sulla 2 o sulla 3.
-Il flag va alzato **quando avviene il wrap**, dentro quel ramo, non
-confrontando l'indice finale con 1 — altrimenti il blocco non scatta proprio
-nei giri in cui qualcuno ha gia' finito, che sono la maggioranza verso la fine
-dell'asta.
-
-**Il blocco va messo in `prenota_chiamata`** (ultima versione
-`20260902140000_chiamata_per_conto.sql:45-124`), accanto al controllo del turno
-gia' presente (`:88-92`), con un messaggio che dica cosa manca — «Il giro e'
-finito: l'admin deve confermare o sorteggiare un nuovo ordine» — e non un
-generico rifiuto. **Vale anche per la chiamata per conto**, che passa dalla
-stessa funzione: giusto cosi', l'admin che chiama per un assente non deve poter
-scavalcare il proprio stesso blocco.
-
-**Cosa deve abbassare il flag:**
-
-- la nuova `admin_conferma_ordine()`, guardia `is_admin()` sullo stampo di
-  `admin_toggle_buste` (`20260802180000_buste_turni.sql:40-70`);
-- `genera_ordine_chiamata` (`20260801220200_rpc_consolidate.sql:426-460`), che
-  gia' riazzera `indice_chiamata = 1`: se si sorteggia, il giro nuovo parte;
-- da valutare `admin_imposta_turno`
-  (`20260806200000_turno_consumato.sql:255-285`): se l'admin sposta il turno a
-  mano sta gia' decidendo lui, e lasciare il flag alzato lo bloccherebbe subito
-  dopo.
-
-**Da non dimenticare: la fascia di stato.** Con il turno bloccato,
-`descriviStato` (`src/utils/statoLega.ts`) direbbe ancora «Tocca a X», e X
-proverebbe a chiamare ricevendo un errore — cioe' la cosa somiglierebbe a un
-guasto. Serve un ramo suo: «Giro completato · l'admin deve confermare
-l'ordine», tono attesa. E' il caso tipico per cui quella funzione e' pura e
-provabile: si aggiunge un ramo e un caso nella prova.
-
-**Anche `avvia_asta_admin` rispetta il blocco** — deciso il 5 settembre. E'
-l'unica via che mette un giocatore all'asta senza passare da
-`prenota_chiamata` (`20260902120000_asta_admin_assegna_al_turno.sql`), quindi
-senza il controllo lo scavalcherebbe: l'admin metterebbe all'asta d'ufficio
-mentre il giro e' fermo in attesa della sua stessa conferma. Il blocco va
-messo subito dopo la guardia `is_admin()`, prima di leggere l'ordine.
+Dopo il push va anche **rigenerato `src/utils/supabase/database.types.ts`**:
+la colonna e `admin_conferma_ordine` sono state aggiunte a mano per far
+compilare, e la rigenerazione e' l'unica cosa che dice se combaciano davvero.
 
 ---
 
@@ -628,6 +579,7 @@ messo subito dopo la guardia `is_admin()`, prima di leggere l'ordine.
 
 | Quando | Cosa |
 |---|---|
+| 5 set 2026 | Finito il giro, il turno si ferma e aspetta l'admin |
 | 5 set 2026 | Filtro per campionato in Svincolati, Buste e Sommario Aste |
 | 5 set 2026 | L'ordine di chiamata resta visibile anche con un'asta viva |
 | 5 set 2026 | Pagina Statistiche: eta', quotazioni e spesa d'asta di ogni squadra |

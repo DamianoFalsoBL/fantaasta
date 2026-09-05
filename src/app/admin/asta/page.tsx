@@ -13,6 +13,9 @@ export default function AdminAstaPage() {
   
   const [ordineChiamata, setOrdineChiamata] = useState<any[]>([])
   const [indiceChiamata, setIndiceChiamata] = useState(1)
+  // Il giro e' tornato a capo e aspetta una decisione: nessuno puo' chiamare
+  // finche' l'admin non conferma o risorteggia.
+  const [giroDaConfermare, setGiroDaConfermare] = useState(false)
   const [squadreMap, setSquadreMap] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
   const [listeEsaurite, setListeEsaurite] = useState(false)
@@ -132,10 +135,11 @@ export default function AdminAstaPage() {
 
     // 3. Carica regole_lega per ordine chiamata
     const { data: regole } = await supabase
-      .from('regole_lega').select('ordine_chiamata, indice_chiamata, slot_totali').limit(1).single()
+      .from('regole_lega').select('ordine_chiamata, indice_chiamata, slot_totali, giro_da_confermare').limit(1).single()
     if (regole) {
       setOrdineChiamata(regole.ordine_chiamata || [])
       setIndiceChiamata(regole.indice_chiamata || 1)
+      setGiroDaConfermare(regole.giro_da_confermare ?? false)
     }
     const slotTotali = regole?.slot_totali ?? 30
 
@@ -237,9 +241,27 @@ export default function AdminAstaPage() {
 
   const sorteggiaOrdine = async () => {
     setLoading(true)
-    const { data, error } = await supabase.rpc('genera_ordine_chiamata')
+    const { error } = await supabase.rpc('genera_ordine_chiamata')
     if (error) {
       setError(`Errore sorteggio: ${error.message}`)
+    } else {
+      loadData()
+    }
+    setLoading(false)
+  }
+
+  /**
+   * «Va bene cosi'»: si riparte con lo stesso ordine, dal primo.
+   *
+   * E' l'altra meta' della decisione che il blocco di fine giro impone. Senza,
+   * l'unico modo di sbloccare sarebbe risorteggiare — cioe' cambiare l'ordine
+   * per forza, anche quando quello che c'e' andava benissimo.
+   */
+  const confermaOrdine = async () => {
+    setLoading(true)
+    const { error } = await supabase.rpc('admin_conferma_ordine')
+    if (error) {
+      setError(`Errore conferma: ${error.message}`)
     } else {
       loadData()
     }
@@ -254,6 +276,18 @@ export default function AdminAstaPage() {
       <div className="fm-panel overflow-hidden">
         <div className="fm-panel-head">
           <span>Ordine di chiamata</span>
+          {/* Il pulsante compare solo a giro finito, accanto a quello di
+              sempre: e' una decisione che si prende una volta per giro, e
+              tenerlo sempre acceso lo farebbe premere per abitudine. */}
+          {giroDaConfermare && (
+            <button
+              onClick={confermaOrdine}
+              disabled={loading}
+              className="fm-btn fm-btn-primary fm-btn-sm"
+            >
+              Conferma l&apos;ordine
+            </button>
+          )}
           <button
             onClick={sorteggiaOrdine}
             disabled={loading}
@@ -262,6 +296,16 @@ export default function AdminAstaPage() {
             Sorteggia nuovo ordine
           </button>
         </div>
+
+        {/* Detto a parole e non solo col pulsante: senza, l'admin vedrebbe i
+            manager ricevere «Il giro e' finito» e non saprebbe che la palla e'
+            passata a lui. */}
+        {giroDaConfermare && (
+          <div className="border-b border-ambra/50 bg-ambra/15 px-3 py-2.5 text-sm font-semibold text-ambra">
+            Giro completato: nessuno può chiamare finché non confermi
+            l&apos;ordine o ne sorteggi uno nuovo.
+          </div>
+        )}
         {ordineChiamata.length > 0 ? (
           <>
             <div className="flex gap-2 overflow-x-auto p-3 pb-1 md:flex-wrap md:overflow-visible">
