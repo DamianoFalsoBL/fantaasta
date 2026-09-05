@@ -560,20 +560,7 @@ tabellone.
 
 ---
 
-## Da fare, deciso il 5 settembre
-
-### Fatto il 5 settembre — resta da spingere la migration
-
-`20260905120000_giro_completato.sql` e' scritta ma **il codice non va in
-produzione prima del `db push`**: la fascia di stato e la Regia leggono
-`regole_lega.giro_da_confermare`, che senza la migration non esiste. La query
-fallirebbe e la fascia direbbe «Ordine di chiamata da sorteggiare» a tutti.
-
-Dopo il push va anche **rigenerato `src/utils/supabase/database.types.ts`**:
-la colonna e `admin_conferma_ordine` sono state aggiunte a mano per far
-compilare, e la rigenerazione e' l'unica cosa che dice se combaciano davvero.
-
----
+## Prove che non si possono fidare
 
 ### `prova-presenza.mts` fallisce se c'e' qualcuno collegato davvero
 
@@ -590,7 +577,8 @@ quello atteso. Con la lega collegata l'id estraneo si vede nell'output.
 **La scorciatoia sbagliata sarebbe rilassare gli attesi** fino a farli passare:
 i due casi che falliscono sono proprio quelli che verificano il comportamento
 interessante. La strada e' dare alla prova un topic suo — parametrizzando il
-nome del canale in `annuncia Presenza`/`ascoltaPresenza`, oggi costante — cosi'
+nome del canale in `annunciaPresenza` /
+`ascoltaPresenza`, oggi costante — cosi'
 gira isolata da chi sta usando il sito.
 
 ---
