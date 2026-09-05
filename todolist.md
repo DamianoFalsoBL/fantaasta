@@ -560,6 +560,33 @@ tabellone.
 
 ---
 
+## Da rimettere in fila dopo l'asta
+
+### I tetti che si combattono: da riguardare a mente fredda
+
+Deciso e fatto il 5 settembre (`20260905161000_tetti_si_combattono.sql`). E'
+l'unica modifica di quel giorno che cambia **quanto si paga**, quindi vale la
+pena riguardarla dopo averla vista girare in un'asta vera.
+
+Prima due tetti automatici non si combattevano mai: con A a 50 e B a 40, senza
+rilanci a mano, il prezzo restava dov'era e A si prendeva il giocatore a 11.
+Ora chi e' in testa sale fino a quanto serve per battere il miglior tetto
+avversario, mai oltre il proprio — la regola delle aste a proxy.
+
+**Le due conseguenze accettate consapevolmente**, da verificare che non diano
+fastidio in pratica:
+
+- dal prezzo si deduce ora all'incirca il tetto dell'avversario, che prima era
+  segreto;
+- chi dichiara un tetto alto se lo vede addebitare appena un altro ne dichiara
+  uno, non solo quando arriva un rilancio a mano.
+
+Se una delle due si rivelasse spiacevole, si torna indietro togliendo **solo**
+quella migration: il messaggio d'errore e l'interfaccia stanno in commit a
+parte apposta.
+
+---
+
 ## Prove che non si possono fidare
 
 ### `prova-presenza.mts` fallisce se c'e' qualcuno collegato davvero
@@ -587,6 +614,8 @@ gira isolata da chi sta usando il sito.
 
 | Quando | Cosa |
 |---|---|
+| 5 set 2026 | I tetti automatici si combattono fra loro, e il pareggio si spiega |
+| 5 set 2026 | Il filtro campionato accetta piu' campionati insieme |
 | 5 set 2026 | Finito il giro, il turno si ferma e aspetta l'admin |
 | 5 set 2026 | Filtro per campionato in Svincolati, Buste e Sommario Aste |
 | 5 set 2026 | L'ordine di chiamata resta visibile anche con un'asta viva |

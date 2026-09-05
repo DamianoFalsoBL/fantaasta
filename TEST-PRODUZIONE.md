@@ -622,6 +622,33 @@ sull'ultima squadra della fila dalla Regia, e facendole chiamare.
   stesso. E' il caso in cui un controllo scritto come «l'indice e' tornato a 1»
   fallirebbe, cioe' la maggioranza dei giri verso la fine dell'asta.
 
+### D4c · Massimo automatico: pareggi e tetti che si combattono (nuovo, 5 settembre)
+
+Servono due manager, **M1** e **M2**, e un'asta viva. Base 10, rilancio minimo 1.
+
+- [ ] M1 dichiara un massimo di **50**. **Atteso:** M1 va in testa a 11 e legge
+  «50 cr · attivo».
+- [ ] M2 dichiara un massimo di **40**. **Atteso (comportamento nuovo):** il
+  prezzo sale da solo a **41** con M1 ancora in testa, e M2 legge «40 cr ·
+  superato». Prima non succedeva niente e M1 si sarebbe preso il giocatore a
+  11 pur essendoci uno disposto a 40.
+- [ ] Ripeti con **due massimi uguali** (50 e 50). **Atteso:** il prezzo va a
+  **50**, resta in testa **chi ha dichiarato per primo**, e il secondo legge
+  «superato» — non «attivo».
+- [ ] Con il prezzo gia' a 50, M2 prova a dichiarare **50**. **Atteso:** il
+  rifiuto arriva **dal sito, in italiano**, e spiega la regola: «A 50 crediti
+  pareggeresti un'offerta gia' sul tavolo...». **Non** deve comparire il
+  fumetto del browser in inglese: se lo vedi, il `min` sul campo e' tornato.
+- [ ] Sotto il campo del massimo si legge sempre la regola: «A parita' resta in
+  testa chi ha dichiarato per primo».
+- [ ] **Il caso che non deve regredire.** Un manager chiama un giocatore, resta
+  in testa alla base, e prima dell'avvio dichiara un massimo. **Atteso:** il
+  suo tetto **non** rilancia contro se stesso — nessuna offerta AUTOMATICO a 7
+  quando e' gia' in testa a 6. E' il difetto corretto il 27 agosto, ed e' la
+  cosa che questa modifica poteva rompere.
+- [ ] Su un'asta soltanto **prenotata**, dichiara un massimo. **Atteso:** il
+  chip dice «in attesa» e non «attivo»: scattera' quando l'admin avvia il timer.
+
 ### D5 · Avvio del timer
 - [ ] Admin → *Avvia timer*.
   **Atteso:** il conto alla rovescia parte da entrambi i lati e **scorre
