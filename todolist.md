@@ -538,46 +538,10 @@ elenco, proprio per permettere questa conversione una pagina alla volta.
 
 ## Da fare, deciso il 4 settembre
 
-Proposte confrontando il sito con un concorrente, discusse e filtrate insieme:
-tre accettate, due lasciate fuori (statistiche e upload logo fantasquadra — non
-scartate per sempre, solo non prioritarie oggi).
-
-### Il sito installabile come app
-
-Oggi non c'e' ne' `manifest.json` ne' service worker: si parte da zero. Serve
-un manifest (nome, icone 192/512px — `public/icon.svg` gia' esiste come base,
-va esportato in PNG alle taglie giuste — colori, `display: standalone`,
-`start_url`) collegato dai metadata di Next in `src/app/layout.tsx`.
-
-**Da tenere fuori, di proposito: nessun service worker che mette in cache
-pagine o dati.** Il sito vive di realtime Supabase, e una pagina servita dalla
-cache durante un'asta mostrerebbe prezzi vecchi — e' lo stesso genere di rischio
-gia' evitato per la riga di stato (mai leggere l'orologio durante il render, mai
-fidarsi di un dato non appena arrivato). Qui si punta solo
-all'installabilita': icona in home, apertura a schermo intero senza barra del
-browser. Se un giorno servira' anche l'offline, e' un progetto a parte con la
-sua cautela sulla invalidazione della cache.
-
-### Occhiolino nel cambio password
-
-`src/components/CambiaPassword.tsx` ha tre campi password senza modo di
-vederli in chiaro. Non e' da inventare: il pattern (👁️/🙈, stato
-`showPassword`) **esiste gia'** in `src/components/LoginForm.tsx:92` — qui
-manca solo la stessa cosa applicata ai tre campi (attuale, nuova, conferma).
-
-### Pagina profilo, per ora solo il cambio password
-
-Spostare `<CambiaPassword />` da `/mia-rosa` (`src/app/mia-rosa/page.tsx:245`)
-a una pagina `/profilo` propria, raggiungibile dal menu utente nella NavBar.
-
-**Scope volutamente ridotto.** La richiesta originale accoppiava questa pagina
-all'upload del logo della fantasquadra, che e' rimasto fuori: e' la prima
-funzione di caricamento immagini del sito (oggi tutto passa da import
-CSV/XLSX), servirebbe uno storage con le sue policy, la scelta di chi puo'
-caricare, un limite di formato/dimensione, e un componente da mostrare ovunque
-compare il nome della fantasquadra. Roba da progettare a parte, non da
-accodare a uno spostamento di componente. Se si riprende, la pagina profilo e'
-gia' il posto giusto dove metterla.
+Proposte confrontando il sito con un concorrente, discusse e filtrate insieme.
+**Tre delle quattro sono state fatte il 5 settembre** — occhiolino, pagina
+profilo e sito installabile, vedi *Fatto di recente*. Restano fuori, non
+scartate per sempre: le statistiche e l'upload del logo fantasquadra.
 
 ### L'ordine di chiamata durante un'asta viva, solo per l'admin
 
@@ -671,6 +635,9 @@ messo subito dopo la guardia `is_admin()`, prima di leggere l'ordine.
 
 | Quando | Cosa |
 |---|---|
+| 5 set 2026 | Il sito si installa sul telefono, con icone proprie |
+| 5 set 2026 | Il profilo ha una pagina sua, dal chip col proprio nome |
+| 5 set 2026 | L'occhiolino anche nel cambio password |
 | 3 set 2026 | Spinte le migration del 2 settembre e verificate a database |
 | 3 set 2026 | Import completo della lega nuova: 14 squadre, 37 squadre con stemma |
 | 2 set 2026 | L'admin puo' chiamare per conto di un manager assente |
