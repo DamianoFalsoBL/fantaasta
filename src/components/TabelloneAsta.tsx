@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import RuoliGiocatore from '@/components/RuoliGiocatore'
+import BarraOrdine from '@/components/BarraOrdine'
 // `elencoAbbandoni` era definita qui: e' passata in `utils/statoLega.ts` quando
 // e' servita anche alla riga di stato. Il corpo e' identico, spostato e non
 // riscritto.
@@ -275,15 +276,6 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
     // sposta il massimo, perché cambiano slot liberi e giocatori in lista.
   }, [squadraId, squadraDelegaId, giocatoreInAsta, asta?.prezzo_corrente, supabase])
 
-  // Su telefono la barra dei turni scorre in orizzontale: con quattordici
-  // squadre quella di turno finisce facilmente fuori campo, e la domanda "a chi
-  // tocca?" resta senza risposta finché non si trascina. La si porta in vista
-  // da sé a ogni avanzamento.
-  const turnoRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    turnoRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
-  }, [indiceChiamata, ordineChiamata])
-
   const [timeLeft, setTimeLeft] = useState(0)
 
   useEffect(() => {
@@ -417,86 +409,14 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   if (!asta) {
     return (
       <div className="flex flex-col gap-6">
-        {/* HEADER ORDINE CHIAMATA */}
-        {ordineChiamata.length > 0 && (() => {
-          // Si mostrano solo le squadre che devono ancora chiamare. Quella di
-          // turno resta sempre visibile, per non lasciare la barra senza
-          // riferimento durante l'attimo in cui il turno sta avanzando.
-          const daChiamare = ordineChiamata.filter(
-            (sqId, idx) => squadreAttive.has(sqId) || (idx + 1) === indiceChiamata
-          )
-          const concluse = ordineChiamata.length - daChiamare.length
-
-          // La domanda vera è "a chi tocca, e quanto manca a me": leggerla dal
-          // colore di una pillola in una fila che scorre non funziona, tanto
-          // meno su un telefono. Qui si risponde a parole.
-          const sqTurno = ordineChiamata[indiceChiamata - 1]
-          const nomeTurno = squadreMap[sqTurno] || 'Squadra'
-          const mioPosto = daChiamare.indexOf(squadraId ?? '')
-          const turnoCorrente = daChiamare.indexOf(sqTurno)
-          const turniMancanti = mioPosto >= 0 && turnoCorrente >= 0 ? mioPosto - turnoCorrente : -1
-
-          return (
-            <div className="fm-panel overflow-hidden">
-              <div className="fm-panel-head">
-                <span>Ordine di chiamata</span>
-                {concluse > 0 && (
-                  <span className="fm-label normal-case tracking-normal">
-                    {concluse} {concluse === 1 ? 'squadra ha' : 'squadre hanno'} completato
-                  </span>
-                )}
-              </div>
-
-              {/* La riga che risponde alla domanda, prima delle pillole. */}
-              <div
-                className={`flex items-baseline justify-between gap-3 border-b px-3 py-2.5 ${
-                  isMioTurno ? 'border-neon/40 bg-neon/10' : 'border-line bg-panel-hi'
-                }`}
-              >
-                <span className={`fm-title text-base ${isMioTurno ? 'text-neon' : 'text-ink'}`}>
-                  {isMioTurno ? 'Tocca a te' : `Tocca a ${nomeTurno}`}
-                </span>
-                {!isMioTurno && turniMancanti > 0 && (
-                  <span className="fm-label shrink-0 normal-case tracking-normal">
-                    {turniMancanti === 1 ? 'sei il prossimo' : `mancano ${turniMancanti} turni`}
-                  </span>
-                )}
-              </div>
-              {/* Su schermo stretto la barra scorre invece di andare a capo:
-                  con 14 squadre, andando a capo si mangiava mezzo schermo. */}
-              <div className="flex gap-2 overflow-x-auto px-3 py-2.5 md:flex-wrap md:overflow-visible">
-                {daChiamare.map((sqId) => {
-                  const posizione = ordineChiamata.indexOf(sqId) + 1
-                  const isTurno = posizione === indiceChiamata
-                  const isMe = sqId === squadraId
-                  return (
-                    <div
-                      key={sqId}
-                      ref={isTurno ? turnoRef : undefined}
-                      /* Niente scale: ingrandendo la pillola di turno finiva
-                         sopra a quella accanto. L'anello invece non occupa
-                         spazio nel flusso, quindi non spinge le vicine. */
-                      className={`fm-chip shrink-0 ${
-                        isTurno
-                          ? 'fm-chip-attivo ring-2 ring-neon ring-offset-2 ring-offset-panel'
-                          : isMe
-                            ? 'fm-chip-mia'
-                            : 'opacity-60'
-                      }`}
-                    >
-                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
-                        isTurno ? 'bg-void text-neon' : 'bg-panel-hover text-ink-dim'
-                      }`}>
-                        {posizione}
-                      </span>
-                      {squadreMap[sqId] || 'Squadra'}{isMe && ' (Tu)'}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })()}
+        <BarraOrdine
+          ordine={ordineChiamata}
+          indice={indiceChiamata}
+          attive={squadreAttive}
+          nomi={squadreMap}
+          squadraId={squadraId}
+          isMioTurno={!!isMioTurno}
+        />
 
         <div className="fm-panel flex flex-col items-center justify-center p-10 text-center">
           <h2 className="fm-title text-xl text-ink-mid">Nessuna asta in corso</h2>
@@ -1077,6 +997,20 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
         )}
 
       </div>
+
+      {/* In fondo e non in testa: mentre un'asta e' viva la cosa che si guarda
+          e' il prezzo, e una riga in cima lo spingerebbe piu' giu' proprio sul
+          telefono. Qui risponde a chi si sta chiedendo quando tocchera' a lui,
+          che e' una domanda che si fa con calma. */}
+      <BarraOrdine
+        compatta
+        ordine={ordineChiamata}
+        indice={indiceChiamata}
+        attive={squadreAttive}
+        nomi={squadreMap}
+        squadraId={squadraId}
+        isMioTurno={!!isMioTurno}
+      />
     </div>
   )
 }
