@@ -589,6 +589,20 @@ Va deciso se vale la query in piu'. Se si fa, il conto non va riscritto:
 
 ## Da rimettere in fila dopo l'asta
 
+### Il ritiro d'ufficio e le aste simultanee
+
+`ritira_chi_non_puo_piu` (5 settembre) mette fuori chi non arriva piu'
+all'offerta minima, e **non prevede nessun ripescaggio**. E' corretto oggi
+perche' dentro una singola asta la capienza di spesa non puo' crescere: ne gira
+una per volta, lo garantisce il controllo in `prenota_chiamata`.
+
+**Se un giorno le aste diventassero simultanee** — non e' in programma, ma la
+modalita' asta libera qui sopra ne parla — questa e' la prima cosa da rivedere:
+chiudendo un'altra asta i crediti si liberano, e uno messo fuori d'ufficio
+dovrebbe poter rientrare.
+
+---
+
 ### I tetti che si combattono: da riguardare a mente fredda
 
 Deciso e fatto il 5 settembre (`20260905161000_tetti_si_combattono.sql`). E'
@@ -656,6 +670,7 @@ gira isolata da chi sta usando il sito.
 
 | Quando | Cosa |
 |---|---|
+| 5 set 2026 | Chi non puo' piu' permettersi il prezzo esce dall'asta da solo |
 | 5 set 2026 | Spinte e verificate a database le tre migration del 5 settembre |
 | 5 set 2026 | I tetti automatici si combattono fra loro, e il pareggio si spiega |
 | 5 set 2026 | Il filtro campionato accetta piu' campionati insieme |

@@ -245,6 +245,12 @@ export function descriviStato(foto: FotoLega): RigaStato {
      * continuava a contare i secondi mentre il tabellone diceva già «asta
      * finita». Il `> 1` non è pignoleria: con un solo contendente il conto
      * darebbe sempre «finita» dall'istante zero.
+     *
+     * Dal 5 settembre in `abbandoni` finisce anche chi **non ha premuto
+     * niente**: `ritira_chi_non_puo_piu` ci mette d'ufficio chi non arriva più
+     * all'offerta minima. Il conto qui non cambia — un contendente che non può
+     * offrire non è in gara comunque — ma questo ramo scatta molto più spesso
+     * di prima, ed è voluto.
      */
     const attivi = asta.contendenti.filter((id) => !asta.abbandoni.includes(id)).length
     const soloRimasto = attivi <= 1 && asta.contendenti.length > 1

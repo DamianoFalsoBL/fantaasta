@@ -649,6 +649,29 @@ Servono due manager, **M1** e **M2**, e un'asta viva. Base 10, rilancio minimo 1
 - [ ] Su un'asta soltanto **prenotata**, dichiara un massimo. **Atteso:** il
   chip dice «in attesa» e non «attivo»: scattera' quando l'admin avvia il timer.
 
+### D4d · Chi non può più permetterselo esce da solo (nuovo, 5 settembre)
+
+Servono due manager e un giocatore che uno dei due **non possa** permettersi:
+guarda in *Budget e Fasi* il massimo offribile di M2 e scegli un giocatore su
+cui superarlo con pochi rilanci.
+
+- [ ] Con l'asta viva, rilancia finché il prezzo supera il massimo offribile di
+  M2. **Atteso:** M2 passa da solo fra i ritirati — la sua pastiglia in *In
+  gara* diventa barrata con la ❌ — **senza che nessuno abbia premuto niente**.
+- [ ] Guarda lo schermo di M2. **Atteso:** legge «Il tuo massimo (X cr) non
+  arriva a Y: sei fuori da quest'asta», **non** «Ti sei ritirato»: non ha
+  premuto nulla e non deve credere di averlo fatto.
+- [ ] Se M2 era l'unico avversario, l'asta **finisce subito**: banner ambra
+  «Asta finita: non è rimasto nessun altro in gara», e il timer si ferma.
+  Prima andava a scadenza anche quando l'esito era già deciso.
+- [ ] **Chi è in testa non esce mai.** Porta il prezzo esattamente al massimo
+  offribile di chi guida: non può più rilanciare, ma **non deve** finire fra i
+  ritirati — sta vincendo.
+- [ ] Anche all'**avvio del timer**: se un contendente non arriva nemmeno alla
+  base d'asta, deve risultare fuori appena l'admin avvia.
+- [ ] Chi esce **non rientra**: dentro una singola asta i crediti non crescono.
+  Se lo vedi tornare «in gara», è un difetto e va segnalato.
+
 ### D5 · Avvio del timer
 - [ ] Admin → *Avvia timer*.
   **Atteso:** il conto alla rovescia parte da entrambi i lati e **scorre

@@ -520,7 +520,9 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   const offertaMinima = senzaOfferte ? asta.base_asta : asta.prezzo_corrente + 1
 
   // L'asta è di fatto finita e aspetta solo la chiusura dell'admin. Due strade:
-  // il tempo è scaduto, oppure si sono ritirati tutti tranne uno.
+  // il tempo è scaduto, oppure è rimasto in gara uno solo — per ritiro
+  // volontario o perché il prezzo ha superato quello che gli altri potevano
+  // offrire, e il server li ha messi fuori d'ufficio.
   //
   // Il confronto è con l'orologio vero e non solo con `timeLeft`: quel
   // contatore parte da 0 e viene riempito da un effect, quindi al primo
@@ -542,12 +544,20 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
   const nonPuoiRilanciare =
     astaFinita
       ? isSoloLeft
-        ? 'Si sono ritirati tutti gli altri: l\'asta aspetta la chiusura dell\'admin.'
+        ? "Non è rimasto nessun altro in gara: l'asta aspetta la chiusura dell'admin."
         : 'Tempo scaduto: l\'asta aspetta la chiusura dell\'admin.'
     : rosaPiena ? 'La tua rosa è al completo: non puoi aggiudicarti altri giocatori.'
     : ruoloPieno ? 'Hai già il numero massimo di portieri.'
     : !isParticipant ? 'Non sei fra i contendenti per questo giocatore.'
-    : hasAbbandonato ? 'Ti sei ritirato da quest\'asta.'
+    : hasAbbandonato
+      ? massimoOffribile !== null && massimoOffribile < offertaMinima
+        /* Dal 5 settembre il server ritira d'ufficio chi non arriva
+           all'offerta minima. «Ti sei ritirato» sarebbe una bugia verso chi
+           non ha premuto niente, ed e' la bugia peggiore: farebbe cercare un
+           pulsante premuto per sbaglio. La condizione e' la stessa che il
+           server usa per decidere, quindi non puo' contraddirlo. */
+        ? `Il tuo massimo (${massimoOffribile} cr) non arriva a ${offertaMinima}: sei fuori da quest'asta.`
+        : 'Ti sei ritirato da quest\'asta.'
     : isChiamata ? 'In attesa che l\'admin avvii il timer.'
     : isWinning ? 'Sei già in testa.'
     : massimoOffribile !== null && massimoOffribile < offertaMinima
@@ -618,7 +628,10 @@ export default function TabelloneAsta({ squadraId, isAdmin }: { squadraId: strin
           >
             <span className="text-base">⏹️</span>
             <span>
-              Asta finita: {isSoloLeft ? 'si sono ritirati tutti gli altri' : 'il tempo è scaduto'}.
+              {/* «non e' rimasto nessun altro» e non «si sono ritirati tutti»: dal 5
+                  settembre si esce anche senza premere niente, quando i crediti
+                  non bastano piu'. */}
+              Asta finita: {isSoloLeft ? 'non è rimasto nessun altro in gara' : 'il tempo è scaduto'}.
             </span>
             <span className="font-normal text-ink-mid">
               {asta.squadre
