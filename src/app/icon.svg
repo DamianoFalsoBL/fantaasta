@@ -8,7 +8,14 @@
     sono sei e non dodici — a 16px una griglia 3x4 diventa una macchia.
 
     Per cambiarlo: questo file e src/components/Marchio.tsx vanno tenuti
-    identici nella forma.
+    identici nella forma. E vanno **rigenerate le icone dell'app**, che sono
+    PNG e non seguono questo file da sole:
+
+        node scripts/genera-icone.mjs
+
+    che riscrive public/icon-192.png, public/icon-512.png e
+    src/app/apple-icon.png ridisegnando la stessa forma (le coordinate dei
+    rettangoli sono ricopiate li' dentro, su base 64 come qui).
   -->
   <defs>
     <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
