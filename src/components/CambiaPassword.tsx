@@ -22,6 +22,66 @@ const LUNGHEZZA_MINIMA = 6
  * su un sito senza dati sensibili, e l'unico effetto sarebbe far scegliere a
  * tutti la stessa password con un punto esclamativo in fondo.
  */
+/**
+ * Un campo password con l'occhiolino che lo mostra in chiaro.
+ *
+ * Sta qui e non nel modulo perché i campi sono tre e il markup dell'occhiolino
+ * è una dozzina di righe: copiarlo tre volte vuol dire tre posti dove
+ * correggere lo stesso difetto, e tre modi di divergere.
+ *
+ * Il pulsante è `tabIndex={-1}` come nel modulo di accesso
+ * (`LoginForm.tsx`): passando da un campo all'altro con Tab non ci si
+ * inciampa. Resta comunque raggiungibile col dito e col mouse.
+ *
+ * **Vederla in chiaro serve più di quanto sembri.** Una password incollata
+ * porta con sé uno spazio invisibile, e in un campo a pallini non c'è modo di
+ * accorgersene: è già costato un manager che non riusciva più a entrare.
+ */
+function CampoPassword({
+  id,
+  etichetta,
+  valore,
+  onCambia,
+  autoComplete,
+  minLength,
+}: {
+  id: string
+  etichetta: React.ReactNode
+  valore: string
+  onCambia: (v: string) => void
+  autoComplete: string
+  minLength?: number
+}) {
+  const [inChiaro, setInChiaro] = useState(false)
+
+  return (
+    <div>
+      <label htmlFor={id} className="fm-label mb-1 block">{etichetta}</label>
+      <div className="relative">
+        <input
+          id={id}
+          type={inChiaro ? 'text' : 'password'}
+          autoComplete={autoComplete}
+          minLength={minLength}
+          className="fm-input pr-10"
+          value={valore}
+          onChange={(e) => onCambia(e.target.value)}
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setInChiaro((v) => !v)}
+          className="absolute inset-y-0 right-0 flex items-center pr-3 text-ink-dim transition hover:text-ink"
+          tabIndex={-1}
+          aria-label={inChiaro ? 'Nascondi la password' : 'Mostra la password'}
+        >
+          {inChiaro ? '🙈' : '👁️'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function CambiaPassword() {
   const supabase = createClient()
   const [attuale, setAttuale] = useState('')
@@ -107,47 +167,30 @@ export default function CambiaPassword() {
         </summary>
 
         <form onSubmit={invia} className="fm-panel-body space-y-3">
-          <div>
-            <label htmlFor="pw-attuale" className="fm-label mb-1 block">Password attuale</label>
-            <input
-              id="pw-attuale"
-              type="password"
-              autoComplete="current-password"
-              className="fm-input"
-              value={attuale}
-              onChange={(e) => setAttuale(e.target.value)}
-              required
-            />
-          </div>
+          <CampoPassword
+            id="pw-attuale"
+            etichetta="Password attuale"
+            valore={attuale}
+            onCambia={setAttuale}
+            autoComplete="current-password"
+          />
           <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label htmlFor="pw-nuova" className="fm-label mb-1 block">
-                Nuova password (almeno {LUNGHEZZA_MINIMA} caratteri)
-              </label>
-              <input
-                id="pw-nuova"
-                type="password"
-                autoComplete="new-password"
-                minLength={LUNGHEZZA_MINIMA}
-                className="fm-input"
-                value={nuova}
-                onChange={(e) => setNuova(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="pw-conferma" className="fm-label mb-1 block">Ripeti la nuova password</label>
-              <input
-                id="pw-conferma"
-                type="password"
-                autoComplete="new-password"
-                minLength={LUNGHEZZA_MINIMA}
-                className="fm-input"
-                value={conferma}
-                onChange={(e) => setConferma(e.target.value)}
-                required
-              />
-            </div>
+            <CampoPassword
+              id="pw-nuova"
+              etichetta={`Nuova password (almeno ${LUNGHEZZA_MINIMA} caratteri)`}
+              valore={nuova}
+              onCambia={setNuova}
+              autoComplete="new-password"
+              minLength={LUNGHEZZA_MINIMA}
+            />
+            <CampoPassword
+              id="pw-conferma"
+              etichetta="Ripeti la nuova password"
+              valore={conferma}
+              onCambia={setConferma}
+              autoComplete="new-password"
+              minLength={LUNGHEZZA_MINIMA}
+            />
           </div>
 
           {esito && (
